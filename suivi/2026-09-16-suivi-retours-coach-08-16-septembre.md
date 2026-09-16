@@ -86,6 +86,25 @@ Trois dossiers portent des données qui n'appartiennent pas au client. Ce n'est 
 
 Conséquence pratique : les normes calculées à partir de ces bilans ne sont pas utilisables pour piloter les charges, et la recommandation « analytique avant polyarticulaire » qui en découle a dû être écartée chez Florence Aparico parce qu'elle contredisait son historique réel. Tant que l'export n'est pas fiabilisé, la programmation doit s'appuyer sur les charges réellement soulevées, pas sur les ratios du bilan.
 
+### Treize clients suivis hors de la feuille « Dossier pedro 2 »
+
+Le tableau de bord « Suivi PEDRO » pilote la génération mensuelle sur 94 clients, alors que la feuille
+« Dossier pedro 2 » n'en contient que 81. Treize clients reçoivent donc un bloc sans figurer dans la
+feuille qui sert de référence au relevé : Christophe Camicas, Corinne Napal, Deborah Foulonneau,
+Dhyana Noel, Gaelle Labadie, Guillaume Petitpas, Jean Sébastien Lacam, Julien Nguyen van,
+Ruth Gertrudix, Satya Pilot, Ségolène Berger, Valerie Franck, Vincent Garcia.
+
+Le tableau de bord signale bien une catégorie « traités hors roster », mais elle ne nomme que trois
+personnes (Florent Parade, Marion Laurans, Valeria Castelletto) : les treize ci-dessus y sont comptés
+comme du roster. Tant que la feuille n'est pas complétée, ces clients échappent au relevé des retours
+coach, qui part de la feuille.
+
+### Doublons et orthographes dans la feuille
+
+- Une ligne « Xavier » sans nom de famille pointe vers le même document que **Xavier Thomas** : doublon à supprimer.
+- La feuille écrit **Pascal Ramoudou** là où les dossiers Drive portent **Pascal Ramondou**.
+- La feuille écrit **Jena Guillaume Rocher**, **Alexendra APARD** et **Gaspard farine** : à harmoniser avec les dossiers.
+
 ### Reste du rapport précédent
 
 - **Le fileId de Gaspard Farine** reste à corriger dans « Dossier pedro 2 ».
@@ -101,6 +120,6 @@ Conséquence pratique : les normes calculées à partir de ces bilans ne sont pa
 
 ## 5. Périmètre de ce relevé
 
-Ce rapport couvre les 36 dossiers du roster « Dossier pedro 2 » dont le contenu a été vérifié séance par séance. Douze dossiers du roster ont été modifiés sur la période mais n'ont pas été ouverts un par un : Emilie White, Guillaume Puygrenier, Célia Lina, Pauline Delpon, Marie Fourmey, Martine Viard, Noic Gouhizoun, Marc Veyret, Ludovic Mauger, Xavier Josseaume, Anne Lise Medalin, Xavier Thomas. Plusieurs de ces modifications correspondent à la préparation des blocs d'octobre plutôt qu'à l'enregistrement d'une séance, mais cela reste à confirmer.
+Ce rapport couvre les 36 dossiers du roster « Dossier pedro 2 » dont le contenu a été vérifié séance par séance. Douze dossiers du roster ont été modifiés sur la période mais n'ont pas été ouverts un par un : Emilie White, Guillaume Puygrenier, Célia Lina, Pauline Delpon, Marie Fourmey, Martine Viard, Noic Gouhizoun, Marc Vernet, Ludovic Mauger, Xavier Josseaume, Anne Lise Medalin, Xavier Thomas. Plusieurs de ces modifications correspondent à la préparation des blocs d'octobre plutôt qu'à l'enregistrement d'une séance, mais cela reste à confirmer.
 
-Des dossiers hors roster ont également été modifiés sur la période et ne sont pas couverts ici : Beatrice Piquard, Perrine Courtellemont, Dhyana Noel, Christophe Camicas, Ruth Gertrudix, Florent Parade, Marion Laurans, Valeria Castelletto, Fanny Gaillard, Safouane Rihani, Marika Dufour, Frédérique Haliche, Caroline Decombe.
+Des dossiers absents de la feuille « Dossier pedro 2 » ont également été modifiés sur la période et ne sont pas couverts ici : Beatrice Piquard, Perrine Courtellemont, Dhyana Noel, Christophe Camicas, Ruth Gertrudix, Florent Parade, Marion Laurans, Valeria Castelletto, Fanny Gaillard, Safouane Rihani, Marika Dufour, Frédérique Haliche, Caroline Decombe. Trois d'entre eux (Dhyana Noel, Christophe Camicas, Ruth Gertrudix) sont en réalité suivis par le tableau de bord comme s'ils étaient au roster — voir la section 3.
