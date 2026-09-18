@@ -55,20 +55,23 @@
   .mono { font-family:"JetBrains Mono", ui-monospace, "SF Mono", monospace; font-variant-numeric:tabular-nums; }
 
   /* ---------- header ---------- */
-  header.top { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:14px 24px; margin-bottom:26px; padding-bottom:20px; border-bottom:2px solid var(--line); }
-  .idbox { display:flex; align-items:center; gap:13px; }
+  header.top {
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    position:relative; gap:10px; margin-bottom:26px; padding-bottom:22px; border-bottom:2px solid var(--line);
+  }
   .mark {
     width:36px; height:36px; flex-shrink:0;
     display:grid; place-items:center;
   }
   .mark svg { width:100%; height:100%; display:block; }
-  h1 { font-size:23px; font-weight:800; letter-spacing:-.015em; margin:0; text-wrap:balance; }
+  .mark-lg { width:68px; height:68px; margin-bottom:4px; }
+  h1 { font-size:25px; font-weight:800; letter-spacing:-.015em; margin:0; text-wrap:balance; }
   .kicker { font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin:0 0 4px; }
-  .srcline { font-size:12px; color:var(--ink-2); margin:0; text-align:right; line-height:1.6; }
+  .srcline { font-size:12px; color:var(--ink-2); margin:0; text-align:center; line-height:1.6; }
   .srcline b { color:var(--ink); font-weight:600; }
 
   /* ---------- theme toggle ---------- */
-  .top-right { display:flex; align-items:center; gap:10px; }
+  .top-theme-toggle { position:absolute; top:0; right:0; }
   .theme-toggle {
     appearance:none; cursor:pointer; flex-shrink:0;
     width:30px; height:30px; border-radius:8px; border:1px solid var(--line-2); background:var(--surface); color:var(--ink-2);
@@ -404,7 +407,6 @@
     .colhead { display:none; }
     .crow { grid-template-columns:1fr; gap:9px; }
     .suivi { justify-content:flex-start; }
-    .srcline { text-align:left; }
     .bloc { grid-template-columns:1fr; gap:4px; }
     .pain-step { grid-template-columns:1fr; gap:3px; }
 
@@ -530,8 +532,16 @@
 
 <div class="wrap">
   <header class="top">
-    <div class="idbox">
-      <span class="mark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1429 1441" width="1429" height="1441">
+    <button type="button" id="theme-toggle" class="theme-toggle top-theme-toggle" aria-label="Changer de thème clair / sombre" title="Thème clair / sombre">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.2"/>
+        <path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/>
+      </svg>
+    </button>
+    <span class="mark mark-lg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1429 1441" width="1429" height="1441">
 <g transform="translate(0.000000,1456.000000) scale(0.100000,-0.100000)" fill="#A37E2C" stroke="none">
 <path d="M6024 14514 c-15 -99 -13 -99 -341 -101 -341 -3 -323 0 -363 -63 -44
 -69 -48 -70 -218 -70 -165 0 -167 -1 -206 -77 -29 -58 -45 -63 -206 -63 -164
@@ -699,25 +709,11 @@
 -168 -16z"/>
 </g>
 </svg></span>
-      <div>
-        <h1>Ultimate Physical Bordeaux</h1>
-      </div>
-    </div>
-    <div class="top-right">
-      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Changer de thème clair / sombre" title="Thème clair / sombre">
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="4.2"/>
-          <path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/>
-        </svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/>
-        </svg>
-      </button>
-      <p class="srcline">
-        Génération relevée le <b>18 septembre 2026</b><br>
-        Retours coach relevés le <b>16 septembre 2026</b> <span title="Roster complet du 14/09 ; docs Drive re-vérifiés le 15/09. Les retours coach couvrent le 08 au 16/09.">(08→16/09)</span>
-      </p>
-    </div>
+    <h1>Ultimate Physical Bordeaux</h1>
+    <p class="srcline">
+      Génération relevée le <b>18 septembre 2026</b><br>
+      Retours coach relevés le <b>16 septembre 2026</b> <span title="Roster complet du 14/09 ; docs Drive re-vérifiés le 15/09. Les retours coach couvrent le 08 au 16/09.">(08→16/09)</span>
+    </p>
   </header>
 
   <div class="views" role="tablist" aria-label="Vues">
