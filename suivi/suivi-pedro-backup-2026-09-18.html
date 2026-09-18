@@ -40,13 +40,16 @@
   }
 
   * { box-sizing:border-box; }
+  html, body { overscroll-behavior-y:contain; }
   body {
     background:var(--paper); color:var(--ink);
     font-family:"Manrope", ui-sans-serif, system-ui, sans-serif;
     font-size:14px; line-height:1.5;
     padding-block:28px 64px; padding-left:16px; padding-right:16px;
     -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
   }
+  button, a, input, textarea, select { -webkit-tap-highlight-color:transparent; }
   ::selection { background:var(--accent-soft); color:var(--ink); }
   .wrap { max-width:1020px; margin:0 auto; }
   .mono { font-family:"JetBrains Mono", ui-monospace, "SF Mono", monospace; font-variant-numeric:tabular-nums; }
@@ -123,6 +126,7 @@
     font:inherit; font-size:13px; color:var(--ink);
     background:var(--surface); border:1px solid var(--line); border-radius:10px;
     padding:9px 13px; transition:border-color .15s ease;
+    -webkit-appearance:none; appearance:none;
   }
   .search::placeholder { color:var(--ink-3); }
   .search:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent); }
@@ -348,6 +352,8 @@
   .pill:hover:not([aria-pressed="true"]) { border-color:var(--ink-3); color:var(--ink); }
   .pill[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:var(--surface); }
   .pill:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .pill:active, .seg button:active, .views button:active, .steps button:active,
+  .genb:active, .legend button:active, .search-clear:active { opacity:.7; }
   .bankgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:10px; align-items:start; }
   .bank { border:1px solid var(--line); border-radius:9px; overflow:hidden; background:var(--surface); }
   .bank header {
@@ -379,6 +385,29 @@
     .srcline { text-align:left; }
     .bloc { grid-template-columns:1fr; gap:4px; }
     .pain-step { grid-template-columns:1fr; gap:3px; }
+
+    /* iOS Safari auto-zooms the page when a focused field is smaller than 16px */
+    .search,
+    .ob-field input[type="text"], .ob-field textarea, .ob-field select,
+    .ob-inline input, .ob-inline select,
+    .noterow input { font-size:16px; }
+    #ob-freq { font-size:16px !important; }
+
+    /* comfortable touch targets (Apple HIG / Material both want ~44dp) */
+    .steps button { padding:11px 12px; font-size:11.5px; }
+    .noteb { width:36px; height:36px; font-size:14px; }
+    .genb { padding:9px 14px; font-size:12px; }
+    .search-clear { width:30px; height:30px; font-size:18px; }
+    .pill { padding:9px 14px; }
+    .views button { padding:10px 16px; }
+    .seg button { padding:9px 12px; }
+
+    /* let tab/filter rows scroll sideways instead of clipping or wrapping into a jumble */
+    .views, .bankbar, .seg {
+      overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; flex-wrap:nowrap;
+    }
+    .views::-webkit-scrollbar, .bankbar::-webkit-scrollbar, .seg::-webkit-scrollbar { display:none; }
+    .views { width:100%; }
   }
 
   /* ---------- retours coach ---------- */
