@@ -67,6 +67,28 @@
   .srcline { font-size:12px; color:var(--ink-2); margin:0; text-align:right; line-height:1.6; }
   .srcline b { color:var(--ink); font-weight:600; }
 
+  /* ---------- theme toggle ---------- */
+  .top-right { display:flex; align-items:center; gap:10px; }
+  .theme-toggle {
+    appearance:none; cursor:pointer; flex-shrink:0;
+    width:30px; height:30px; border-radius:8px; border:1px solid var(--line-2); background:var(--surface); color:var(--ink-2);
+    display:grid; place-items:center; transition:border-color .15s ease, color .15s ease, background-color .15s ease;
+  }
+  .theme-toggle:hover { color:var(--ink); border-color:var(--ink-3); }
+  .theme-toggle:active { opacity:.7; }
+  .theme-toggle:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .theme-toggle svg { width:16px; height:16px; }
+  .theme-toggle .icon-sun { display:none; }
+  .theme-toggle .icon-moon { display:block; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-toggle .icon-sun { display:block; }
+    :root:not([data-theme="light"]) .theme-toggle .icon-moon { display:none; }
+  }
+  :root[data-theme="dark"] .theme-toggle .icon-sun { display:block; }
+  :root[data-theme="dark"] .theme-toggle .icon-moon { display:none; }
+  :root[data-theme="light"] .theme-toggle .icon-sun { display:none; }
+  :root[data-theme="light"] .theme-toggle .icon-moon { display:block; }
+
   /* ---------- progress band ---------- */
   .band { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:20px 22px; margin-bottom:16px; }
   .band-head { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 16px; margin-bottom:14px; }
@@ -682,11 +704,22 @@
         <h1>Ultimate Physical Bordeaux</h1>
       </div>
     </div>
-    <p class="srcline">
-      Source : feuille <b>Dossier pedro 2</b> + docs Drive<br>
-      Génération relevée le <b>18 septembre 2026</b><br>
-      Retours coach relevés le <b>16 septembre 2026</b> <span title="Roster complet du 14/09 ; docs Drive re-vérifiés le 15/09. Les retours coach couvrent le 08 au 16/09.">(08→16/09)</span>
-    </p>
+    <div class="top-right">
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Changer de thème clair / sombre" title="Thème clair / sombre">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2"/>
+          <path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/>
+        </svg>
+      </button>
+      <p class="srcline">
+        Source : feuille <b>Dossier pedro 2</b> + docs Drive<br>
+        Génération relevée le <b>18 septembre 2026</b><br>
+        Retours coach relevés le <b>16 septembre 2026</b> <span title="Roster complet du 14/09 ; docs Drive re-vérifiés le 15/09. Les retours coach couvrent le 08 au 16/09.">(08→16/09)</span>
+      </p>
+    </div>
   </header>
 
   <div class="views" role="tablist" aria-label="Vues">
@@ -2424,6 +2457,24 @@ $("#list").addEventListener("click", e => {
   try { mcpNS = window.claude && window.claude.use ? await window.claude.use("mcp") : null; } catch (e) { mcpNS = null; }
   try { sampleFn = window.claude && window.claude.use ? await window.claude.use("sample") : null; } catch (e) { sampleFn = null; }
   renderList();
+})();
+
+// --- thème clair / sombre (mémorisé sur cet appareil) ---
+(() => {
+  const root = document.documentElement;
+  let saved = null;
+  try { saved = localStorage.getItem("pedro-theme"); } catch (e) {}
+  if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
+  const btn = document.getElementById("theme-toggle");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const current = root.getAttribute("data-theme");
+    const systemDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const effectiveDark = current === "dark" || (!current && systemDark);
+    const next = effectiveDark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("pedro-theme", next); } catch (e) {}
+  });
 })();
 </script>
 
