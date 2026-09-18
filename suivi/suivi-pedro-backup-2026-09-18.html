@@ -1,0 +1,2288 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Suivi PEDRO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper:#f4f4f1; --surface:#ffffff; --surface-2:#ececea; --surface-3:#e1e2de;
+    --line:#dcdcd7; --line-2:#c4c5be;
+    --ink:#14161a; --ink-2:#5c625d; --ink-3:#8c9089;
+    --accent:#8f6f28; --accent-soft:#f2e8cd;
+    --ok:#186b45; --ok-bg:#deefe4; --ok-line:#a6d3b8; --ok-solid:#2c8c5f;
+    --warn:#8f540a; --warn-bg:#f9edcf; --warn-line:#ecd08c; --warn-solid:#cf8c26;
+    --alert:#9c281d; --alert-bg:#fae3e0; --alert-line:#eeb2a8; --alert-solid:#bb422f;
+    --shadow:0 1px 2px rgba(12,14,10,.05), 0 18px 34px -20px rgba(12,14,10,.32);
+    --r:12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#0c0e10; --surface:#15181b; --surface-2:#1b1f22; --surface-3:#22262a;
+      --line:#262b2f; --line-2:#383e43;
+      --ink:#eef0ee; --ink-2:#9aa19b; --ink-3:#676e69;
+      --accent:#c9a463; --accent-soft:#2a2210;
+      --ok:#5fd39a; --ok-bg:#0f2a1e; --ok-line:#1f4e37; --ok-solid:#3fa873;
+      --warn:#eda252; --warn-bg:#2b2008; --warn-line:#4f3a10; --warn-solid:#dd8f34;
+      --alert:#ef8b7c; --alert-bg:#2d1512; --alert-line:#592621; --alert-solid:#b04a3a;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 22px 44px -22px rgba(0,0,0,.72);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0c0e10; --surface:#15181b; --surface-2:#1b1f22; --surface-3:#22262a;
+    --line:#262b2f; --line-2:#383e43;
+    --ink:#eef0ee; --ink-2:#9aa19b; --ink-3:#676e69;
+    --accent:#c9a463; --accent-soft:#2a2210;
+    --ok:#5fd39a; --ok-bg:#0f2a1e; --ok-line:#1f4e37; --ok-solid:#3fa873;
+    --warn:#eda252; --warn-bg:#2b2008; --warn-line:#4f3a10; --warn-solid:#dd8f34;
+    --alert:#ef8b7c; --alert-bg:#2d1512; --alert-line:#592621; --alert-solid:#b04a3a;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 22px 44px -22px rgba(0,0,0,.72);
+  }
+
+  * { box-sizing:border-box; }
+  body {
+    background:var(--paper); color:var(--ink);
+    font-family:"Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-size:14px; line-height:1.5;
+    padding-block:28px 64px; padding-left:16px; padding-right:16px;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection { background:var(--accent-soft); color:var(--ink); }
+  .wrap { max-width:1020px; margin:0 auto; }
+  .mono { font-family:"JetBrains Mono", ui-monospace, "SF Mono", monospace; font-variant-numeric:tabular-nums; }
+
+  /* ---------- header ---------- */
+  header.top { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:14px 24px; margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid var(--line); }
+  .idbox { display:flex; align-items:center; gap:13px; }
+  .mark {
+    width:36px; height:36px; flex-shrink:0;
+    display:grid; place-items:center;
+  }
+  .mark svg { width:100%; height:100%; display:block; }
+  h1 { font-size:22px; font-weight:800; letter-spacing:-.02em; margin:0; text-wrap:balance; }
+  .kicker { font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0 0 3px; }
+  .srcline { font-size:12px; color:var(--ink-2); margin:0; text-align:right; line-height:1.6; }
+  .srcline b { color:var(--ink); font-weight:600; }
+
+  /* ---------- progress band ---------- */
+  .band { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:20px 22px; margin-bottom:14px; }
+  .band-head { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 16px; margin-bottom:14px; }
+  .band-head h2 { margin:0; font-size:14px; font-weight:700; letter-spacing:-.01em; }
+  .band-head .pct { font-size:12.5px; color:var(--ink-2); }
+  .band-head .pct b { font-family:"JetBrains Mono",monospace; font-size:15px; color:var(--ink); font-weight:600; }
+
+  .bar { display:flex; height:8px; border-radius:99px; overflow:hidden; background:var(--surface-3); gap:2px; }
+  .bar span { display:block; transition:width .3s ease; }
+  .bar .s-ok { background:var(--ok-solid); }
+  .bar .s-warn { background:var(--warn-solid); }
+  .bar .s-alert { background:var(--alert-solid); }
+  .legend { display:flex; flex-wrap:wrap; gap:6px 22px; margin-top:13px; }
+  .legend button {
+    appearance:none; border:none; background:none; padding:2px 4px; margin:-2px -4px; cursor:pointer; font:inherit; text-align:left;
+    display:flex; align-items:baseline; gap:8px; border-radius:6px; transition:background-color .15s ease;
+  }
+  .legend button:hover { background:var(--surface-2); }
+  .legend button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .legend .key { width:8px; height:8px; border-radius:2px; flex-shrink:0; transform:translateY(-1px); }
+  .legend .n { font-family:"JetBrains Mono",monospace; font-weight:600; font-size:14px; }
+  .legend .t { font-size:12.5px; color:var(--ink-2); }
+  .legend button[aria-pressed="true"] .t { color:var(--ink); font-weight:600; }
+
+  .jours { font-size:11px; color:var(--ink-3); }
+  .jours.stale { color:var(--alert); font-weight:600; }
+
+  /* ---------- controls ---------- */
+  .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+  .seg { display:flex; gap:3px; padding:3px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; }
+  .seg button {
+    appearance:none; border:none; background:none; cursor:pointer;
+    font:inherit; font-size:12.5px; font-weight:600; color:var(--ink-2);
+    padding:6px 12px; border-radius:7px; white-space:nowrap; transition:background-color .15s ease, color .15s ease;
+  }
+  .seg button:hover { color:var(--ink); }
+  .seg button[aria-pressed="true"] { background:var(--surface); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  .seg button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .search {
+    flex:1; min-width:170px;
+    font:inherit; font-size:13px; color:var(--ink);
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:9px 13px; transition:border-color .15s ease;
+  }
+  .search::placeholder { color:var(--ink-3); }
+  .search:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent); }
+
+  /* ---------- list ---------- */
+  .listwrap { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); box-shadow:var(--shadow); overflow:hidden; }
+  .colhead {
+    display:grid; grid-template-columns:1fr 128px 260px;
+    gap:14px; padding:10px 20px;
+    background:var(--surface-2); border-bottom:1px solid var(--line);
+    font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+  }
+  .client { border-bottom:1px solid var(--line); transition:background-color .15s ease; }
+  .client:last-child { border-bottom:none; }
+  .client:hover { background:var(--surface-2); }
+  .client.prio { box-shadow:inset 3px 0 0 var(--alert); }
+  .client.late { box-shadow:inset 3px 0 0 var(--warn); }
+  .crow { display:grid; grid-template-columns:1fr 128px 260px; gap:14px; align-items:center; padding:12px 20px; }
+  .who { min-width:0; }
+  .nm { font-weight:600; font-size:13.5px; letter-spacing:-.01em; }
+  .meta { display:flex; flex-wrap:wrap; align-items:center; gap:4px 9px; margin-top:3px; font-size:11.5px; color:var(--ink-2); }
+  .meta .sep { color:var(--ink-3); }
+  .meta a { color:var(--accent); text-decoration:none; font-weight:600; }
+  .meta a:hover { text-decoration:underline; }
+  .freq { font-family:"JetBrains Mono",monospace; font-weight:600; color:var(--ink); }
+
+  .badge {
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:11px; font-weight:700; padding:4px 10px; border-radius:99px;
+    border:1px solid transparent; white-space:nowrap;
+  }
+  .badge::before { content:""; width:6px; height:6px; border-radius:99px; background:currentColor; flex-shrink:0; }
+  .b-ok { color:var(--ok); background:var(--ok-bg); border-color:var(--ok-line); }
+  .b-warn { color:var(--warn); background:var(--warn-bg); border-color:var(--warn-line); }
+  .b-alert { color:var(--alert); background:var(--alert-bg); border-color:var(--alert-line); }
+
+  /* suivi control */
+  .suivi { display:flex; flex-wrap:wrap; align-items:center; gap:6px; justify-content:flex-end; }
+  .steps { display:flex; border:1px solid var(--line-2); border-radius:8px; overflow:hidden; }
+  .steps button {
+    appearance:none; border:none; background:var(--surface); cursor:pointer;
+    font:inherit; font-size:11px; font-weight:600; color:var(--ink-2);
+    padding:5px 9px; border-right:1px solid var(--line); transition:background-color .15s ease;
+  }
+  .steps button:last-child { border-right:none; }
+  .steps button:hover:not([aria-pressed="true"]) { background:var(--surface-2); }
+  .steps button:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+  .steps button { padding:5px 8px; font-size:10.5px; letter-spacing:.01em; white-space:nowrap; }
+  .steps button[aria-pressed="true"] { font-weight:700; }
+  .steps button[aria-pressed="true"][data-v="a_traiter"] { background:var(--surface-3); color:var(--ink); }
+  .steps button[aria-pressed="true"][data-v="en_cours"] { background:var(--warn-bg); color:var(--warn); }
+  .steps button[aria-pressed="true"][data-v="envoye"] { background:var(--ok-bg); color:var(--ok); }
+  .steps[data-off="1"] button { cursor:default; opacity:.42; }
+  .noteb {
+    appearance:none; cursor:pointer; font:inherit; font-size:12px; line-height:1;
+    width:26px; height:26px; flex-shrink:0; border-radius:7px;
+    border:1px solid var(--line-2); background:var(--surface); color:var(--ink-3);
+    display:grid; place-items:center; position:relative; transition:border-color .15s ease, color .15s ease;
+  }
+  .noteb:hover { color:var(--ink); border-color:var(--ink-3); }
+  .noteb:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .noteb[data-has="1"] { color:var(--accent); border-color:var(--accent); }
+  .noterow { padding:0 20px 13px 20px; }
+  .noterow input {
+    width:100%; font:inherit; font-size:12.5px; color:var(--ink);
+    background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:7px 11px;
+  }
+  .noterow input:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; }
+  .empty { padding:28px 20px; text-align:center; color:var(--ink-2); font-size:13px; }
+
+  /* génération */
+  .genb {
+    appearance:none; cursor:pointer; font:inherit; font-size:10.5px; font-weight:700; letter-spacing:.01em;
+    padding:5px 10px; border-radius:7px; white-space:nowrap; flex-shrink:0;
+    border:1px solid var(--accent); background:var(--accent); color:var(--surface);
+    transition:opacity .15s ease;
+  }
+  .genb:hover { opacity:.88; }
+  .genb:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .genb[disabled] { cursor:default; opacity:.4; border-color:var(--line-2); background:none; color:var(--ink-3); }
+  .genrow { padding:0 20px 18px; }
+  .genpanel { border:1px solid var(--line-2); border-radius:10px; background:var(--surface-2); padding:13px 15px; }
+  .genpanel .gp-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:9px; }
+  .genpanel .gp-title { font-size:12px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:8px; }
+  .genpanel .gp-close {
+    appearance:none; border:none; background:none; cursor:pointer; font:inherit; font-size:11px;
+    color:var(--ink-3); padding:3px 6px; border-radius:5px;
+  }
+  .genpanel .gp-close:hover { color:var(--ink); }
+  .gp-spin {
+    width:12px; height:12px; border-radius:99px; flex-shrink:0;
+    border:2px solid var(--line-2); border-top-color:var(--accent);
+    animation:gp-spin .7s linear infinite;
+  }
+  @keyframes gp-spin { to { transform:rotate(360deg); } }
+  .gp-msg { font-size:12px; color:var(--ink-2); line-height:1.5; }
+  .gp-msg b { color:var(--ink); font-weight:600; }
+  .gp-err { font-size:12px; color:var(--alert); line-height:1.5; background:var(--alert-bg); border:1px solid var(--alert-line); border-radius:8px; padding:9px 11px; }
+  .gp-note { font-size:11px; color:var(--ink-3); margin-top:7px; line-height:1.5; }
+  .gp-draft textarea {
+    width:100%; min-height:220px; resize:vertical;
+    font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11px; line-height:1.5; color:var(--ink);
+    background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:10px 12px;
+  }
+  .gp-draft textarea:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; }
+  .gp-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .gp-actions button {
+    appearance:none; cursor:pointer; font:inherit; font-size:12px; font-weight:700;
+    padding:8px 15px; border-radius:8px; border:1px solid var(--line-2); background:var(--surface); color:var(--ink);
+    transition:background-color .15s ease;
+  }
+  .gp-actions button:hover { background:var(--surface-2); }
+  .gp-actions button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .gp-actions button[disabled] { opacity:.45; cursor:default; }
+  .gp-actions .primary { background:var(--accent); border-color:var(--accent); color:var(--surface); }
+  .gp-actions .primary:hover { opacity:.88; background:var(--accent); }
+  .gp-done { font-size:12px; color:var(--ok); background:var(--ok-bg); border:1px solid var(--ok-line); border-radius:8px; padding:9px 11px; }
+  .gp-done a { color:inherit; font-weight:700; }
+
+  /* ---------- side notes ---------- */
+  .aside { margin-top:24px; }
+  .aside h2 { font-size:13px; font-weight:700; margin:0 0 4px; }
+  .aside p.lead { margin:0 0 12px; font-size:12.5px; color:var(--ink-2); max-width:62ch; }
+  .chips { display:flex; flex-wrap:wrap; gap:7px; }
+  .chip {
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px dashed var(--line-2); border-radius:9px; background:var(--surface);
+    padding:7px 12px; font-size:12.5px; text-decoration:none; color:var(--ink); transition:border-color .15s ease;
+  }
+  .chip:hover { border-style:solid; border-color:var(--accent); }
+  .chip em { font-style:normal; font-size:11px; color:var(--ink-3); font-family:"JetBrains Mono",monospace; }
+
+  .method { margin-top:24px; border-top:1px solid var(--line); padding-top:15px; display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px 26px; }
+  .method div h3 { margin:0 0 3px; font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); }
+  .method div p { margin:0; font-size:12px; color:var(--ink-2); line-height:1.55; }
+  .method code { font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink); }
+
+  .foot { margin-top:22px; font-size:11.5px; color:var(--ink-3); }
+
+  /* ---------- onboarding bilan form ---------- */
+  .ob-field { margin-bottom:12px; }
+  .ob-field label { display:block; font-size:11.5px; color:var(--ink-2); margin-bottom:4px; font-weight:600; }
+  .ob-field input[type="text"], .ob-field textarea, .ob-field select {
+    width:100%; font:inherit; font-size:12.5px; color:var(--ink);
+    background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:8px 11px;
+  }
+  .ob-field textarea { min-height:60px; resize:vertical; }
+  .ob-row { display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; margin-bottom:12px; padding-bottom:10px; border-bottom:1px dashed var(--line); }
+  .ob-row .ob-row-title { flex-basis:100%; font-size:12px; color:var(--ink-2); }
+  .ob-inline { display:flex; flex-direction:column; min-width:110px; }
+  .ob-inline label { font-size:10.5px; color:var(--ink-3); margin-bottom:3px; }
+  .ob-inline input, .ob-inline select { padding:7px 9px; border-radius:7px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font-size:12px; font:inherit; }
+  .ob-h3 { font-size:12px; font-weight:700; margin:18px 0 8px; color:var(--ink); }
+
+
+  /* ---------- view switcher ---------- */
+  .views { display:flex; gap:4px; padding:4px; background:var(--surface-2); border:1px solid var(--line); border-radius:11px; margin-bottom:16px; width:fit-content; }
+  .views button {
+    appearance:none; border:none; background:none; cursor:pointer;
+    font:inherit; font-size:13px; font-weight:700; color:var(--ink-2);
+    padding:8px 16px; border-radius:8px; white-space:nowrap; transition:background-color .15s ease, color .15s ease;
+  }
+  .views button:hover { color:var(--ink); }
+  .views button[aria-selected="true"] { background:var(--surface); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  .views button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+
+  /* ---------- méthode ---------- */
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:20px 22px; margin-bottom:14px; }
+  .card > h2 { margin:0 0 4px; font-size:14px; font-weight:700; letter-spacing:-.01em; }
+  .card > p.lead { margin:0 0 15px; font-size:12.5px; color:var(--ink-2); max-width:66ch; }
+
+  .blocs { display:grid; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:9px; overflow:hidden; }
+  .bloc { display:grid; grid-template-columns:120px 1fr; gap:14px; background:var(--surface); padding:11px 15px; align-items:baseline; }
+  .bloc .tag { font-family:"JetBrains Mono",monospace; font-size:12px; font-weight:600; color:var(--ink); }
+  .bloc .tag em { font-style:normal; color:var(--accent); }
+  .bloc p { margin:0; font-size:12.5px; color:var(--ink-2); line-height:1.55; }
+
+  .weeks { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .week { border:1px solid var(--line); border-radius:9px; padding:12px 14px; background:var(--surface); border-top:3px solid var(--line-2); }
+  .week.peak { border-top-color:var(--accent); }
+  .week.deload { border-top-color:var(--ok-solid); }
+  .week h3 { margin:0 0 3px; font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); }
+  .week p { margin:0; font-size:12px; color:var(--ink-2); line-height:1.5; }
+
+  .pain { display:grid; gap:8px; }
+  .pain-step { display:grid; grid-template-columns:74px 1fr; gap:14px; align-items:start; border-left:3px solid; padding:9px 0 9px 14px; }
+  .pain-step.p1 { border-color:var(--ok-solid); }
+  .pain-step.p2 { border-color:var(--warn-solid); }
+  .pain-step.p3 { border-color:var(--alert-solid); }
+  .pain-step .lvl { font-family:"JetBrains Mono",monospace; font-weight:600; font-size:13px; }
+  .pain-step.p1 .lvl { color:var(--ok); } .pain-step.p2 .lvl { color:var(--warn); } .pain-step.p3 .lvl { color:var(--alert); }
+  .pain-step p { margin:0; font-size:12.5px; color:var(--ink-2); line-height:1.55; }
+  .pain-step p b { color:var(--ink); font-weight:600; }
+
+  .grille { display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:9px; align-items:start; }
+  .gr { border:1px solid var(--line); border-radius:9px; padding:11px 14px; background:var(--surface); }
+  .gr h3 { margin:0 0 3px; font-size:12px; font-weight:700; }
+  .gr p { margin:0; font-size:11.5px; color:var(--ink-2); line-height:1.5; }
+
+  /* banques */
+  .bankbar { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:12px; }
+  .pill {
+    appearance:none; cursor:pointer; font:inherit; font-size:12px; font-weight:600;
+    border:1px solid var(--line-2); background:var(--surface); color:var(--ink-2);
+    padding:6px 12px; border-radius:99px; white-space:nowrap; transition:background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .pill:hover:not([aria-pressed="true"]) { border-color:var(--ink-3); color:var(--ink); }
+  .pill[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:var(--surface); }
+  .pill:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .bankgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:10px; align-items:start; }
+  .bank { border:1px solid var(--line); border-radius:9px; overflow:hidden; background:var(--surface); }
+  .bank header {
+    display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+    padding:9px 14px; background:var(--surface-2); border-bottom:1px solid var(--line);
+  }
+  .bank header .t { font-size:12px; font-weight:700; }
+  .bank header .d { font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3); }
+  .bank ul { list-style:none; margin:0; padding:9px 14px 11px; display:flex; flex-wrap:wrap; gap:5px; }
+  .bank li { font-size:11.5px; color:var(--ink); background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:3px 8px; line-height:1.35; }
+  .bank li mark { background:var(--accent-soft); color:var(--accent); padding:0 1px; border-radius:2px; }
+  .bank li { display:inline-flex; align-items:center; gap:5px; }
+  .bank li .swap {
+    appearance:none; border:none; background:none; cursor:pointer; font:inherit; font-size:11px; line-height:1;
+    color:var(--ink-3); padding:0; width:15px; height:15px; flex-shrink:0;
+    display:inline-flex; align-items:center; justify-content:center; border-radius:4px;
+    transition:background-color .15s ease, color .15s ease;
+  }
+  .bank li .swap:hover { color:var(--accent); background:var(--accent-soft); }
+  .bank li .swap:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .bankmore { margin:0; padding:0 14px 11px; font-size:10.5px; color:var(--ink-3); font-style:italic; }
+  .bankcount { font-size:12px; color:var(--ink-2); margin:0 0 12px; }
+  .bankcount b { font-family:"JetBrains Mono",monospace; color:var(--ink); font-weight:600; }
+
+  @media (max-width:760px) {
+    .colhead { display:none; }
+    .crow { grid-template-columns:1fr; gap:9px; }
+    .suivi { justify-content:flex-start; }
+    .srcline { text-align:left; }
+    .bloc { grid-template-columns:1fr; gap:4px; }
+    .pain-step { grid-template-columns:1fr; gap:3px; }
+  }
+
+  /* ---------- retours coach ---------- */
+  .rc-head { display:flex; flex-wrap:wrap; gap:14px 28px; align-items:flex-end; justify-content:space-between; margin-bottom:14px; }
+  .rc-head .rc-lede { margin:0; font-size:12.5px; color:var(--ink-2); max-width:56ch; line-height:1.6; }
+  .rc-figs { display:flex; flex-wrap:wrap; gap:8px 26px; }
+  .rc-fig { display:flex; flex-direction:column; gap:1px; }
+  .rc-fig b { font-family:"JetBrains Mono",monospace; font-size:19px; font-weight:600; line-height:1.1; letter-spacing:-.02em; }
+  .rc-fig span { font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); }
+  .rc-fig.is-alert b { color:var(--alert); }
+
+  .rc-sec { margin-bottom:26px; }
+  .rc-sec > h2 { margin:0 0 3px; font-size:14px; font-weight:700; letter-spacing:-.01em; }
+  .rc-sec > p.lead { margin:0 0 13px; font-size:12.5px; color:var(--ink-2); max-width:66ch; line-height:1.6; }
+
+  .rc-cards { display:grid; gap:9px; }
+  .rc-card { border:1px solid var(--line); border-left:3px solid var(--line-2); border-radius:9px; background:var(--surface); padding:13px 16px; }
+  .rc-card.n-alert { border-left-color:var(--alert-solid); }
+  .rc-card.n-warn { border-left-color:var(--warn-solid); }
+  .rc-card.n-ok { border-left-color:var(--ok-solid); }
+  .rc-ctop { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px; margin-bottom:6px; }
+  .rc-ctop .rc-nm { font-size:13.5px; font-weight:700; letter-spacing:-.01em; }
+  .rc-ctop .rc-dt { font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--ink-3); }
+  .rc-ctop .rc-lk { margin-left:auto; display:flex; gap:9px; font-size:11.5px; }
+  .rc-ctop .rc-lk a { color:var(--accent); text-decoration:none; font-weight:600; }
+  .rc-ctop .rc-lk a:hover { text-decoration:underline; }
+  .rc-quote { margin:0 0 7px; font-size:12.5px; color:var(--ink); line-height:1.6; }
+  .rc-do { margin:0; font-size:12.5px; color:var(--ink-2); line-height:1.6; padding-left:13px; border-left:1px solid var(--line-2); }
+  .rc-do b { color:var(--ink); font-weight:600; }
+
+  .rc-tag { display:inline-flex; align-items:center; font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+            padding:2px 7px; border-radius:5px; border:1px solid transparent; white-space:nowrap; }
+  .t-alert { color:var(--alert); background:var(--alert-bg); border-color:var(--alert-line); }
+  .t-warn { color:var(--warn); background:var(--warn-bg); border-color:var(--warn-line); }
+  .t-ok { color:var(--ok); background:var(--ok-bg); border-color:var(--ok-line); }
+  .t-info { color:var(--ink-2); background:var(--surface-2); border-color:var(--line); }
+
+  .rc-echeance { border:1px solid var(--accent); border-radius:var(--r); background:var(--accent-soft); padding:15px 19px; }
+  :root[data-theme="dark"] .rc-echeance, :root:not([data-theme="light"]) .rc-echeance { background:var(--accent-soft); }
+  .rc-echeance h3 { margin:0 0 5px; font-size:13px; font-weight:700; color:var(--ink); }
+  .rc-echeance .rc-cd { font-family:"JetBrains Mono",monospace; font-size:11.5px; font-weight:600; color:var(--accent); }
+  .rc-echeance p { margin:6px 0 0; font-size:12.5px; color:var(--ink-2); line-height:1.6; max-width:70ch; }
+
+  .rc-agenerer { border:1px solid var(--warn-line); border-radius:var(--r); background:var(--warn-bg); padding:15px 19px; }
+  .rc-agenerer h3 { margin:0 0 5px; font-size:13px; font-weight:700; color:var(--ink); }
+  .rc-agenerer p { margin:0 0 11px; font-size:12.5px; color:var(--ink-2); line-height:1.6; max-width:70ch; }
+  .rc-agenerer .rc-names span { background:var(--surface); border-color:var(--warn-line); }
+  .rc-agenerer .rc-names a { color:var(--ink); text-decoration:none; }
+  .rc-agenerer .rc-names a:hover { color:var(--accent); text-decoration:underline; }
+
+  .rc-row { border-bottom:1px solid var(--line); padding:12px 20px; display:grid; grid-template-columns:235px 1fr; gap:6px 18px; align-items:baseline; }
+  .rc-row:last-child { border-bottom:none; }
+  .rc-row:hover { background:var(--surface-2); }
+  .rc-who { min-width:0; }
+  .rc-who .rc-nm { font-size:13px; font-weight:600; letter-spacing:-.01em; }
+  .rc-who .rc-sub { margin-top:3px; display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; font-size:11px; color:var(--ink-2); }
+  .rc-who .rc-sub a { color:var(--accent); text-decoration:none; font-weight:600; }
+  .rc-who .rc-sub a:hover { text-decoration:underline; }
+  .rc-dates { font-family:"JetBrains Mono",monospace; color:var(--ink-3); }
+  .rc-note { font-size:12.5px; color:var(--ink-2); line-height:1.6; }
+  .rc-note em { font-style:normal; color:var(--ink-3); }
+
+  .rc-anos { display:grid; gap:11px; }
+  .rc-ano { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); padding:15px 19px; }
+  .rc-ano.g-alert { border-color:var(--alert-line); background:var(--alert-bg); }
+  .rc-ano h3 { margin:0 0 6px; font-size:13px; font-weight:700; display:flex; flex-wrap:wrap; align-items:center; gap:9px; }
+  .rc-ano > p { margin:0 0 9px; font-size:12.5px; color:var(--ink-2); line-height:1.6; max-width:70ch; }
+  .rc-ano ul { margin:0 0 9px; padding-left:18px; display:grid; gap:6px; }
+  .rc-ano li { font-size:12.5px; color:var(--ink-2); line-height:1.6; }
+  .rc-ano li b { color:var(--ink); }
+  .rc-ano .rc-chute { margin:0; font-size:12.5px; color:var(--ink); line-height:1.6; padding-top:9px; border-top:1px solid var(--line); max-width:70ch; }
+  .rc-ano.g-alert .rc-chute { border-top-color:var(--alert-line); }
+  .rc-names { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:9px; }
+  .rc-names span { font-size:11.5px; color:var(--ink); background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:3px 8px; }
+
+  .rc-two { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px 26px; align-items:start; }
+  .rc-two ul { margin:0; padding-left:18px; display:grid; gap:7px; }
+  .rc-two li { font-size:12.5px; color:var(--ink-2); line-height:1.6; }
+  .rc-two p { margin:0 0 9px; font-size:12.5px; color:var(--ink-2); line-height:1.6; }
+
+  /* pastille de rappel dans « Suivi des blocs » */
+  .rc-flag {
+    display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:700;
+    padding:2px 7px; border-radius:5px; border:1px solid var(--alert-line);
+    background:var(--alert-bg); color:var(--alert); white-space:nowrap; text-decoration:none;
+  }
+  .rc-flag.f-warn { border-color:var(--warn-line); background:var(--warn-bg); color:var(--warn); }
+  .rc-flag.f-ok { border-color:var(--ok-line); background:var(--ok-bg); color:var(--ok); }
+  .rc-flag:hover { text-decoration:underline; }
+
+  @media (max-width:760px) {
+    .rc-row { grid-template-columns:1fr; }
+    .rc-ctop .rc-lk { margin-left:0; flex-basis:100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="idbox">
+      <span class="mark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1429 1441" width="1429" height="1441">
+<g transform="translate(0.000000,1456.000000) scale(0.100000,-0.100000)" fill="#A37E2C" stroke="none">
+<path d="M6024 14514 c-15 -99 -13 -99 -341 -101 -341 -3 -323 0 -363 -63 -44
+-69 -48 -70 -218 -70 -165 0 -167 -1 -206 -77 -29 -58 -45 -63 -206 -63 -164
+0 -176 -4 -210 -70 -30 -59 -52 -70 -145 -70 -89 0 -104 -8 -139 -77 -26 -52
+-51 -63 -141 -63 -89 0 -104 -8 -139 -77 -26 -52 -51 -63 -141 -63 -89 0 -104
+-8 -139 -77 -26 -52 -51 -63 -142 -63 -90 0 -102 -7 -146 -88 -9 -17 -35 -40
+-58 -52 -23 -12 -49 -35 -58 -53 -40 -74 -62 -87 -155 -87 -93 0 -101 -4 -142
+-78 -11 -19 -40 -47 -65 -62 -27 -16 -54 -43 -70 -70 -16 -27 -43 -54 -70 -70
+-27 -16 -54 -43 -70 -70 -16 -27 -43 -54 -70 -70 -27 -16 -54 -43 -67 -66 -37
+-65 -54 -74 -148 -74 -90 0 -99 -5 -140 -78 -11 -19 -40 -47 -65 -62 -27 -16
+-54 -43 -70 -70 -16 -27 -43 -54 -70 -70 -27 -16 -54 -43 -70 -70 -18 -31 -39
+-52 -70 -66 -63 -31 -70 -45 -70 -143 0 -100 -3 -105 -66 -140 -32 -17 -56
+-41 -74 -71 -16 -27 -43 -54 -70 -70 -27 -16 -54 -43 -70 -70 -16 -27 -43 -54
+-70 -70 -27 -16 -54 -43 -70 -70 -18 -31 -39 -52 -70 -66 -63 -31 -70 -45 -70
+-143 0 -100 -3 -105 -66 -140 -33 -18 -56 -40 -74 -71 -18 -31 -39 -51 -70
+-66 -63 -31 -70 -45 -70 -144 0 -100 -6 -111 -72 -139 -60 -25 -68 -42 -68
+-143 0 -97 -6 -109 -72 -137 -60 -25 -68 -42 -68 -143 0 -97 -6 -109 -72 -137
+-60 -25 -68 -42 -68 -143 0 -97 -6 -109 -72 -137 -64 -27 -73 -48 -69 -156 2
+-49 4 -110 4 -135 3 -71 -17 -105 -74 -129 -69 -28 -84 -65 -73 -181 15 -166
+5 -204 -66 -240 -65 -33 -65 -33 -65 -357 0 -338 2 -331 -94 -341 -81 -7 -81
+-2377 0 -2384 96 -10 94 -3 94 -341 0 -324 0 -324 65 -357 71 -36 81 -74 66
+-240 -11 -116 4 -153 73 -181 57 -24 77 -58 74 -129 0 -25 -2 -85 -4 -135 -4
+-108 5 -129 69 -156 66 -28 72 -40 72 -137 0 -101 8 -118 68 -143 66 -28 72
+-40 72 -137 0 -101 8 -118 68 -143 66 -28 72 -40 72 -137 0 -101 8 -118 68
+-143 66 -28 72 -39 72 -139 0 -99 7 -113 70 -144 31 -15 52 -35 70 -66 18 -31
+41 -53 74 -71 63 -35 66 -40 66 -140 0 -98 7 -112 70 -143 31 -15 52 -35 70
+-66 18 -31 41 -53 74 -71 63 -35 66 -40 66 -140 0 -98 7 -112 70 -143 31 -14
+52 -35 70 -66 16 -27 43 -54 70 -70 27 -16 54 -43 70 -70 16 -27 43 -54 70
+-70 27 -16 54 -43 70 -70 16 -27 43 -54 70 -70 27 -16 54 -43 70 -70 16 -27
+43 -54 70 -70 27 -16 54 -43 70 -70 16 -27 43 -54 70 -70 27 -16 54 -43 70
+-70 16 -27 43 -54 70 -70 25 -15 54 -43 65 -62 41 -73 50 -78 140 -78 94 0
+111 -9 148 -74 13 -23 40 -50 67 -66 27 -16 54 -43 70 -70 16 -27 43 -54 70
+-70 25 -15 54 -43 65 -62 41 -73 50 -78 139 -78 91 0 116 -11 142 -63 35 -69
+49 -77 142 -77 92 0 114 -13 154 -87 9 -18 35 -41 58 -53 23 -12 49 -35 58
+-52 44 -81 56 -88 146 -88 94 0 116 -10 146 -70 34 -66 46 -70 210 -70 161 0
+177 -5 206 -63 35 -69 50 -77 139 -77 93 0 115 -11 145 -70 35 -69 39 -70 280
+-70 238 0 245 -2 276 -63 40 -79 32 -77 276 -77 244 0 243 0 287 -69 18 -27
+39 -52 47 -55 20 -8 2548 -8 2568 0 8 3 29 28 47 55 45 71 37 69 357 69 323 0
+305 -4 346 77 29 58 45 63 206 63 164 0 176 4 210 70 30 59 52 70 145 70 89 0
+104 8 139 77 29 58 45 63 206 63 164 0 176 4 210 70 30 60 52 70 146 70 90 0
+102 7 146 88 9 17 35 40 58 52 23 12 49 35 58 53 40 74 62 87 154 87 93 0 107
+8 142 77 26 52 51 63 142 63 89 0 98 5 139 78 11 19 40 47 65 62 27 16 54 43
+70 70 16 27 43 54 70 70 27 16 54 43 67 66 37 65 54 74 148 74 90 0 99 5 140
+78 11 19 40 47 65 62 27 16 54 43 70 70 16 27 43 54 70 70 27 16 54 43 70 70
+16 27 43 54 70 70 27 16 54 43 70 70 16 27 43 54 70 70 27 16 54 43 70 70 16
+27 43 54 70 70 27 16 54 43 70 70 16 27 43 54 70 70 27 16 54 43 70 70 18 31
+39 52 70 66 63 31 70 45 70 143 0 100 3 105 66 140 32 18 56 41 74 71 18 31
+41 53 74 70 72 38 85 84 65 220 -17 120 -5 154 66 185 99 44 103 135 7 165
+-70 23 -74 33 -67 136 8 106 -6 134 -67 134 -44 0 -56 -9 -87 -66 -14 -27 -43
+-60 -63 -74 -21 -14 -51 -46 -67 -71 -17 -28 -46 -56 -72 -70 -27 -15 -53 -41
+-69 -69 -16 -27 -43 -54 -70 -70 -27 -16 -54 -43 -70 -70 -16 -27 -43 -54 -70
+-70 -27 -16 -54 -43 -70 -70 -18 -31 -39 -52 -70 -66 -63 -31 -70 -45 -70
+-143 0 -100 -3 -105 -66 -140 -32 -17 -56 -41 -74 -71 -16 -27 -43 -54 -70
+-70 -27 -16 -54 -43 -67 -66 -37 -65 -54 -74 -148 -74 -90 0 -99 -5 -140 -78
+-11 -19 -40 -47 -65 -62 -27 -16 -54 -43 -70 -70 -16 -27 -43 -54 -70 -70 -27
+-16 -54 -43 -70 -70 -16 -27 -43 -54 -70 -70 -27 -16 -54 -43 -67 -66 -37 -65
+-54 -74 -148 -74 -91 0 -103 -7 -147 -88 -9 -17 -35 -40 -58 -52 -23 -12 -49
+-35 -58 -53 -40 -74 -62 -87 -154 -87 -93 0 -107 -8 -142 -77 -26 -52 -51 -63
+-141 -63 -89 0 -104 -8 -139 -77 -26 -52 -51 -63 -141 -63 -89 0 -104 -8 -139
+-77 -26 -52 -51 -63 -141 -63 -89 0 -104 -8 -139 -77 -29 -58 -45 -63 -206
+-63 -164 0 -176 -4 -210 -70 -35 -69 -39 -70 -280 -70 -241 0 -245 -1 -280
+-70 -38 -74 -8 -70 -560 -70 -552 0 -522 4 -560 -70 -34 -66 -46 -70 -210 -70
+-164 0 -176 4 -210 70 -38 74 -8 70 -560 70 -552 0 -522 -4 -560 70 -35 69
+-39 70 -280 70 -241 0 -245 1 -280 70 -34 66 -46 70 -210 70 -161 0 -177 5
+-206 63 -35 69 -50 77 -139 77 -90 0 -115 11 -141 63 -35 69 -50 77 -139 77
+-90 0 -115 11 -141 63 -35 69 -50 77 -139 77 -90 0 -115 11 -141 63 -35 69
+-49 77 -142 77 -92 0 -114 13 -154 87 -9 18 -35 41 -58 53 -23 12 -49 35 -58
+52 -44 81 -56 88 -147 88 -94 0 -111 9 -148 74 -13 23 -40 50 -67 66 -27 16
+-54 43 -70 70 -16 27 -43 54 -70 70 -27 16 -54 43 -70 70 -16 27 -43 54 -70
+70 -25 15 -54 43 -65 62 -41 73 -50 78 -140 78 -94 0 -111 9 -148 74 -13 23
+-40 50 -67 66 -27 16 -54 43 -70 70 -18 30 -42 54 -74 71 -63 35 -66 40 -66
+140 0 98 -7 112 -70 143 -31 14 -52 35 -70 66 -16 27 -43 54 -70 70 -27 16
+-54 43 -70 70 -16 27 -43 54 -70 70 -27 16 -54 43 -70 70 -18 30 -42 54 -74
+71 -63 35 -66 40 -66 140 0 98 -7 112 -70 143 -31 15 -52 35 -70 66 -18 31
+-41 53 -74 71 -63 35 -66 40 -66 137 0 101 -8 118 -68 143 -66 28 -72 40 -72
+137 0 101 -8 118 -68 143 -66 28 -72 40 -72 139 0 101 -10 119 -73 144 -33 12
+-48 25 -58 49 -14 32 -14 45 -8 212 5 109 -7 133 -74 159 -33 12 -48 25 -58
+49 -14 32 -14 45 -8 212 5 108 -7 133 -74 159 -67 25 -70 35 -66 301 5 375 7
+368 -74 399 -71 27 -67 -30 -67 976 0 1006 -4 949 67 976 81 31 79 24 74 399
+-4 266 -1 276 66 301 67 26 79 51 74 159 -6 167 -6 180 8 212 10 24 25 37 58
+49 67 26 79 50 74 159 -6 167 -6 180 8 212 10 24 25 37 58 49 63 25 73 43 73
+144 0 99 6 111 72 139 60 25 68 42 68 143 0 97 6 109 72 137 60 25 68 42 68
+143 0 97 3 102 66 137 33 18 56 40 74 71 18 31 39 51 70 66 63 31 70 45 70
+143 0 100 3 105 66 140 33 18 56 40 74 71 18 31 39 51 70 66 63 31 70 45 70
+143 0 100 3 105 66 140 32 17 56 41 74 71 16 27 43 54 70 70 27 16 54 43 70
+70 16 27 43 54 70 70 27 16 54 43 70 70 16 27 43 54 70 70 27 16 54 43 70 70
+16 27 43 54 70 70 27 16 54 43 70 70 16 27 43 54 70 70 27 16 54 43 67 66 37
+65 54 74 148 74 90 0 99 5 140 78 11 19 40 47 65 62 27 16 54 43 70 70 16 27
+43 54 70 70 27 16 54 43 67 66 37 65 54 74 147 74 91 0 105 8 140 77 26 52 51
+63 141 63 89 0 104 8 139 77 26 52 51 63 141 63 89 0 104 8 139 77 26 52 51
+63 141 63 89 0 104 8 139 77 26 52 51 63 141 63 89 0 104 8 139 77 29 58 45
+63 206 63 164 0 176 4 210 70 35 69 39 70 280 70 241 0 245 1 280 70 38 74 8
+70 560 70 552 0 522 -4 560 70 34 66 46 70 210 70 164 0 176 -4 210 -70 38
+-74 8 -70 560 -70 552 0 522 4 560 -70 35 -69 39 -70 280 -70 241 0 245 -1
+280 -70 34 -66 46 -70 210 -70 161 0 177 -5 206 -63 35 -69 50 -77 139 -77 90
+0 115 -11 141 -63 35 -69 50 -77 139 -77 90 0 115 -11 141 -63 35 -69 50 -77
+139 -77 90 0 115 -11 141 -63 35 -69 50 -77 139 -77 90 0 115 -11 141 -63 35
+-69 49 -77 140 -77 93 0 110 -9 147 -74 13 -23 40 -50 67 -66 27 -16 54 -43
+70 -70 16 -27 43 -54 70 -70 27 -16 54 -43 70 -70 16 -27 43 -54 70 -70 25
+-15 54 -43 65 -62 41 -73 50 -78 140 -78 94 0 111 -9 148 -74 13 -23 40 -50
+67 -66 27 -16 54 -43 70 -70 16 -27 43 -54 70 -70 27 -16 54 -43 70 -70 18
+-30 42 -54 74 -71 63 -35 66 -40 66 -140 0 -98 7 -112 70 -143 31 -14 52 -35
+70 -66 16 -27 43 -54 70 -70 27 -16 54 -43 70 -70 16 -27 43 -54 70 -70 27
+-16 54 -43 70 -70 18 -30 42 -54 74 -71 63 -35 66 -40 66 -140 0 -98 7 -112
+70 -143 31 -15 52 -35 70 -66 18 -31 41 -53 74 -71 63 -35 66 -40 66 -137 0
+-101 8 -118 68 -143 66 -28 72 -40 72 -139 0 -101 10 -119 73 -144 53 -20 72
+-56 70 -126 0 -25 -2 -85 -4 -135 -4 -108 5 -129 69 -156 66 -28 72 -40 72
+-139 0 -101 10 -119 73 -144 65 -25 70 -42 66 -231 -6 -292 -6 -294 69 -326
+66 -28 72 -39 72 -141 0 -96 21 -138 70 -138 48 0 70 -42 70 -135 0 -94 6
+-105 85 -159 15 -10 33 -34 41 -52 58 -138 173 -92 159 63 -10 113 -10 122 -5
+480 4 342 5 337 -73 367 -33 12 -48 25 -58 49 -14 32 -14 45 -8 212 5 109 -7
+133 -74 159 -53 20 -72 56 -70 126 0 25 2 86 4 135 4 108 -5 129 -69 156 -66
+28 -72 40 -72 137 0 101 -8 118 -68 143 -66 28 -72 40 -72 137 0 101 -8 118
+-68 143 -66 28 -72 40 -72 137 0 101 -8 118 -68 143 -66 28 -72 39 -72 139 0
+99 -7 113 -70 144 -31 15 -52 35 -70 66 -18 31 -41 53 -74 71 -63 35 -66 40
+-66 140 0 98 -7 112 -70 143 -31 14 -52 35 -70 66 -16 27 -43 54 -70 70 -27
+16 -54 43 -70 70 -18 30 -42 54 -74 71 -63 35 -66 40 -66 140 0 98 -7 112 -70
+143 -31 14 -52 35 -70 66 -16 27 -43 54 -70 70 -27 16 -54 43 -70 70 -16 27
+-43 54 -70 70 -27 16 -54 43 -70 70 -16 27 -43 54 -70 70 -27 16 -54 43 -70
+70 -16 27 -43 54 -70 70 -25 15 -54 43 -65 62 -41 73 -50 78 -140 78 -94 0
+-111 9 -148 74 -13 23 -40 50 -67 66 -27 16 -54 43 -70 70 -16 27 -43 54 -70
+70 -25 15 -54 43 -65 62 -41 74 -49 78 -142 78 -93 0 -115 13 -155 87 -9 18
+-35 41 -58 53 -23 12 -49 35 -58 52 -44 81 -56 88 -146 88 -91 0 -116 11 -142
+63 -35 69 -50 77 -139 77 -90 0 -115 11 -141 63 -35 69 -50 77 -139 77 -90 0
+-115 11 -141 63 -35 69 -50 77 -139 77 -93 0 -115 11 -145 70 -34 66 -46 70
+-210 70 -161 0 -177 5 -206 63 -39 76 -41 77 -206 77 -170 0 -174 1 -218 70
+-40 63 -22 60 -363 63 -328 2 -326 2 -341 101 -11 73 -2361 73 -2372 0z M5781
+12724 c-30 -21 -51 -73 -51 -124 0 -119 34 -140 226 -140 174 0 191 -6 202
+-75 4 -22 5 -1628 2 -3570 -3 -1941 -2 -3546 2 -3565 14 -72 -1 -70 485 -70
+444 0 462 1 483 40 14 27 14 7453 0 7480 -21 39 -33 40 -687 40 -574 0 -641
+-2 -662 -16z M3261 9504 c-30 -21 -51 -73 -51 -124 0 -119 34 -140 223 -140
+151 0 179 -6 197 -40 7 -13 10 -488 8 -1517 -1 -824 -1 -1521 -1 -1549 1 -69
+15 -92 71 -115 66 -28 72 -40 72 -137 0 -101 8 -118 68 -143 66 -28 72 -40 72
+-137 0 -100 8 -118 66 -142 28 -13 51 -31 62 -51 44 -82 56 -89 146 -89 94 0
+116 -10 146 -70 37 -73 15 -70 493 -70 475 0 439 -6 500 84 10 14 39 36 65 49
+85 40 84 113 -3 157 -29 15 -61 42 -79 68 -17 24 -49 53 -70 65 -24 13 -50 40
+-66 67 -16 27 -43 54 -70 70 -27 16 -54 43 -70 70 -18 30 -42 54 -74 71 -63
+35 -66 40 -66 139 0 101 -10 120 -73 144 -33 12 -48 25 -58 49 -14 32 -14 45
+-8 212 5 108 -7 133 -74 159 -28 10 -48 26 -56 42 -12 27 -17 2716 -5 2736 13
+20 -9 112 -32 135 -31 31 -1289 37 -1333 7z M7872 9492 c-15 -15 -35 -42 -44
+-60 -11 -21 -33 -39 -62 -52 -25 -10 -49 -28 -55 -39 -15 -28 -16 -7173 -1
+-7201 20 -38 38 -38 752 -41 784 -3 737 -7 775 64 81 151 -54 296 -138 148
+-45 -81 -101 -80 -155 4 -23 36 -46 60 -68 69 -19 8 -39 23 -45 35 -12 21 -17
+6924 -5 6943 13 20 -9 111 -32 135 -40 40 -883 36 -922 -5z M9702 9504 c-12
+-8 -31 -33 -42 -54 -30 -60 -52 -70 -148 -70 -94 0 -132 -22 -132 -77 -2 -75
+-2 -241 -1 -266 2 -65 33 -77 203 -77 170 0 185 -4 214 -63 35 -69 49 -77 140
+-77 93 0 110 -9 147 -74 13 -23 40 -50 67 -66 27 -16 54 -43 70 -70 18 -30 42
+-54 74 -71 63 -35 66 -40 66 -139 0 -101 10 -120 73 -144 33 -12 48 -25 58
+-49 14 -32 14 -45 8 -212 -5 -108 7 -133 74 -159 69 -26 68 -17 68 -486 0
+-469 1 -460 -68 -486 -67 -26 -79 -51 -74 -159 6 -167 6 -180 -8 -212 -10 -24
+-25 -37 -58 -49 -67 -26 -79 -50 -74 -159 6 -167 6 -180 -7 -210 -8 -19 -29
+-39 -59 -55 -32 -17 -55 -39 -73 -70 -18 -31 -39 -51 -70 -66 -63 -31 -70 -45
+-70 -142 0 -100 -8 -118 -66 -142 -28 -13 -51 -31 -62 -51 -44 -81 -57 -89
+-142 -89 -98 0 -102 -2 -145 -61 -24 -34 -50 -56 -80 -69 -132 -56 -76 -168
+78 -154 51 5 149 7 220 5 143 -3 163 3 193 62 35 70 49 77 144 77 95 0 109 7
+144 77 26 52 51 63 142 63 89 0 98 5 139 78 11 19 40 47 65 62 27 16 54 43 70
+70 16 27 43 54 70 70 27 16 54 43 70 70 16 27 43 54 70 70 27 16 54 43 70 70
+16 27 43 54 70 70 27 16 54 43 70 70 18 31 39 52 70 66 63 31 70 45 70 144 0
+100 6 111 72 139 60 25 68 42 68 143 0 97 6 109 72 137 60 25 68 42 68 143 0
+97 6 109 72 137 73 31 69 -7 69 701 0 708 4 670 -69 701 -66 28 -72 39 -72
+139 0 99 -7 113 -70 144 -31 14 -52 35 -70 66 -16 27 -43 54 -70 70 -27 16
+-54 43 -70 70 -16 27 -43 54 -70 70 -27 16 -54 43 -70 70 -16 27 -43 54 -70
+70 -25 15 -54 43 -65 62 -41 73 -50 78 -139 78 -94 0 -116 11 -146 70 -36 71
+-31 70 -350 70 -319 0 -314 -1 -350 70 -34 66 -46 70 -210 70 -116 0 -150 -3
+-168 -16z"/>
+</g>
+</svg></span>
+      <div>
+        <p class="kicker">Bloc Octobre 2026</p>
+        <h1>Suivi des blocs — Ultimate Physical Bordeaux</h1>
+      </div>
+    </div>
+    <p class="srcline">
+      Source : feuille <b>Dossier pedro 2</b> + docs Drive<br>
+      Génération relevée le <b>18 septembre 2026</b><br>
+      Retours coach relevés le <b>16 septembre 2026</b> <span title="Roster complet du 14/09 ; docs Drive re-vérifiés le 15/09. Les retours coach couvrent le 08 au 16/09.">(08→16/09)</span>
+    </p>
+  </header>
+
+  <div class="views" role="tablist" aria-label="Vues">
+    <button type="button" role="tab" data-view="onboarding" aria-selected="false">Onboarding</button>
+    <button type="button" role="tab" data-view="methode" aria-selected="false">Méthode PEDRO</button>
+    <button type="button" role="tab" data-view="suivi" aria-selected="true">Suivi des blocs</button>
+    <button type="button" role="tab" data-view="distanciel" aria-selected="false">Suivi distanciel</button>
+    <button type="button" role="tab" data-view="retours" aria-selected="false">Retours coach</button>
+  </div>
+
+  <div id="view-suivi">
+  <section class="band">
+    <div class="band-head">
+      <h2>Avancement de la génération mensuelle</h2>
+      <p class="pct"><b id="pctnum">0 %</b> du roster a son bloc d'octobre</p>
+    </div>
+    <div class="bar" id="bar" role="img" aria-label="Répartition des clients par état du bloc">
+      <span class="s-ok" id="bar-ok"></span>
+      <span class="s-warn" id="bar-warn"></span>
+      <span class="s-alert" id="bar-alert"></span>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <div class="controls">
+    <div class="seg" id="freqseg" role="group" aria-label="Filtrer par fréquence">
+      <button type="button" data-freq="0" aria-pressed="true">Toutes fréquences</button>
+      <button type="button" data-freq="1" aria-pressed="false">1×/sem</button>
+      <button type="button" data-freq="2" aria-pressed="false">2×/sem</button>
+      <button type="button" data-freq="3" aria-pressed="false">3×/sem</button>
+    </div>
+    <input class="search" id="q" type="search" placeholder="Chercher un client…" aria-label="Chercher un client">
+  </div>
+
+  <div class="listwrap">
+    <div class="colhead">
+      <span>Client</span>
+      <span>Dernier bloc</span>
+      <span style="text-align:right">Où j'en suis</span>
+    </div>
+    <div id="list"></div>
+  </div>
+
+  <section class="aside">
+    <h2>Traités hors roster</h2>
+    <p class="lead">Ces clients ont un bloc généré mais n'apparaissent pas dans la feuille « Dossier pedro 2 ». À ajouter au roster pour qu'ils partent avec le lot le mois prochain.</p>
+    <div class="chips" id="hors"></div>
+  </section>
+  </div>
+
+  <div id="view-methode" hidden>
+
+    <section class="card">
+      <h2>Trame d'une séance</h2>
+      <p class="lead">Structure fixe, dans cet ordre. « T » = nombre de tours : le bloc entier est répété ce nombre de fois avant de passer au suivant. Les intitulés s'adaptent au client (« Activ » au lieu de A1, « Cardio » au lieu de Finisher) — jamais la structure.</p>
+      <div class="blocs">
+        <div class="bloc"><span class="tag">A1 <em>3T</em></span><p>Activation / mobilité : 3 exercices courts en circuit, orientés vers les axes prioritaires du client (mobilité thoracique, activation psoas, proprioception cheville/genou).</p></div>
+        <div class="bloc"><span class="tag">B1 <em>4T</em></span><p>Superset antagoniste n°1 : un mouvement bas du corps (ischios / quadriceps / hanche) + un mouvement haut du corps (dos, pecs / épaules), avec charge.</p></div>
+        <div class="bloc"><span class="tag">B2 <em>4T</em></span><p>Superset antagoniste n°2 : même logique que B1, exercices différents — on fait varier le matériel et la dominante par rapport à B1.</p></div>
+        <div class="bloc"><span class="tag">B3 <em>3T</em></span><p>Gainage / core : 2 exercices en superset, en tenant compte des préférences du client (gainage dynamique si le statique ne passe pas).</p></div>
+        <div class="bloc"><span class="tag">Finisher <em>4T</em></span><p>Conditionnement : 1 à 2 exercices cardio / métabolique, au niveau d'impact toléré (low-impact en réathlétisation).</p></div>
+      </div>
+      <p class="lead" style="margin:14px 0 0">Notation dans la cellule : <code class="mono">Bloc (XT) : Exercice @charge xREPS /c / Exercice …</code> — <code class="mono">@</code> charge, <code class="mono">x</code> répétitions, <code class="mono">''</code> secondes, <code class="mono">/c</code> par côté, <code class="mono">PDC</code> poids de corps, <code class="mono">AR</code> aller-retour.</p>
+    </section>
+
+    <section class="card">
+      <h2>Périodisation du mois</h2>
+      <p class="lead">Progression sur les charges réellement faites, jamais celles prévues : +2,5 à +5 %, ou une répétition de plus. Au moins 30 % des exercices renouvelés d'une semaine sur l'autre, en gardant 1 à 2 exercices « fil rouge » par bloc pour mesurer la progression.</p>
+      <div class="weeks">
+        <div class="week"><h3>Semaine 1</h3><p>Reprise de contact sur la trame habituelle, volume et charge de référence. On vérifie que rien ne réveille de douleur.</p></div>
+        <div class="week"><h3>Semaine 2</h3><p>Progression d'au moins une variable par exercice clé. Premiers nouveaux exercices introduits.</p></div>
+        <div class="week peak"><h3>Semaine 3 — pic</h3><p>Intensité ou volume les plus élevés du mois, variété maximale.</p></div>
+        <div class="week deload"><h3>Semaine 4 — deload</h3><p>Semaine allégée, ou semaine de test / validation des progrès si le client est en réathlétisation.</p></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Protocole douleur</h2>
+      <p class="lead">Échelle 0–10 systématique pour cadrer les retours. Chaque adaptation faite pour une douleur s'écrit dans la note d'en-tête du document, pour que la séance suivante en tienne compte.</p>
+      <div class="pain">
+        <div class="pain-step p1"><span class="lvl">0–3/10</span><p>Douleur stable ou en diminution : <b>poursuivre et progresser normalement</b>.</p></div>
+        <div class="pain-step p2"><span class="lvl">4–6/10</span><p>Ou douleur qui apparaît pendant l'exercice sans s'aggraver après : <b>réduire amplitude, charge ou vitesse</b>, proposer une variante isométrique ou excentrique contrôlée de la même dominante.</p></div>
+        <div class="pain-step p3"><span class="lvl">&gt; 6/10</span><p>Ou douleur qui s'aggrave, ou symptôme nouveau (gonflement, instabilité franche, douleur nocturne) : <b>retirer l'exercice</b>, alternative sans contrainte sur la zone, et avis médical / kiné en présentiel recommandé explicitement. Jamais de diagnostic.</p></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Grille douleur → adaptation</h2>
+      <p class="lead">Trois filtres dans cet ordre pour choisir un exercice : sécurité par rapport à la douleur, pertinence par rapport à l'objectif, matériel réellement disponible. En cas de doute entre deux options, toujours la plus sûre.</p>
+      <div class="grille">
+        <div class="gr"><h3>Genou / ligament</h3><p>Éviter pivots, plyométrie, squat profond en charge lourde. Privilégier ischios en dominante hanche (RDL, hip thrust), travail unipodal de proprioception, amplitude progressive.</p></div>
+        <div class="gr"><h3>Genou valgus</h3><p>Renforcement moyen fessier et abducteurs, spanish squat, squat box, cue « genou dans l'axe ». Éviter les charges qui accentuent l'effondrement.</p></div>
+        <div class="gr"><h3>Poignet</h3><p>Éviter gainage et pompes au sol en extension de poignet. Pompes surélevées sur box, prises neutres (haltères, KB), gainage sur avant-bras.</p></div>
+        <div class="gr"><h3>Cheville instable</h3><p>Travail unipodal d'équilibre, pied court, progression surface stable → instable sur la durée du bloc.</p></div>
+        <div class="gr"><h3>Épaule / coude</h3><p>Prise neutre ou supination, charge progressive jamais maximale. Ajouter en activation un exercice de rotation externe ciblé (sleeper stretch, RE élastique).</p></div>
+        <div class="gr"><h3>Lombaires</h3><p>Éviter la flexion lombaire chargée, reprendre sous le seuil où la tension est apparue. Hip hinge tempo contrôlé, gainage anti-extension et anti-rotation plutôt que crunchs.</p></div>
+        <div class="gr"><h3>Asymétrie mesurée au bilan</h3><p>Basculer vers du travail unilatéral / analytique isolé plutôt que polyarticulaire bilatéral, en suivant la préconisation du bilan si elle est explicite.</p></div>
+        <div class="gr"><h3>Césarienne / chirurgie abdo</h3><p>Gainage anti-rotation et isométrique (Pallof, dead bug, hollow, gainage latéral) plutôt que sit-up ou crunch chargé.</p></div>
+        <div class="gr"><h3>Douleur ponctuelle isolée</h3><p>Rester vigilant sans sur-adapter tout le mois : vérifier si elle revient sur plusieurs séances avant de la traiter comme une contrainte durable.</p></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Banques d'exercices</h2>
+      <p class="lead">Base de sélection, classée par groupe musculaire, matériel et dominante biomécanique. Une variante créative cohérente avec une dominante listée reste recevable si la logique scientifique tient. Chaque exercice affiché peut être remplacé (⇄) par une variante du même groupe musculaire et de la même dominante.</p>
+      <div class="bankbar" id="bankgroups" role="group" aria-label="Filtrer par groupe musculaire"></div>
+      <div class="bankbar" id="bankmats" role="group" aria-label="Filtrer par matériel"></div>
+      <input class="search" id="bq" type="search" placeholder="Chercher un exercice…" aria-label="Chercher un exercice" style="margin-bottom:12px">
+      <p class="bankcount" id="bankcount"></p>
+      <div class="bankgrid" id="bankgrid"></div>
+    </section>
+
+  </div>
+
+  <div id="view-onboarding" hidden>
+    <section class="band">
+      <div class="band-head">
+        <h2>Nouveau client — bilan initial &amp; dossier Drive</h2>
+      </div>
+      <p class="gp-note" style="margin:0 0 14px;">Crée le dossier Drive du nouveau client dans « Séances Clients », puis rédige son bilan initial dans un style professionnel kiné / coach sportif. Le Doc créé s'appelle « Bilan initial - [nom] » : la génération mensuelle le retrouvera automatiquement (elle cherche un fichier dont le titre contient « bilan » dans le dossier du client).</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <input id="ob-name" class="search" type="text" placeholder="Nom du nouveau client" style="flex:1;min-width:220px;">
+        <div class="ob-inline" style="min-width:130px;"><label>Séances / semaine</label><input id="ob-freq" type="number" min="1" max="7" value="2" style="padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit;font-size:12.5px;"></div>
+        <button id="ob-create-folder" type="button" class="genb" style="padding:9px 16px;font-size:12.5px;">Créer le dossier + l'historique</button>
+      </div>
+      <p class="gp-note" style="margin:8px 0 0;">Crée le dossier, un doc historique vide (prêt pour la 1ère génération) et ajoute le client dans « Suivi des blocs » ci-contre, sans passer par la feuille « Dossier pedro 2 ».</p>
+      <div id="ob-folder-status" style="margin-top:12px;"></div>
+
+      <div id="ob-bilan-wrap" hidden style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line);">
+        <h3 style="margin:0 0 10px;font-size:13px;">Bilan initial — <span id="ob-bilan-name"></span></h3>
+        <div id="ob-fields"></div>
+
+        <div class="gp-actions" style="margin-top:6px;">
+          <button id="ob-write-btn" type="button" class="primary">Rédiger le bilan (style pro)</button>
+          <button id="ob-doc-btn" type="button">Créer le Doc Bilan dans le dossier client</button>
+        </div>
+        <p id="ob-status" class="gp-msg" style="margin-top:8px;"></p>
+        <div id="ob-output-wrap" hidden style="margin-top:10px;">
+          <div class="gp-draft"><textarea id="ob-output" spellcheck="false" aria-label="Bilan rédigé"></textarea></div>
+          <div class="gp-actions" style="margin-top:8px;"><button id="ob-copy-btn" type="button">Copier</button></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <p class="foot" id="foot">Les états « où j'en suis » sont enregistrés sur cette page.</p>
+</div>
+
+<div id="view-distanciel" hidden style="max-width:1020px;margin:0 auto;">
+  <section class="band">
+    <div class="band-head">
+      <h2>Suivi distanciel</h2>
+      <button type="button" id="dist-refresh" class="genb" style="padding:6px 12px;font-size:11px;">Actualiser depuis Drive</button>
+    </div>
+    <p class="gp-note" style="margin:0 0 14px;">Liste tous les programmes du dossier Drive « Suivi distanciel » (un doc « Programme Distanciel - [nom] » par client à distance). Le lien ouvre le programme ; le statut « où j'en suis » est enregistré sur cette page.</p>
+    <div id="dist-status" class="gp-msg"></div>
+    <div class="listwrap" style="margin-top:12px;">
+      <div class="colhead">
+        <span>Client distanciel</span>
+        <span>Dernière modif.</span>
+        <span style="text-align:right">Où j'en suis</span>
+      </div>
+      <div id="dist-list"></div>
+    </div>
+  </section>
+</div>
+
+<div id="view-retours" hidden style="max-width:1020px;margin:0 auto;">
+
+  <section class="band">
+    <div class="rc-head">
+      <div>
+        <h2 style="margin:0 0 4px;font-size:14px;font-weight:700;">Relevé du 8 au 16 septembre 2026</h2>
+        <p class="rc-lede">Ce que les coachs ont écrit dans les dossiers depuis l'arrêt du rapport précédent, le 7 septembre. Source : les dossiers Drive du roster « Dossier pedro 2 » modifiés sur la période.</p>
+      </div>
+      <div class="rc-figs">
+        <div class="rc-fig"><b>36</b><span>dossiers vérifiés</span></div>
+        <div class="rc-fig"><b>33</b><span>avec séance</span></div>
+        <div class="rc-fig is-alert"><b>10</b><span>points d'attention</span></div>
+      </div>
+    </div>
+    <p class="gp-note" style="margin:0;">Cinq clients signalent une fatigue marquée sur la même quinzaine — Solène Lebihan, Mathilde Piaux, Sandra Messibah, Nathan Gattegno, Julien Lacroix. Dans quatre cas sur cinq la séance a été raccourcie : blocs ramenés de 4 tours à 3, finisher sauté.</p>
+  </section>
+
+  <section class="rc-sec rc-agenerer" id="rc-agenerer" hidden></section>
+
+  <section class="rc-sec">
+    <h2>Points d'attention prioritaires</h2>
+    <p class="lead">Douleurs nouvelles, aggravations et blocages techniques relevés sur la période. À intégrer avant la prochaine séance.</p>
+    <div class="rc-cards" id="rc-prio"></div>
+  </section>
+
+  <section class="rc-sec">
+    <h2>Échéance à planifier</h2>
+    <div class="rc-echeance" id="rc-echeance"></div>
+  </section>
+
+  <section class="rc-sec">
+    <h2>Retours détaillés</h2>
+    <p class="lead">Les 33 clients vus sur la période, avec les annotations de coach et les écarts entre charge prévue et charge réellement soulevée.</p>
+    <div class="controls">
+      <div class="seg" id="rc-seg" role="group" aria-label="Filtrer les retours">
+        <button type="button" data-rcf="all" aria-pressed="true">Tous</button>
+        <button type="button" data-rcf="prio" aria-pressed="false">Points d'attention</button>
+        <button type="button" data-rcf="nouveau" aria-pressed="false">Nouveaux clients</button>
+        <button type="button" data-rcf="anomalie" aria-pressed="false">Bilan douteux</button>
+      </div>
+      <input class="search" id="rc-q" type="search" placeholder="Chercher un client, un exercice, une charge…" aria-label="Chercher dans les retours">
+    </div>
+    <div class="listwrap">
+      <div class="colhead" style="grid-template-columns:235px 1fr;">
+        <span>Client</span>
+        <span>Retours coach et corrections de charge</span>
+      </div>
+      <div id="rc-list"></div>
+    </div>
+    <p class="gp-note" id="rc-sans"></p>
+  </section>
+
+  <section class="rc-sec">
+    <h2>Anomalies à vérifier</h2>
+    <div class="rc-anos" id="rc-anos"></div>
+  </section>
+
+  <section class="rc-sec">
+    <div class="rc-two">
+      <div>
+        <h2 style="margin:0 0 9px;font-size:14px;font-weight:700;">Ce qui a changé depuis le 07/09</h2>
+        <ul id="rc-chg"></ul>
+      </div>
+      <div>
+        <h2 style="margin:0 0 9px;font-size:14px;font-weight:700;">Périmètre du relevé</h2>
+        <p>Douze dossiers du roster ont été modifiés sur la période sans être ouverts un par un. Plusieurs de ces modifications correspondent à la préparation des blocs d'octobre plutôt qu'à une séance, mais cela reste à confirmer.</p>
+        <div class="rc-names" id="rc-nonouverts"></div>
+        <p>Des dossiers absents de la feuille ont aussi été modifiés et ne sont pas couverts ici :</p>
+        <div class="rc-names" id="rc-horsfeuille"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const DATA = {"clients":[{"nom":"Adrien Lalut","freq":2,"histo":"1FGyIHY0W3KZErVFw2Xe6jAK2nZjnmaqcEWKJuNTpMBs","mois":"Octobre","doc":"1Ka1aRfvndMESh7fEjKLHLxZv-699FTsVYt_ahc0Tjyo","date":"2026-09-15","id":"adrien-lalut"},{"nom":"Alex Coutant","freq":2,"histo":"1PfZm5sff7UEe6GrxIzuIJG2RfDa0tHEShBSAyw8Kp0Q","mois":"Septembre","doc":"1fz8n148DqzCgOl1aW3YBqcRogEu-bQonHIoTFvFLRts","date":"2026-08-28","id":"alex-coutant"},{"nom":"Alex Marien","freq":1,"histo":"175hCKhPsy88YZ2Milf9jPZueFPahVpn-rxFbm1xQ2yE","mois":"Septembre","doc":"1pORL-IXLtV662zxz4-gsG4ROh2A5Vy0ORCKo-N4IDg0","date":"2026-08-28","id":"alex-marien"},{"nom":"Alex Roussel","freq":1,"histo":"17sAvteqItsx1YT2BuwA6W-K9iaNGwxdK-CPFpb7t5kE","mois":"Septembre","doc":"1C-wCV25EwkIZrJGjZGuWNZmctDXm9ix8kQsBQ9W3Tl4","date":"2026-08-28","id":"alex-roussel"},{"nom":"Alexandra Apard","freq":1,"histo":"1h1NDOMBeJcQCLuvfjHswO1q6e7s8kL1uyT5qYcWN2EE","mois":"Septembre","doc":"1pSRQDmk350TlbBjXNcUkrHYwGTFmLzZyriS4sKTZntI","date":"2026-09-04","id":"alexandra-apard"},{"nom":"Alexandre Desse","freq":2,"histo":"1PJBWlFeIrftqR9k00uWn5tOac_WkamJQKBuBU9LrfMg","mois":"Octobre","doc":"1NihbJEU5hoGR5WWlqpZxa91aeMU_E0aI7I-Fvg2GtM0","date":"2026-09-14","id":"alexandre-desse"},{"nom":"Alexandre Frit","freq":1,"histo":"1DjS5Ha75BXGe_X286n8l1c6c85umWrQKjQ6QiRX4Avo","mois":"Septembre","doc":"17HWOs6-XN6mKOsYfWQucEVL_mkINw1nxL1uK3ZREQPI","date":"2026-08-28","id":"alexandre-frit"},{"nom":"Anne Lise Medalin","freq":1,"histo":"1yOApXBmF-xqUiMeC9tJ-A7f3JKzy1ncWVVMYrfa_CsQ","mois":null,"doc":null,"date":null,"id":"anne-lise-medalin"},{"nom":"Antoine Feix","freq":2,"histo":"13ee2WxQ1c6WGEa_6HtRt03vgy3c8j87bj0KL0_oyMzk","mois":"Octobre","doc":"1Zr9TRgERI3aUEeWLL1rZM-AmYotcGWweIvBbXQ2qIGM","date":"2026-09-14","id":"antoine-feix"},{"nom":"Armand Azencot","freq":2,"histo":"1NiQU2yqlaBYIu81ryrvDzuhVekA7kv4FzEXQ_QddAMw","mois":"Octobre","doc":"1PELkZlTd3mFy3vmPDXl53hPcQK_qIIpmVULO7UJS-kY","date":"2026-09-09","id":"armand-azencot"},{"nom":"Arthur Marien","freq":1,"histo":"1DYOo6DZUFj90DtWs-FVBV1bz_xoL_6x60Wc9NFoKQm8","mois":"Septembre","doc":"1TFyzQEeKKy20d4M6dcsst5BO64hmpE0Vud1sUpkdd1c","date":"2026-08-28","id":"arthur-marien"},{"nom":"Aurelie Oudry","freq":1,"histo":"1899EZDwH_pMUeX10reVDQBGhrl2qkAQSM9VU9y0cksI","mois":null,"doc":null,"date":null,"id":"aurelie-oudry"},{"nom":"Ben Lestage","freq":2,"histo":"1EdPzSIGf02o0nMQD48-ZfZYpyKIkItXezjnw9cebn1E","mois":"Septembre","doc":"11SFyptRpeJCMwGYQbZzmgS9Brz7mCbmlN5X4ISik1hk","date":"2026-08-28","id":"ben-lestage"},{"nom":"Benjamin Grondin","freq":2,"histo":"1PHahLErr7_8ca9IBGJypoyfKyK80y5_A7oWDeai9agI","mois":"Septembre","doc":"1Dj3cf8ewG8VzYf-eO6r7uIJDL9wKNHmDUElLyqDF_h8","date":"2026-08-28","id":"benjamin-grondin"},{"nom":"Benoit Pradignac","freq":2,"histo":"1tw951yVfdBjovm34ZopBiAzGw6JtBbqqcHYVI5za38U","mois":null,"doc":null,"date":null,"id":"benoit-pradignac"},{"nom":"Bertrand Marty","freq":2,"histo":"151oIxm-qzcjbhpZFKRklYmgpK8iHaYowIRxQTxrk-gs","mois":"Septembre","doc":"1H6mjuMrPxWJ4B3ZstNP13LRKIm3yZ03WDeQUt8dhYb4","date":"2026-08-28","id":"bertrand-marty"},{"nom":"Bruno Roques","freq":1,"histo":"1_d8qjc-QgbD41N43AitZ0r6MWXqcTmNHsn8d4sJLCeo","mois":"Septembre","doc":"1DCqgfL0zDRQDntyVgAqL9nazSbJcupcSn202g1azwCk","date":"2026-08-28","id":"bruno-roques"},{"nom":"Caroline Gregori","freq":2,"histo":"1iCAiWzl243bJwVONFTU7Uy6dsyaCOb39DuuwZDFQrAc","mois":null,"doc":null,"date":null,"id":"caroline-gregori"},{"nom":"Caroline Picot","freq":1,"histo":"1oCcEUYeVbQcjwnLlGWIXVBXjvjmSjOTW52ECdQFoxXQ","mois":"Septembre","doc":"14xs0TAdb3xhjNbg-SuvWNT9pfgGJpf9ZzojcgnIXfxY","date":"2026-08-28","id":"caroline-picot"},{"nom":"Catarina Barros","freq":2,"histo":"1cZHke9spw-d72NRroC1UfdXd4DW3kyFd47L9KJtcisI","mois":"Septembre","doc":"1sMN_JOPfX5CWIk5pmSIFaBSPSgg31FmMO6Qk6bgbkzQ","date":"2026-08-28","id":"catarina-barros"},{"nom":"Catherine Leonard","freq":2,"histo":"1b0Nmo4EoDP5Gzj7UW2bbdgsNNNOjOlj0UUOnArq3pF0","mois":"Septembre","doc":"1Win_mllP1YKiwOpZny-znHkVmRqzcrMynlIo8rnnl-A","date":"2026-08-28","id":"catherine-leonard"},{"nom":"Catherine Vienne","freq":1,"histo":"16on9akf49T2gTvBgd2D5ikI0TL5mUnAOiA92iTwR7WU","mois":"Septembre","doc":"1lzKofLrnx4ipofpeNjzsvJdhGaU7xvISWWZEXYG1FYw","date":"2026-08-28","id":"catherine-vienne"},{"nom":"Charles de Resseguier","freq":2,"histo":"1_esCsNiDPjnVtpbfn0TFrA2u0TU8X0E_2mS6rNj7PR4","mois":null,"doc":null,"date":null,"id":"charles-de-resseguier"},{"nom":"Charléne Jules","freq":2,"histo":"1wDol6Ciy54LHQaTGRipAURJGzFlNzIOAnB9iLhegMiw","mois":"Septembre","doc":"18RMMCNp8IJ2K1WvtoDzrWYNYqcfFaWCLqabwRGSqHxg","date":"2026-08-28","id":"charlene-jules"},{"nom":"Christophe Camicas","freq":1,"histo":"1uf-MriQWEbp-wfsVVYyVQribrduRNVw-b24ZcPkd3bw","mois":null,"doc":null,"date":null,"id":"christophe-camicas"},{"nom":"Christophe Car","freq":2,"histo":"1LpJtxqO3ikMDPDJ1zGmSwmtsuX5uvP76_9yLpUQLjx8","mois":"Septembre","doc":"1QgNTfdTOOfVYCQaFiL8ny3bRONgAJNkuH5kCPVsrh2Y","date":"2026-08-28","id":"christophe-car"},{"nom":"Corinne Napal","freq":2,"histo":"1kCFhmhnLQPZJxqs8LUtl5dmgsEh5X9oi2OFe4RVjJfk","mois":"Septembre","doc":"1BqsNCpt0FzzYiE_MGsiAbCTM90V9GCKnWZaNzaG7e-Q","date":"2026-08-28","id":"corinne-napal"},{"nom":"Célia Lina","freq":1,"histo":"1G27a4R0nFTl7MplXL4O6eeVfquz7ucoCO3BEBGDdgNQ","mois":null,"doc":null,"date":null,"id":"celia-lina"},{"nom":"Deborah Foulonneau","freq":2,"histo":"11QLIzYfodob_vdkDmoqSDBBCJZPBGIqLYXj_4inR6hI","mois":"Septembre","doc":"1xLrbITRzJpPFwzmFM66FqlZf-1n9qHD3Ghs28xa0lXg","date":"2026-08-28","id":"deborah-foulonneau"},{"nom":"Dhyana Noel","freq":2,"histo":"1RMX6CGZktz12kmIlNZOvmhj3GMRISnPsNQ8dgCJ9r0E","mois":"Septembre","doc":"1uyIp7EzylvP08dmHtMKFeduwFT7sl6-ZK_7IbDuVHP0","date":"2026-08-28","id":"dhyana-noel"},{"nom":"Elea Riviere","freq":2,"histo":"1Tz_wMhn18nbrTDsxycO-bBbGoQyJmOI_J9WowGmedB0","mois":"Septembre","doc":"14fpWjG7IeWj9xN_YTJ7ySccfvlA38ExwRJ_ATkApq2g","date":"2026-08-28","id":"elea-riviere"},{"nom":"Elizabeth Hillard","freq":2,"histo":"1X0a0cutIw946ygwGUY1zre7W31XC4PlebQ62y6J3s54","mois":"Septembre","doc":"1xhJjoZOTiFKCxir8XknOgLl7lBVLceTEDasTIJu7hW8","date":"2026-08-28","id":"elizabeth-hillard"},{"nom":"Emilie Laporte","freq":3,"histo":"1WK5MLwWh0Rz3RERf-vbbtLh1iZ5xq9UhzVIA6Hh4EO0","mois":"Octobre","doc":"1_aBnrAmIxWk2CU2M22Ai_s7JYYLf2C4A7Ebs1wZnCxc","date":"2026-09-09","id":"emilie-laporte"},{"nom":"Emilie White","freq":3,"histo":"1VyRtt1ScOhWdClLI2UZT2Ba-LmFDfaQcSP_05X04H80","mois":"Octobre","doc":"1tPnuXtyIxMOagBJv3GpYtC7_Fz89rTLPsfLaGXuVj0c","date":"2026-09-09","id":"emilie-white"},{"nom":"Estelle Mau","freq":1,"histo":"1H2NW3QQ7yN13FtafBZDKiKAIFshahzhMRP5dsV0MC0Y","mois":"Septembre","doc":"1ZFp089Ezwbfr8mYbb94YtwUBeb8Oje8UL6gVmNO_25I","date":"2026-08-28","id":"estelle-mau"},{"nom":"Evelyne Demolin","freq":2,"histo":"1fKNi6k5bIZDQFkkJkaazZEQoNyZ9XwFG-gr-0mbd3s8","mois":"Septembre","doc":"1kuGD9A33s5CiuInFC-WgRhQjlk42If-tA4g-YpJZdHA","date":"2026-08-28","id":"evelyne-demolin"},{"nom":"Florence Aparico","freq":2,"histo":"1eYx2EpV1OlcBU5fbLPbo816DEcQultcfKUJG731tiiY","mois":"Octobre","doc":"1bPLasw3jv99Nctj5iH6cJr3XQfRe0BU07W9fmk79RB4","date":"2026-09-15","id":"florence-aparico"},{"nom":"Francoise Sucré","freq":2,"histo":"16ewGZkTRmcpCrMUAWN_26m1MKqp5tYDJ889AACl8UK0","mois":"Septembre","doc":"1uPgtXw8JfwU4QdT08KhCg1SGEHX9T6tCgMeHUbHBK4c","date":"2026-08-28","id":"francoise-sucre"},{"nom":"Gaelle Labadie","freq":1,"histo":"1nm9kBBA4HoazX7Z2gTpszUSr0K_9ev3ocJpM7ABwuLA","mois":"Septembre","doc":"1wwulDQoO7lKUn_5MeIVJnLOL8iFR8NecvUOH5UBsV68","date":"2026-08-28","id":"gaelle-labadie"},{"nom":"Gaspard Farine","freq":2,"histo":"1vVFHwssRz6hPSJMVlwh0EMN4WT-Rt5W7MnUzq0k8heo","mois":"Septembre","doc":"1Qi7hCmavvMmG2iMyQU084pU1JmYvLZd_TY5G0LonCR0","date":"2026-08-28","id":"gaspard-farine"},{"nom":"Gilles Piaux","freq":2,"histo":"1pgkpkWjFbY_eoHMu0N9GKtfD936utlvqd8NAKeUGbtc","mois":"Septembre","doc":"1G_cTooq2iV5kLlrBSNFUSWGXBo5UvzS4DKVnNDOzepU","date":"2026-08-28","id":"gilles-piaux"},{"nom":"Guillaume Petitpas","freq":3,"histo":"15i1BTzMByzsccd81K3fD2_qf3QFbU0JUgztMeSZnveU","mois":"Octobre","doc":"1JXeDDYIb1yNA6YmMqjJLoi2rz6Ue5s_axOs6cIFkNpE","date":"2026-09-09","id":"guillaume-petitpas"},{"nom":"Guillaume Puygrenier","freq":2,"histo":"1mtjg6e_3xREuFekRI8EDqjNloHWIT_uFAT1CsQD0_TQ","mois":null,"doc":null,"date":null,"id":"guillaume-puygrenier"},{"nom":"Gwen Marien","freq":1,"histo":"1wuhJF8PhdXzQU4PzPyUgT8Ch8Y85omRecB3tJlzp5Lo","mois":"Septembre","doc":"1vy0xclOcL8UcKbMkGoFbsqsD1XAlybiu05UR-TCuQEo","date":"2026-08-28","id":"gwen-marien"},{"nom":"Henry Lemoine","freq":1,"histo":"1dKp6Ubt_hoPXZUpxpbKELxnWIsxGwee5lVWwexia5k8","mois":"Octobre","doc":"174UIgY_oO1bLfWQp4xJmH-aUq0-pGrj4-LC5K9YKL_4","date":"2026-09-14","id":"henry-lemoine"},{"nom":"Isabelle Feillou","freq":1,"histo":"1mizkQuCi4augrK0uhAux96xRbPYSm9Q4sfoOEHQvwm4","mois":"Septembre","doc":"1mXXMfdiNn0uQU8jC8POvhDV7PvR--AWvopQF96G_Lo0","date":"2026-08-31","id":"isabelle-feillou"},{"nom":"Jean Noel Lacour","freq":1,"histo":"1PN8Hi9p5heOv5PL9apleTQHP7-8KqDU-UM2T25It3u0","mois":"Septembre","doc":"1D-hIvPDwMSegx4i9hzV8JWSLX7c8Spz6e4OkecoOPjA","date":"2026-08-28","id":"jean-noel-lacour"},{"nom":"Jean Pierre Catherin","freq":1,"histo":"1g9eeG9JX6v9rf4YLAVCtjDiIBLRRAoxI5Wr6Iwz8FI8","mois":null,"doc":null,"date":null,"id":"jean-pierre-catherin"},{"nom":"Jean Pujol","freq":2,"histo":"1DLQyKyeSmtfGZ_INJVec4eph_UHK7YJW7WTKlBVoBdg","mois":null,"doc":null,"date":null,"id":"jean-pujol"},{"nom":"Jean Sébastien Lacam","freq":2,"histo":"1eYQa3kU1dt_S7WP3qRxIT-RM8D-VZ04YAEirOEDcc5Q","mois":null,"doc":null,"date":null,"id":"jean-sebastien-lacam"},{"nom":"Jena Guillaume Rocher","freq":2,"histo":"1QvBeuEByjLIFSsJZ6ID6CgqwMY2EBE0_4aErv_c1baI","mois":null,"doc":null,"date":null,"id":"jena-guillaume-rocher"},{"nom":"Julian Helissey","freq":2,"histo":"19w5T4nH_tCUWIbhtOiUNA-WO6eFQr9mGNI7CzQ7tPOg","mois":"Septembre","doc":"1IsovdLCqYzI94XVVlqoDc3_mJbVBzcOFRK1mYBhw5Pg","date":"2026-08-28","id":"julian-helissey"},{"nom":"Julie Gaudron","freq":1,"histo":"1uZSRVr6TJYh8CiR152tJJusxlRT1r3Zumzoi-8hLkTw","mois":"Septembre","doc":"16ceD56qOHGFFCETINwXOKHZewPfdkPSkkCdzQCItgEY","date":"2026-08-28","id":"julie-gaudron"},{"nom":"Julie Leonard","freq":1,"histo":"1J0WnMIPYEVk4pEbNwTQr8SVS83EGUOF7F_ywLZhhVpg","mois":null,"doc":null,"date":null,"id":"julie-leonard"},{"nom":"Julien Lacroix","freq":2,"histo":"1jhqaF_6YA94hI81XiSGDmgixdEaG3lPqvq9Z_89SUig","mois":"Septembre","doc":"19r5U2VzQBgkGqb8eM4vAw4Q_oyMkXfir1pE6xsJs6mw","date":"2026-08-28","id":"julien-lacroix"},{"nom":"Julien Nguyen van","freq":2,"histo":"1z8tgDqphh1lU5IGKAOA_BS0ut4IXCH7hxboPuDfZez8","mois":"Septembre","doc":"1nm8KROGZQmOOlfJ4D5YShE3AmjRQnz2xU6lAFI5pPVM","date":"2026-08-28","id":"julien-nguyen-van"},{"nom":"Justine Boissou","freq":2,"histo":"1yguMDglMLEATB3U3zdIm0ClzHCb1ksVFevJY91b_gDk","mois":null,"doc":null,"date":null,"id":"justine-boissou"},{"nom":"Kate Janecek","freq":1,"histo":"1yYv2J1g3zVFm_KxutLjmsVPaH7LgQ3gnyoECsolk-rs","mois":"Septembre","doc":"1-vTb6JoN3VPDfVm8FFeIZe98vKK2TmktftR6OpUqgtE","date":"2026-08-28","id":"kate-janecek"},{"nom":"Laurence Laluque","freq":1,"histo":"1BuAG4W-5qwQRbY8lXmB8npid6ZoCLxXb6ZxB-ksc6vI","mois":"Septembre","doc":"1KCAuN3kIOlU2epL8hV_i-sanISN74FE3lf_KQ-IQwZY","date":"2026-08-28","id":"laurence-laluque"},{"nom":"Laurence Poulain","freq":1,"histo":"1rmtesYftG0QufVuI_FcvvMcggKvuyimMfe2IsyYaGcY","mois":"Septembre","doc":"1F_rwiJCZRDsrFTtGahlcvzIPDEDnXd6C3SrBGw-G9fc","date":"2026-08-28","id":"laurence-poulain"},{"nom":"Louis Huault","freq":2,"histo":"1GfUsh5ArvnOcpjE65xE6ABL4Rr3oun6xLQEhoCL2huo","mois":"Septembre","doc":"1GF1jTrivxQYnxHgrAkRSQlTtoxX_1mP3dr9chx8PnJU","date":"2026-08-28","id":"louis-huault"},{"nom":"Louise Thirion","freq":2,"histo":"1HN-ZW55Lp5y5zFip1t8b7kuU8yQXdDrQQE7h2uWogM0","mois":"Septembre","doc":"1SvOK6nTqiqLbInJHliObDdNtayjl_4y2vjU3bidRL4M","date":"2026-08-31","id":"louise-thirion"},{"nom":"Ludovic Mauger","freq":2,"histo":"1vgxzojEmgEhTItNFmko8fxWFQUg-e2cdqCaWfEtvNfo","mois":"Octobre","doc":"1RFc-3mexN-T0ElxycMmibxejBxpkk0wVeviSdPzaItc","date":"2026-09-14","id":"ludovic-mauger"},{"nom":"Léna Gasmi","freq":3,"histo":"1KRrO0B8Fs9ivz5ztV6QZibuqon4GJHp-lByjBPsOuPU","mois":"Octobre","doc":"18cn0NZLXfHqgHbJdAUaPlLDtjxjdA3gqZeivwvffjgY","date":"2026-09-09","id":"lena-gasmi"},{"nom":"Marc Vernet","freq":1,"histo":"1CZ3jUrpD9sQPRN7IG3zZeUyhd47R-AekSTwECVf6kRY","mois":null,"doc":null,"date":null,"id":"marc-vernet"},{"nom":"Marie Fourmey","freq":2,"histo":"1Y5iRK4mvaVld2OMQzJ-RulZBCRBKAgi8ErifPVW8Wo8","mois":"Octobre","doc":"15Kf60IO9Hj-pEhbpeCUJP8QJzA_OgoUD9aCRT7PioA4","date":"2026-09-09","id":"marie-fourmey"},{"nom":"Marina Popova","freq":1,"histo":"1eIKCaVWvM3JR05J87K6NfAdlYkR2nEXNuDdCiuFZMBU","mois":"Septembre","doc":"13Dk9Gm29OTh2X4om9Yc2G0Xs4iu5aAHhOJAoSYjjQXw","date":"2026-08-28","id":"marina-popova"},{"nom":"Martine Viard","freq":2,"histo":"1No8CEtXPl5ZG5HgGeRg5kMTEN4s2Q0Z-p5Q1SKDu0DQ","mois":null,"doc":null,"date":null,"id":"martine-viard"},{"nom":"Mathilde Piaux","freq":2,"histo":"1lBO_RE5qqdk84uy_vW1mW0DOcHRUL3uIIoj6m9AJjJk","mois":"Septembre","doc":"1YepU2_8GtagxkqdtDzU1i2wio3jgaIh-zQvmDjUgCfo","date":"2026-08-31","id":"mathilde-piaux"},{"nom":"Maxence Lacam","freq":3,"histo":"1wd-RcS-4xxjFV2HoJaP9ctnzo7JaH5EXt-7X1worUhk","mois":"Octobre","doc":"1bnzbXk4pW4-5twzrTZdVMCxIgl1uRJnnvH_hTP-gDgg","date":"2026-09-09","id":"maxence-lacam"},{"nom":"Noic Gouhizoun","freq":1,"histo":"1Fv64MefNni4YCR7JNkoGA4agbdgyI3Rqdq0oB1J4-7E","mois":"Septembre","doc":"1R51twEmwVR0J_Xx532efxUfSjtJedR9Abxpv8vUHHSA","date":"2026-08-31","id":"noic-gouhizoun"},{"nom":"Ophelie Lafourcade","freq":1,"histo":"1WnUgMDrVIbgIAxogPddNVgu5t-YPqq3P_17iX5JVDjA","mois":"Septembre","doc":"1nNmCsgDzPuCLNlVceKq97eeWxhmQE-EXp1G8-VR8csY","date":"2026-08-31","id":"ophelie-lafourcade"},{"nom":"Pascal Ramondou","freq":2,"histo":"1gIpw3_Ob50L-G2oX3DdTr_CuPgcEkWWohtTynAUEdCQ","mois":"Octobre","doc":"1cYDAkKqNniM4AmFqz8zWaF6RDh6CEi9QROAuL6L9V48","date":"2026-09-11","id":"pascal-ramondou"},{"nom":"Pauline Delpon","freq":2,"histo":"1A7WpJe8-IjcwWQTdEfI0ucn-FB6I5Lhdlh93xtnrPLI","mois":"Septembre","doc":"1npjhBVIb7hiAqU1FKfaYDRKZo44LhOD4uDD1TITmkco","date":"2026-08-31","id":"pauline-delpon"},{"nom":"Philippe Heraudet","freq":1,"histo":"1Amn6oIDb7M3t5yAWy7EszIDHW7yJCk015D92DV7pm8w","mois":null,"doc":null,"date":null,"id":"philippe-heraudet"},{"nom":"Philippe Hervé","freq":2,"histo":"1EjeefChSFnisJHkZDybow1PIHc_VpqK-OIsBhd5JZ0M","mois":"Octobre","doc":"1ZU7O2GmeIwXe1cq4hXYI8fBqxqrcwNOChcJ2g9mwaeA","date":"2026-09-09","id":"philippe-herve"},{"nom":"Pierre Lacour","freq":2,"histo":"1KUOmW09mKjz6vgsSdvvbbdfKtPenr_PTh099sKteyS4","mois":"Septembre","doc":"19215ujBJMmS2ejACCVpSUnYjm_EmI0I1toVaci6d2aI","date":"2026-08-28","id":"pierre-lacour"},{"nom":"Quitterie Madelin","freq":2,"histo":"1epPKEbxsa-Zy2EknIgwb0D6MlO8lSY2URgjGaP77IfI","mois":"Septembre","doc":"1aL41EAGiZeIFK3SzwvcTGzFtzhr2QjeEzNtMOcUGBoE","date":"2026-08-31","id":"quitterie-madelin"},{"nom":"Romain Verge","freq":2,"histo":"1Dhu5S01ta5g1Caa2ock7e-44HDD08KW7D3iX-68TBVA","mois":"Septembre","doc":"1n84mGi5VTQ6XykUDOZd8wwhtJL7tYrRtdIhQwUQBZh4","date":"2026-08-31","id":"romain-verge"},{"nom":"Ruth Gertrudix","freq":2,"histo":"1W-k6IcaenYGu1eruXRYIVcdBjRHhJ83Y05JXgQnK4bA","mois":"Octobre","doc":"1uIoNdmL_tV8HIX7uzE9OkTEM8dIQGCutLb0isKujTWo","date":"2026-09-09","id":"ruth-gertrudix"},{"nom":"Sandra Messibah","freq":1,"histo":"1vENjGutzdgPY_lQ_FUlOCwJ5F6NIoE4_5R96HrBdhO4","mois":"Octobre","doc":"1tGQGXUSz2TXhi_hOc9S6OrVNtOWrOGx1Hdk2MTn0Nf0","date":"2026-09-11","id":"sandra-messibah"},{"nom":"Satya Pilot","freq":1,"histo":"1dOg-aYxjCxqLpMt-UZVbU6VubzdNcjX8uqkd-mvS4RE","mois":"Septembre","doc":"13FL4iQIKrIhpX-fdp0T1zVKqbKcgLIapAGUzMz_suRA","date":"2026-08-31","id":"satya-pilot"},{"nom":"Solène Lebihan","freq":3,"histo":"1XAfjvFdeN8zSkivdFs0dk7QdgOqKvYM5zF_KVwXVh5M","mois":"Septembre-Octobre","doc":"1v9TC28GYeV-HkLfNU3E7OvSqZO47ykVc5F0OvSR3N6c","date":"2026-09-11","id":"solene-lebihan"},{"nom":"Sonia Anguilet","freq":2,"histo":"1X3nG-Aek2mbRiTqt_LglxVbtHoJ-XVApYpnRxRaBS4k","mois":"Septembre","doc":"1IkZUYVF52lTIAl4YMFNYEOn6nuwPoMgQj_i_HBrJtTE","date":"2026-08-31","id":"sonia-anguilet"},{"nom":"Sophie Collantier","freq":1,"histo":"14aWuSNAhJ07dPaOBg_yMIiRSnDa_eZuzQoc8-MhQ8mE","mois":"Septembre","doc":"1hG0zKQUGzEO6vchoUQXnHW1l1KNXKov-ZVYuEM_Ry9U","date":"2026-08-31","id":"sophie-collantier"},{"nom":"Stéphanie Theux","freq":2,"histo":"1klJHSUkbcm4Rsw6RhEQudV-NU5bQzAKahkUHzA0dDq0","mois":"Septembre","doc":"1109Yfw3urkyaPmKGE_1WNAfNa23BNqGlqDw0FBOIZZY","date":"2026-08-31","id":"stephanie-theux"},{"nom":"Sébastien Thalamy","freq":2,"histo":"16Ske2uuI-_bSMQ8Q7uZANYn5mHStAZFD3PwXdXv8sLs","mois":"Septembre","doc":"1dObAJg-ww-uPXTo1r8_vP7quH_nrUqerhA0ogc8uJ2c","date":"2026-08-31","id":"sebastien-thalamy"},{"nom":"Ségolène Berger","freq":2,"histo":"1NpykiKs5-a89asrGiQb8cqaRonyhBbdV19ig17SPodc","mois":"Septembre","doc":"1BAF-AshEXFFsrNygyMjMWun2rP1Qqc4gCgUeX5BthDc","date":"2026-08-28","id":"segolene-berger"},{"nom":"Tristan Normand","freq":2,"histo":"1C7cScSHUzZ7xuHEokl-Semu9KbnJzXbvnrVn23u0oL0","mois":"Septembre","doc":"1DSsbziqXBBS0_0kPHoGgLM2loHRWEsWG-kW_y4mPIZU","date":"2026-08-31","id":"tristan-normand"},{"nom":"Valerie Franck","freq":2,"histo":"1nLIy7Ua7X9Q8kPuiFUdBEebcIZdaofi4xZUJyT242P8","mois":"Septembre","doc":"1-9G9W-31zCYcd_TJWLfWibusxg-ZXE0mHyd9QcrpvWg","date":"2026-08-28","id":"valerie-franck"},{"nom":"Vincent Garcia","freq":3,"histo":"10l_nrjSVbBRAgDOI8FyjRVf97id_9WjFL_VQt_GqQ-I","mois":"Octobre","doc":"1Wvp0EiAW-Vhutd5B2UDaaX6HbwCw6ujh6GxAMdnk3_Q","date":"2026-09-09","id":"vincent-garcia"},{"nom":"Xavier Josseaume","freq":2,"histo":"1BS0GR_FnKoW6PSL5uhKlMGPHM0nq2gN-WUFegciFbqc","mois":"Septembre","doc":"1D5hwdVuToqokatMTCmWj88m2EVJ840_hMXhDg1ALgPs","date":"2026-08-28","id":"xavier-josseaume"},{"nom":"Xavier Thomas","freq":2,"histo":"17V1E8qMZTFbVzA12FFle5QG-y7mw8msSk856YjmjGI0","mois":"Septembre","doc":"1o-x0PvJNc19SO7CslAuWTWwgqLsUgI8RHp-PoYnAfAM","date":"2026-08-31","id":"xavier-thomas"},{"nom":"Yannick Olekhnovitch","freq":1,"histo":"11_DWnGzl2oC-vZH3lMjrMbNTk16ehFwogdVrWWYaW-8","mois":"Septembre","doc":"16p3ThHiRwQJQjfeiyv0lTp1yw74qP2ZF1ZlC4-WLD9U","date":"2026-08-31","id":"yannick-olekhnovitch"}],"hors":[{"nom":"Florent Parade","mois":"Octobre","doc":"1ZAqcTMnmnT92VBTmf79Xip5eFVe9sUAQwS8c3Zvu-bU","date":"2026-09-08","id":"florent-parade"},{"nom":"Marion Laurans","mois":"Septembre","doc":"1NnJWqX2q3tpJhUGqSdKIkC_7Ch7tuiZlDkbmbgAZc2c","date":"2026-09-04","id":"marion-laurans"},{"nom":"Valeria Castelletto","mois":"Octobre","doc":"1meqgyv_Nud_kTSqT2yRaMNPlDhynhgSPXFAsaDFExSQ","date":"2026-09-09","id":"valeria-castelletto"}]};
+const BANQUES = [{"nom":"Ischio-jambiers","id":"ij","g":[{"m":"Élastique","d":"Hanche","e":["Good Morning élastique","Hip hinge élastique sous les pieds","Romanian Deadlift (RDL)","RDL unilatéral élastique","Pull-through élastique (ancrage bas arrière)","Hip thrust élastique","Glute bridge élastique (bilatéral)","Glute bridge unilatéral élastique","Glute walk AR","Deadlift élastique sumo","Deadlift élastique conventionnel","Hip hinge tempo (excentrique lente)","Hip hinge iso maintien 30–45''","Kickback fessier élastique à quatre pattes","Monster walk élastique (marche latérale)","Clamshell élastique","Bird dog élastique (extension hanche)","Frog pump élastique","Single-leg glute bridge élastique surélevé"]},{"m":"Élastique","d":"Genou","e":["IJ élastique ou assis","Nordic curl assisté élastique","Curl isométrique à 30° / 60° / 90°","Curl excentrique unilatéral","Curl en pont (bridge + flexion)","Leg curl allongé élastique (ancrage bas)","Curl debout unilatéral élastique (poulie basse)","Stability ball hamstring curl élastique renforcé"]},{"m":"Kettlebell / haltères","d":"Hanche","e":["KB Romanian Deadlift","KB Stiff-Leg Deadlift","KB Deadlift sumo","KB Deadlift conventionnel","RDL unilatéral KB","KB Swing (2 mains)","KB Swing unilatéral","KB Good Morning (goblet ou dos)","KB Hip thrust","KB Glute bridge","KB Rack pull","KB Deadlift déficit","Single-leg RDL haltère (contact orteil)","KB Hip thrust unilatéral (pied surélevé)","Suitcase deadlift KB unilatéral","KB Swing américain (overhead)"]},{"m":"Kettlebell / haltères","d":"Genou","e":["Hamstring curl pieds sur KB (instabilité)","Bridge pieds sur KB","Curl glissé + KB sur bassin","Curl isométrique en pont pieds sur KB","Nordic curl lesté (gilet ou disque)","Curl fessier suspendu TRX + charge légère"]},{"m":"Barre","d":"Hanche","e":["Romanian Deadlift barre","Stiff-Leg Deadlift barre","Deadlift conventionnel","Deadlift sumo","Deadlift déficit","Rack pull (mi-tibia ou sous genou)","Good Morning barre","Hip thrust barre","Glute bridge barre","RDL unilatéral barre","RDL tempo (3–5'' excentrique)","RDL pause sous genou","RDL 1.5 reps","Snatch-grip deadlift","Deficit RDL","Good Morning assis (banc)","Hip thrust barre pause 2''","B-stance hip thrust barre"]},{"m":"Barre","d":"Genou","e":["Nordic curl","Nordic excentrique seule","Glute Ham Raise","Curl glissé au sol","Curl isométrique 90°","Curl excentrique unilatéral","GHR assisté élastique","Curl nordic avec charge lestée sur la nuque","Reverse hyperextension"]}]},{"nom":"Quadriceps","id":"quadri","g":[{"m":"Élastique","d":"Genou","e":["Leg extension élastique assis","Leg extension debout unilatéral","Spanish squat (élastique derrière les genoux)","Squat talons surélevés + élastique","Squat partiel tension continue","Fentes élastique","Farmer box","Sissy squat assisté élastique","Chaise ballon (isométrique)","Squat bulgare élastique (pied arrière surélevé)","Step-up élastique","Wall sit élastique (tension latérale genoux)","Fente arrière élastique (band resisted reverse lunge)"]},{"m":"Kettlebell / haltères","d":"Genou","e":["Goblet squat talons surélevés","Goblet squat","Chaise","Spanish squat","Squat bulgare haltères","Step-up haltères","Fente avant haltères","Squat sauté léger (goblet KB légère)"]},{"m":"Kettlebell / haltères","d":"Mixte","e":["Front squat double KB","Zercher squat KB","KB thruster","KB clean + squat","KB squat jump","KB squat isométrique","Goblet squat pulse (1.5 reps)","KB overhead squat (mobilité + quad)"]},{"m":"Barre","d":"Genou","e":["Front squat barre","Squat talons surélevés","Squat b-stance barre","Hack squat barre (derrière les jambes)","Squat bulgare barre","Fentes barre","Fentes arrière barre","Zercher squat","Spanish squat barre guidée","Sissy squat","Squat prise étroite (narrow stance)","Step-up barre","Squat pause profonde (bottom pause)","Front squat pause"]},{"m":"Barre","d":"Mixte","e":["Squat","Squat pause","Squat box","Anderson squat","Box squat (hauteur basse pour accent quad)","Thruster barre","Squat jump barre légère","Squat tempo (3–5'' descente)","Squat 1.5 reps"]}]},{"nom":"Dos","id":"dos","g":[{"m":"Élastique","d":"Tirage vertical","e":["Tirage vertical élastique","Tractions élastique","Lat pulldown élastique unilatéral (ancrage haut)","Straight-arm pulldown élastique"]},{"m":"Élastique","d":"Tirage horizontal","e":["Rowing assis élastique ou db","Rowing unilatéral élastique ou db","Face pull élastique","Band pull-apart","Rowing élastique","Seated cable row élastique tempo","Y-row élastique (prise haute)"]},{"m":"Élastique","d":"Chaîne postérieure","e":["Good Morning bâton ou barre","Romanian Deadlift (RDL)","Extension lombaire (GHD)","Superman","Bird dog élastique anti-extension"]},{"m":"Kettlebell / haltères","d":"Tirage horizontal","e":["Rowing unilatéral db","Renegade row","Gorilla row","Rowing KB/db","Meadows row db (banc incliné)","Chest-supported row db"]},{"m":"Kettlebell / haltères","d":"Tirage vertical","e":["Tirage menton KB","Clean KB ou db","Snatch KB","Pullover db","High pull KB (double)"]},{"m":"Kettlebell / haltères","d":"Chaîne postérieure","e":["RDL KB","Swing KB","Good Morning KB","Rack pull KB","KB Farmer carry (posture dos droit)"]},{"m":"Poulie / machine","d":"Tirage vertical","e":["Tirage vertical supination","Tirage vertical","Tirage vertical unilatéral","Pulldown prise large","Pulldown prise neutre"]},{"m":"TRX","d":"Tirage horizontal","e":["TRX 45° unilatéral","TRX 45°","TRX Y","TRX T","TRX W","TRX face pull","TRX row explosif (power pull)"]},{"m":"TRX","d":"Gainage dynamique","e":["TRX plank","TRX mountain climber"]},{"m":"Barre","d":"Tirage horizontal","e":["Rowing barre pronation","Rowing Pendlay","Rowing Yates","Rowing barre","Rowing T-bar","Rowing prise serrée (close grip)"]},{"m":"Barre","d":"Tirage vertical","e":["Tractions pronation","Tractions supination","Tractions lestées","Tractions élastique (assistées)","Tractions prise neutre","Tractions archer (unilatéral assisté)"]},{"m":"Barre","d":"Chaîne postérieure","e":["Romanian Deadlift barre (RDL)","Deadlift (DL)","Good Morning barre","Rack pull","Deadlift déficit","Trap bar deadlift"]}]},{"nom":"Pectoraux / épaules","id":"pec","g":[{"m":"Élastique","d":"Poussée horizontale","e":["Pompes élastique (résistance dans le dos)","Chest press élastique (ancrage arrière)","Chest press unilatéral élastique","Pec deck élastique (fly)","Fly décliné / incliné élastique","Pompes plyo élastique (résistance progressive)","Chest press single-arm élastique tempo"]},{"m":"Élastique","d":"Poussée verticale","e":["Overhead press élastique","Overhead press unilatéral élastique","Arnold press élastique","Élévations latérales élastique","Élévations frontales élastique","Landmine press élastique","Élévations latérales à la poulie basse élastique"]},{"m":"Élastique","d":"Coiffe des rotateurs","e":["Rotation externe élastique coude au corps","Rotation interne élastique coude au corps","Y-T-W élastique","Face pull élastique","Pattern d'armé du lancer (rotation externe en abduction)","Scaption élastique (élévation en Y)","Rotation externe à 90° d'abduction élastique"]},{"m":"Kettlebell / haltères","d":"Poussée horizontale","e":["KB floor press","KB floor press unilatéral","Pompes lestées KB (gilet ou plaque)","Développé couché haltères","Fly haltères (pec fly)"]},{"m":"Kettlebell / haltères","d":"Poussée verticale","e":["KB overhead press","KB push press","KB Arnold press","KB bottoms-up press (stabilité renforcée)","KB Turkish get-up (phase haute)","Développé épaule assis haltères","Landmine press unilatéral"]},{"m":"Kettlebell / haltères","d":"Gainage d'épaule","e":["KB halo","KB waiter's walk (marche en position serveur)","KB overhead carry unilatéral","Bottoms-up carry KB"]},{"m":"Barre","d":"Poussée horizontale","e":["Développé couché","Développé couché prise serrée","Développé incliné","Développé décliné","Développé pause poitrine","Développé tempo (3–5'' descente)","Floor press barre","Développé couché prise large","Développé Spoto (pause au-dessus de la poitrine)"]},{"m":"Barre","d":"Poussée verticale","e":["Overhead press barre (militaire)","Push press","Behind the neck press (si mobilité d'épaule suffisante)","Z press (assis au sol, exigence de gainage)","Push press unilatéral (landmine)","Bradford press"]}]},{"nom":"Bras","id":"bras","g":[{"m":"Élastique","d":"Flexion de coude","e":["Curl biceps élastique debout","Curl biceps unilatéral élastique","Curl marteau élastique","Curl 21 élastique","Curl araignée élastique (spider curl)","Curl concentré élastique"]},{"m":"Élastique","d":"Extension de coude","e":["Extension triceps poulie haute élastique","Kickback triceps élastique","Extension triceps au-dessus de la tête élastique","Pompes serrées + élastique","Extension triceps couché élastique (skull crusher élastique)"]},{"m":"Kettlebell / haltères","d":"Flexion de coude","e":["Curl biceps KB","Curl marteau KB","Curl incliné haltères (banc incliné)","Curl araignée haltères"]},{"m":"Kettlebell / haltères","d":"Extension de coude","e":["Extension triceps KB au-dessus de la tête (2 mains)","Kickback triceps KB","Skull crusher KB","Extension triceps unilatérale haltère (au-dessus de la tête)"]},{"m":"Barre","d":"Flexion de coude","e":["Curl biceps barre droite","Curl biceps barre EZ","Curl pupitre (Scott)","Curl 21","Curl prise inversée (reverse curl)"]},{"m":"Barre","d":"Extension de coude","e":["Skull crusher barre EZ","Développé couché prise serrée","Extension triceps barre au-dessus de la tête","JM press"]}]},{"nom":"Gainage / core","id":"core","g":[{"m":"—","d":"Anti-extension","e":["Planche ventrale","Planche ventrale pieds surélevés","Planche genou (régression)","Ab wheel / roulette abdominale","Dead bug","Dead bug ballon","Mountain climber (gainage dynamique)","TRX body saw","Stir the pot (avant-bras sur swiss ball)","Planche avec surcharge dorsale (plaque)","RKC plank (tension maximale)"]},{"m":"—","d":"Anti-rotation","e":["Pallof press élastique","Pallof press câble","Renegade row","Planche avec tirage unilatéral","Bird dog","Half-kneeling Pallof press"]},{"m":"—","d":"Anti-flexion latérale","e":["Planche latérale","Planche latérale avec élévation de jambe","Gainage latéral 45''/c","Suitcase carry (KB unilatéral)","Side bend anti-mouvement","Planche latérale avec rotation (thread the needle)"]},{"m":"—","d":"Flexion (grand droit)","e":["Crunch","Crunch câble à genoux","Relevé de jambes suspendu","Relevé de bassin allongé","Hollow body hold","Hollow rock","Turkish sit up","V-up","Reverse crunch lesté"]},{"m":"—","d":"Rotation contrôlée","e":["Russian twist (avec ou sans charge)","Wood chop câble/élastique","Landmine rotation","Rotation médecine ball contre mur (throw contrôlé)"]}]},{"nom":"Mobilité / échauffement","id":"mob","g":[{"m":"—","d":"Cheville","e":["Mobilisation cheville face au mur (knee-to-wall)","Rotations de cheville","Marche sur pointes / talons","Étirement mollet contre mur (dorsiflexion chargée)"]},{"m":"—","d":"Hanche","e":["90/90 hip switch","Cercles de hanche à quatre pattes","Fente avec rotation thoracique (WGS)","Leg swings avant/arrière et latéraux","Couch stretch (étirement psoas/quad)"]},{"m":"—","d":"Colonne thoracique","e":["Rotation thoracique à quatre pattes (thread the needle)","Cat-cow","Rotation thoracique assise","Open book stretch (allongé sur le côté)"]},{"m":"—","d":"Épaule","e":["Cercles de bras","Dislocations à l'élastique ou au bâton","Rotation externe/interne légère élastique","Scapular push-up","Wall slide"]},{"m":"—","d":"Activation globale","e":["Montées de genoux","Talons-fesses","Squat to stand","Inchworm","Jumping jacks légers","Skipping léger sur place"]}]},{"nom":"Cardio / finishers","id":"cardio","g":[{"m":"—","d":"Low-impact","e":["Vélo / assault bike","Rameur","Marche inclinée","Step-up lent en circuit","Elliptique"]},{"m":"—","d":"Impact modéré à élevé","e":["Corde à sauter","Burpees (variantes sans saut disponibles)","Mountain climbers","Battle rope","Sprint / intervalles course à pied","Box jump (faible hauteur)"]},{"m":"—","d":"Formats de finisher","e":["EMOM 8–10 min","Tabata (20''/10'' x 8)","AMRAP 5–8 min","Circuit chronométré en descente de temps","Death by... (montée progressive de reps)"]}]}];
+const MOIS_LABEL = { "Octobre":"Octobre", "Septembre-Octobre":"Sept.–Oct.", "Septembre":"Septembre" };
+const STEPS = [["a_traiter","À traiter"],["en_cours","En cours"],["envoye","Envoyé"]];
+// ============================================================
+// Relevé des retours coach — 08 au 16 septembre 2026
+// Source : dossiers Drive du roster « Dossier pedro 2 » modifiés depuis le 07/09.
+// Suite du rapport « Suivi des retours coach — Septembre 2026 » (arrêté au 07/09).
+// ============================================================
+const RETOURS = {
+  periode: { debut: "2026-09-08", fin: "2026-09-16", precedent: "2026-09-07" },
+  chiffres: { verifies: 36, avecSeance: 33, sansSeance: 3, prioritaires: 10 },
+
+  // niveau : "alert" douleur nouvelle ou aggravée · "warn" à surveiller · "ok" progrès à acter
+  prio: [
+    { id:"pascal-ramondou", nom:"Pascal Ramoudou", date:"12/09", niveau:"alert",
+      constat:"« beaucoup trop de valgus sur les squats. Douleurs sur l'avant-bras droit (tendinite) »",
+      implique:"Aggravation double en une semaine. Le cue « genou dans l'axe » du 05/09 n'a pas suffi : passer au squat sur cale avec renfo moyen fessier avant toute charge. Prises neutres et pas de préhension lourde tant que l'avant-bras parle." },
+    { id:"elea-riviere", nom:"Elea Rivière", date:"14/09", niveau:"alert",
+      constat:"« séance adaptée suite douleur au dos »",
+      implique:"Douleur nouvelle, rien d'équivalent dans son historique récent. À requalifier à la prochaine séance avant de reprendre le hip thrust à 75 kg." },
+    { id:"justine-boissou", nom:"Justine Boissou", date:"11/09 et 14/09", niveau:"alert",
+      constat:"11/09 : RDL ramené de 16 à 12 kg, « technique à travailler, elle tire trop sur le dos ». 14/09 : « faire attention à la posture sur le DL sumo »",
+      implique:"Deux séances consécutives avec le même défaut de hip hinge. Geler la progression sur DL et RDL, repasser par le good morning bâton et le RDL en tempo." },
+    { id:"mathilde-piaux", nom:"Mathilde Piaux", date:"14/09", niveau:"alert",
+      constat:"« fatigue générale ». RDL descendu à 20 kg, pull-over à 8 kg",
+      implique:"Troisième séance d'affilée adaptée après la douleur dorsale + genou du 07/09. Le signal n'est plus ponctuel." },
+    { id:"jean-pujol", nom:"Jean Pujol", date:"10/09", niveau:"warn",
+      constat:"« cervicales ok, toujours gêné au genou »",
+      implique:"Les cervicales sont réglées, la gêne au genou persiste. Squat bulgare reste plafonné à 14-15 kg, pas de saut ni de pliométrie." },
+    { id:"philippe-heraudet", nom:"Philippe Heraudet", date:"15/09", niveau:"warn",
+      constat:"Développé épaule prévu à 8 kg, fait à 2×4 kg : « déjà très dur, technique pas folle malgré de nombreuses corrections »",
+      implique:"C'est un blocage technique, pas un problème de charge. Sortir le SP du schéma de progression et le retravailler en analytique (rotateurs externes, gainage scapulaire) avant de le recharger." },
+    { id:"sandra-messibah", nom:"Sandra Messibah", date:"12/09", niveau:"warn",
+      constat:"« grosse fatigue suite à l'emploi du temps chargé, chaque bloc a été fait sur 3T au lieu de 4T ». Goblet squat ramené de 16 à 12 kg",
+      implique:"À croiser avec ses déficits de bilan : ischio-jambiers à la limite du pathologique, sangle abdominale en échec au test. Ne pas rattraper le volume perdu à la séance suivante." },
+    { id:null, nom:"Nathan Gattegno", date:"10/09", niveau:"warn", horsFeuille:true,
+      constat:"« pas en forme sur la séance, un peu comme d'hab »",
+      implique:"La baisse de forme est décrite comme habituelle. À traiter comme une donnée de programmation (séances plus courtes, moins de tours) et non comme un aléa." },
+    { id:"sophie-collantier", nom:"Sophie Collantier", date:"12/09", niveau:"warn",
+      constat:"Opération du grain de beauté toujours à venir",
+      implique:"Rappel du 01/09, non encore daté dans le dossier." },
+    { id:"armand-azencot", nom:"Armand Azencot", date:"16/09", niveau:"ok",
+      constat:"« belle évolution ! Toujours le coude à surveiller avec une tendinite mais le renfo contrôlé sur les triceps a l'air de bien fonctionner »",
+      implique:"Bonne nouvelle à acter : le protocole triceps contrôlé fonctionne. À maintenir tel quel, sans augmenter." }
+  ],
+
+  echeance: {
+    id:"julian-helissey", nom:"Julian Helissey", quoi:"Compétition de trail", date:"16 octobre 2026",
+    texte:"La douleur sous le pied du 01/09 n'est plus mentionnée et les charges sont remontées (squat bulgare à 2×16 kg le 11/09). Aucun affûtage n'apparaît encore dans son dossier : c'est la décision de programmation la plus urgente du mois."
+  },
+
+  detail: [
+    { id:"alex-roussel", nom:"Alex Roussel", seances:["10/09","15/09"], note:"« adore les pyramides en série ». Goblet squat prévu 12 kg → 25 kg en top série ; rowing unilat 10 → 14 kg" },
+    { id:"alexandre-desse", nom:"Alexandre Desse", seances:["11/09","15/09"], note:"SP prévu 30-35 kg → 30 kg. DL 75 kg ×5, hip thrust 75 kg ×8" },
+    { id:"antoine-feix", nom:"Antoine Feix", seances:["08/09","11/09","15/09"], note:"Tractions supi prévues @5 kg → faites @6 kg. DL 105 kg ×5, hip thrust 90 kg ×8. Aucune douleur" },
+    { id:"armand-azencot", nom:"Armand Azencot", seances:["10/09","16/09"], note:"Tirage vertical unilat prévu 25 kg → 30 kg.", prio:true },
+    { id:"benoit-pradignac", nom:"Benoit Pradignac", seances:["09/09"], note:"Hip thrust 115 kg ×6, nordic excentrique ×6, squat bulgare 60 kg ×6/c" },
+    { id:"bertrand-marty", nom:"Bertrand Marty", seances:["09/09","14/09","16/09"], note:"« je veux apprendre les muscle ups, posture à corriger et technique à apprendre ». Travail false grip et tractions contrôlées engagé. Step up ramené de 18 à 15 kg" },
+    { id:"caroline-gregori", nom:"Caroline Gregori", seances:["09/09","10/09","16/09"], note:"Squat box tenu à 60 kg, « rester à ce poids pour le moment ». RDL 55 kg « limitée par le grip ». DC prévu 16 kg → 15 kg (8-8-7-7)" },
+    { id:"catherine-leonard", nom:"Catherine Leonard", seances:["10/09"], note:"« appréhension sur le squat barre ». Squat box 35 kg ×6" },
+    { id:"christophe-car", nom:"Christophe Car", seances:["09/09","16/09"], note:"Squat barre 35-40 kg → fait 40 kg. Squat box 40 kg, tirage vertical 45 kg. Suite du « focus posture, il est trop bancal » du 07/09" },
+    { id:"elea-riviere", nom:"Elea Rivière", seances:["14/09"], note:"Séance adaptée, douleur au dos.", prio:true },
+    { id:"emilie-laporte", nom:"Emilie Laporte", seances:["14/09"], note:"Goblet squat 20 kg ×12, RDL kb 32 kg. Rappel du 01/09 : hip thrust trop rapide, pas de temps d'arrêt en haut" },
+    { id:"florence-aparico", nom:"Florence Aparico", seances:["11/09"], note:"« bonne posture sur la plupart des exercices, on peut augmenter un peu les charges, sauf sur le haut du corps où c'est son point faible ». Finisher ski non fait", anomalie:true },
+    { id:"gilles-piaux", nom:"Gilles Piaux", seances:["14/09"], note:"« 3T au lieu de 4 sur le B1, finisher non fait. Posture à améliorer sur le DL ». DL 75 kg ×6" },
+    { id:"jena-guillaume-rocher", nom:"Jean Guillaume Rocher", seances:["10/09","15/09"], note:"« analyser systématiquement la posture suite aux exercices donnés et prioriser l'exécution plutôt que la charge. Le travail peut être souvent bâclé s'il n'est pas suivi. » Squat 45 → 40 kg, hip thrust 60 → 55 kg" },
+    { id:"jean-noel-lacour", nom:"Jean Noël Lacour", meta:"74 ans", seances:["09/09","15/09"], note:"Goblet squat talons surélevés 14 kg, RDL kb 16 kg, SP 6 kg. Suite de « pas de douleur particulière, reprend de bon positionnement »", anomalie:true },
+    { id:"jean-pierre-catherin", nom:"Jean Pierre Catherin", seances:["15/09"], note:"Client récent. DL 35 kg ×6, hip thrust 35-40 kg. Préférence actée : « il n'aime pas le statique » → gainage dynamique uniquement", nouveau:true },
+    { id:"jean-pujol", nom:"Jean Pujol", seances:["10/09","14/09"], note:"DL 55 kg ×6 le 14/09.", prio:true },
+    { id:"julien-lacroix", nom:"Julien Lacroix", seances:["15/09"], note:"Hip thrust 105 kg ×8, SP barre 45 kg ×6. Finisher sled push barré" },
+    { id:"justine-boissou", nom:"Justine Boissou", seances:["11/09","14/09"], note:"", prio:true },
+    { id:"kate-janecek", nom:"Kate Janecek", meta:"sclérose en plaques", seances:["09/09","16/09"], note:"« elle adore soulever des poids donc ne pas hésiter à mettre des exos où y en a ». Fentes faites au TRX à 15 kg, « elle peut pas l'équilibre avec sa maladie »" },
+    { id:"mathilde-piaux", nom:"Mathilde Piaux", seances:["14/09"], note:"", prio:true },
+    { id:null, nom:"Nathan Gattegno", seances:["08/09","10/09"], note:"Blocs ramenés de 4T à 3T le 08/09, dead bug bâton « trop dur ».", prio:true, horsFeuille:true },
+    { id:"pascal-ramondou", nom:"Pascal Ramoudou", seances:["12/09"], note:"", prio:true },
+    { id:"philippe-heraudet", nom:"Philippe Heraudet", seances:["15/09"], note:"", prio:true },
+    { id:"philippe-herve", nom:"Philippe Hervé", seances:["10/09","16/09"], note:"« le repère dans l'espace est très compliqué donc à suivre attentivement l'exécution des exercices ». DL 30 kg : « posture à travailler ++ avant de monter en charge »" },
+    { id:"quitterie-madelin", nom:"Quitterie Madelin", seances:["10/09"], note:"« grosse amélioration sur la posture sur les fentes, il faut juste améliorer l'exécution sur le push press ». Fentes 2×15 kg, RDL kb 32 kg" },
+    { id:"sandra-messibah", nom:"Sandra Messibah", seances:["12/09"], note:"", prio:true },
+    { id:"sebastien-thalamy", nom:"Sébastien Thalamy", seances:["09/09","11/09"], note:"Squat box prévu 60 kg → fait 70 kg ×10. Dips lestés 10 kg ×10" },
+    { id:"solene-lebihan", nom:"Solène Lebihan", seances:["09/09","11/09","12/09","16/09"], note:"12/09 : « grosse fatigue de la semaine » ; « la posture s'améliore de séance en séance sur le squat depuis qu'on a enlevé les chaussures ». 16/09 : « RAS mais fatiguée en ce moment, ne pas hésiter à adapter »" },
+    { id:"sophie-collantier", nom:"Sophie Collantier", seances:["12/09"], note:"Finisher rameur intermittent remplacé par 2×10 cal au ski.", prio:true },
+    { id:"adrien-lalut", nom:"Adrien Lalut", seances:["14/09","15/09"], note:"« bonne posture de manière générale, bon repère dans l'espace ». Séance 2 faite en accès libre", nouveau:true, anomalie:true },
+    { id:"henry-lemoine", nom:"Henry Lemoine", seances:["15/09"], note:"« bonne posture, il est propre sur les mouvements et il cherche les sensations ». Consigne : « monter le poids au rowing progressivement »", nouveau:true },
+    { id:"julian-helissey", nom:"Julian Helissey", seances:["11/09"], note:"Squat bulgare prévu 20 kg → 2×16 kg. Voir l'échéance trail du 16 octobre." }
+  ],
+
+  sansSeance: [
+    { id:"catherine-vienne", nom:"Catherine Vienne", derniere:"07/09" },
+    { id:"charles-de-resseguier", nom:"Charles de Resseguier", derniere:"07/09" },
+    { id:"francoise-sucre", nom:"Françoise Sucré", derniere:"07/09" }
+  ],
+
+  fatigue: ["solene-lebihan","mathilde-piaux","sandra-messibah","julien-lacroix"],
+
+  anomalies: [
+    { titre:"Contamination des bilans entre clients", gravite:"alert",
+      chapeau:"Trois dossiers portent des données qui n'appartiennent pas au client. Ce n'est pas une coquille de saisie isolée, c'est un défaut de la chaîne d'export des bilans.",
+      points:[
+        "<b>Jean Noël Lacour</b> — l'en-tête de son bilan indique « Nom : Ruth / Prénom : Gertrudix » avant de mentionner « Jean Noël / 74 ans ». Toutes les valeurs K-pull sont vides, ainsi que les sections membres inférieurs / tronc / membres supérieurs.",
+        "<b>Florence Aparico</b> — le poids de corps de référence de son bilan est de 119,2 kg, ce qui sert de base à tous ses ratios K-pull. Le chiffre est incohérent avec son profil et avec les charges qu'elle soulève.",
+        "<b>Adrien Lalut</b> — son bilan indique un poids de corps de 119,2 kg. <b>C'est le chiffre qui a été injecté dans le bilan de Florence Aparico.</b>"
+      ],
+      chute:"Les normes calculées à partir de ces bilans ne sont pas utilisables pour piloter les charges. Tant que l'export n'est pas fiabilisé, la programmation s'appuie sur les charges réellement soulevées, pas sur les ratios du bilan." },
+
+    { titre:"Treize clients suivis hors de la feuille « Dossier pedro 2 »", gravite:"warn",
+      chapeau:"Cette page pilote la génération sur 94 clients ; la feuille « Dossier pedro 2 » n'en contient que 81. Treize clients reçoivent un bloc sans figurer dans la feuille qui sert de référence au relevé des retours coach — ils y échappent donc.",
+      liste:["Christophe Camicas","Corinne Napal","Deborah Foulonneau","Dhyana Noel","Gaelle Labadie","Guillaume Petitpas","Jean Sébastien Lacam","Julien Nguyen van","Ruth Gertrudix","Satya Pilot","Ségolène Berger","Valerie Franck","Vincent Garcia"],
+      chute:"La section « Traités hors roster » ci-contre ne nomme que trois personnes (Florent Parade, Marion Laurans, Valeria Castelletto) : les treize ci-dessus y passent pour du roster." },
+
+    { titre:"Doublons et orthographes dans la feuille", gravite:"warn",
+      points:[
+        "Une ligne « Xavier » sans nom de famille pointe vers le même document que <b>Xavier Thomas</b> : doublon à supprimer.",
+        "La feuille écrit <b>Pascal Ramoudou</b> là où les dossiers Drive portent <b>Pascal Ramondou</b>.",
+        "La feuille écrit <b>Jena Guillaume Rocher</b>, <b>Alexendra APARD</b> et <b>Gaspard farine</b> : à harmoniser avec les dossiers."
+      ] },
+
+    { titre:"Reste du rapport précédent", gravite:"warn",
+      points:[
+        "<b>Le fileId de Gaspard Farine</b> reste à corriger dans « Dossier pedro 2 ».",
+        "<b>Les dates postérieures à la séance</b> signalées au 07/09 (Anne Lise Medalin, Catherine Leonard, Jean Pujol, Sandra Messibah au 29/09, Laurence Poulain au 08/09, Arthur Marien au 11/09) n'ont pas été corrigées.",
+        "<b>Julie Leonard et Philippe Heraudet</b>, dont la grille était entièrement à « Pas validé » sans commentaire le 01/09 : le cas de Philippe Heraudet est levé — son coach annote bien, c'est la grille qui n'était pas remplie."
+      ] }
+  ],
+
+  changements: [
+    "La grille « Retours Coach » a été simplifiée le 08/09, comme recommandé au rapport précédent : une ligne par bloc, Validé / Commentaire.",
+    "Un document de procédure a été créé le 16/09 — « SOP UPB — Onboarding client & Génération des séances ».",
+    "Plusieurs clients sont passés au bloc mensuel structuré en 8 à 12 séances numérotées avec colonne « Commentaire » dédiée, nettement plus exploitable que le tableau de mois libre.",
+    "Trois nouveaux clients sont entrés dans le suivi : Adrien Lalut, Henry Lemoine, Jean Pierre Catherin."
+  ],
+
+  perimetre: {
+    nonOuverts: ["Emilie White","Guillaume Puygrenier","Célia Lina","Pauline Delpon","Marie Fourmey","Martine Viard","Noic Gouhizoun","Marc Vernet","Ludovic Mauger","Xavier Josseaume","Anne Lise Medalin","Xavier Thomas"],
+    horsFeuille: ["Beatrice Piquard","Perrine Courtellemont","Dhyana Noel","Christophe Camicas","Ruth Gertrudix","Florent Parade","Marion Laurans","Valeria Castelletto","Fanny Gaillard","Safouane Rihani","Marika Dufour","Frédérique Haliche","Caroline Decombe"]
+  }
+};
+
+// Index « points d'attention » -> pastille dans la liste « Suivi des blocs ».
+// Déclaré ici, avant le premier renderAll(), pour rester hors de la TDZ.
+const RC_PRIO_BY_ID = new Map();
+RETOURS.prio.forEach(p => { if (p.id) RC_PRIO_BY_ID.set(p.id, p.niveau); });
+const RC_FLAG = { alert:["", "Douleur"], warn:["f-warn","À surveiller"], ok:["f-ok","Progrès"] };
+
+function rcFlagHtml(id){
+  const n = RC_PRIO_BY_ID.get(id);
+  if (!n) return "";
+  const [cls, txt] = RC_FLAG[n];
+  return `<span class="sep">·</span><a class="rc-flag ${cls}" href="#retours" title="Point d'attention relevé du 08 au 16/09 — ouvrir les retours coach">${txt}</a>`;
+}
+
+function etat(c){
+  if (c.mois === "Octobre" || c.mois === "Septembre-Octobre") return "ok";
+  if (c.mois === "Septembre") return "warn";
+  return "alert";
+}
+const ETAT_TXT = { ok:"Bloc Octobre", warn:"Septembre seulement", alert:"Aucun bloc récent" };
+const BADGE_TXT = { ok:"Octobre", warn:"Septembre", alert:"Aucun" };
+const ETAT_ORDER = { alert:0, warn:1, ok:2 };
+function fmtDate(d){
+  if(!d) return "";
+  const [y,m,day] = d.split("-");
+  const M = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+  return Number(day) + " " + M[Number(m)-1];
+}
+function joursDepuis(d){
+  if(!d) return null;
+  const then = new Date(d + "T00:00:00");
+  const now = new Date();
+  const diff = Math.floor((now - then) / 86400000);
+  return diff >= 0 ? diff : 0;
+}
+function joursHtml(d){
+  const n = joursDepuis(d);
+  if (n === null) return "";
+  const txt = n === 0 ? "aujourd'hui" : n === 1 ? "il y a 1 j" : "il y a " + n + " j";
+  return `<span class="jours${n > 45 ? " stale" : ""}">(${txt})</span>`;
+}
+function norm(s){ return s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase(); }
+function esc(s){ return String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch])); }
+const docUrl = id => "https://docs.google.com/document/d/" + id + "/edit";
+
+const clients = DATA.clients.map(c => Object.assign({}, c, { etat: etat(c), search: norm(c.nom) }));
+const counts = { ok:0, warn:0, alert:0 };
+clients.forEach(c => counts[c.etat]++);
+let TOTAL = clients.length;
+
+// --- suivi state (db-backed when available) ---
+const suivi = new Map();   // id -> {statut, note}
+const distancielSuivi = new Map();   // id -> {statut, note}
+let distancielClients = [];
+let distancielLoaded = false;
+let store = null;
+let storeDistanciel = null;
+const openNotes = new Set();
+let filterEtat = "all", filterFreq = 0, query = "";
+
+// --- génération assistée (mcp + sample) ---
+const TARGET_MOIS = "Octobre", TARGET_ANNEE = "2026";
+let mcpNS = null, sampleFn = null;
+const gen = new Map();   // id -> {status:'loading'|'draft'|'publishing'|'done'|'error', text, err, parentId, title, bilanUsed, ctl}
+
+const $ = s => document.querySelector(s);
+
+function renderLegend(){
+  const rows = [
+    ["all",  "var(--ink-3)",   TOTAL,         "clients au roster"],
+    ["ok",   "var(--ok-solid)",    counts.ok,    "bloc d'octobre généré"],
+    ["warn", "var(--warn-solid)",  counts.warn,  "en attente depuis septembre"],
+    ["alert","var(--alert-solid)", counts.alert, "sans bloc récent"],
+  ];
+  $("#legend").innerHTML = rows.map(([k,col,n,t]) =>
+    `<button type="button" data-etat="${k}" aria-pressed="${filterEtat===k}">`+
+    `<span class="key" style="background:${col}"></span>`+
+    `<span class="n">${n}</span><span class="t">${t}</span></button>`
+  ).join("");
+}
+
+function renderBar(){
+  const pct = n => (n / TOTAL * 100).toFixed(2) + "%";
+  $("#bar-ok").style.width = pct(counts.ok);
+  $("#bar-warn").style.width = pct(counts.warn);
+  $("#bar-alert").style.width = pct(counts.alert);
+  $("#pctnum").textContent = Math.round(counts.ok / TOTAL * 100) + " %";
+}
+
+function rowHtml(c){
+  const s = suivi.get(c.id) || {};
+  const genReady = mcpNS && sampleFn;
+  const statut = s.statut || "a_traiter";
+  const note = s.note || "";
+  const cls = c.etat === "alert" ? " prio" : (c.etat === "warn" ? " late" : "");
+  const liens = [`<a href="${docUrl(c.histo)}" target="_blank" rel="noopener">Historique</a>`];
+  if (c.doc) liens.push(`<a href="${docUrl(c.doc)}" target="_blank" rel="noopener">Dernier bloc</a>`);
+  const dernier = `<span class="badge b-${c.etat}">${BADGE_TXT[c.etat]}</span>`;
+  const steps = STEPS.map(([k,lab]) =>
+    `<button type="button" data-act="statut" data-id="${c.id}" data-v="${k}" aria-pressed="${statut===k}">${lab}</button>`
+  ).join("");
+  const open = openNotes.has(c.id);
+  return `<div class="client${cls}" data-row="${c.id}">
+    <div class="crow">
+      <div class="who">
+        <div class="nm">${esc(c.nom)}</div>
+        <div class="meta">
+          <span class="freq">${c.freq}×/sem.</span>
+          <span class="sep">·</span><span>${c.date ? "Bloc généré le " + fmtDate(c.date) + " " + joursHtml(c.date) : "Aucun bloc trouvé sur Drive"}</span>
+          <span class="sep">·</span>${liens.join('<span class="sep">·</span>')}
+          ${rcFlagHtml(c.id)}
+        </div>
+      </div>
+      <div>${dernier}</div>
+      <div class="suivi">
+        <div class="steps" ${store ? "" : 'data-off="1"'} role="group" aria-label="Suivi de ${esc(c.nom)}">${steps}</div>
+        <button type="button" class="noteb" data-act="note" data-id="${c.id}" data-has="${note ? 1 : 0}"
+                aria-label="Note sur ${esc(c.nom)}" aria-expanded="${open}">✎</button>
+        <button type="button" class="genb" data-act="gen" data-id="${c.id}" ${genReady ? "" : "disabled"}
+                title="${genReady ? "Générer le bloc " + TARGET_MOIS + " via l'IA, à partir de l'historique Drive" : "Génération indisponible dans cette vue"}">Générer</button>
+      </div>
+    </div>
+    ${open ? `<div class="noterow"><input id="note-${c.id}" data-act="noteinput" data-id="${c.id}" value="${esc(note)}"
+       placeholder="Douleur, contrainte, matériel, rappel…" aria-label="Note sur ${esc(c.nom)}"></div>` : ""}
+    ${genPanelHtml(c)}
+  </div>`;
+}
+
+function genPanelHtml(c){
+  const g = gen.get(c.id);
+  if (!g) return "";
+  let body = "";
+  if (g.status === "loading") {
+    body = `<div class="gp-msg"><span class="gp-spin" aria-hidden="true"></span> &nbsp;Lecture de l'historique${g.step ? " — " + esc(g.step) : ""}…</div>`;
+  } else if (g.status === "error") {
+    body = `<div class="gp-err">${esc(g.msg)}</div>
+      <div class="gp-actions"><button type="button" data-act="gen-retry" data-id="${c.id}">Réessayer</button></div>`;
+  } else if (g.status === "draft") {
+    body = `<div class="gp-draft"><textarea data-act="gen-edit" data-id="${c.id}" spellcheck="false" aria-label="Brouillon du bloc ${TARGET_MOIS} pour ${esc(c.nom)}">${esc(g.text)}</textarea></div>
+      <p class="gp-note">Brouillon généré par l'IA${g.bilanUsed ? ", historique + bilan" : " (aucun bilan trouvé dans le dossier)"}${g.truncated ? " — historique tronqué pour tenir dans la limite" : ""}. Relis avant de publier : rien n'est encore écrit sur Drive.</p>
+      <div class="gp-actions">
+        <button type="button" class="primary" data-act="gen-publish" data-id="${c.id}">Publier sur Drive</button>
+        <button type="button" data-act="gen-retry" data-id="${c.id}">Régénérer</button>
+      </div>`;
+  } else if (g.status === "publishing") {
+    body = `<div class="gp-msg"><span class="gp-spin" aria-hidden="true"></span> &nbsp;Écriture du document sur Drive…</div>`;
+  } else if (g.status === "publish-error") {
+    body = `<div class="gp-err">${esc(g.msg)}</div>
+      <div class="gp-draft"><textarea data-act="gen-edit" data-id="${c.id}" spellcheck="false">${esc(g.text)}</textarea></div>
+      <div class="gp-actions">
+        <button type="button" class="primary" data-act="gen-publish" data-id="${c.id}">Réessayer la publication</button>
+      </div>`;
+  } else if (g.status === "done") {
+    body = `<div class="gp-done">Document créé : <a href="${docUrl(g.newId)}" target="_blank" rel="noopener">${esc(g.title)}</a>. Le suivi a été mis à jour.</div>`;
+  }
+  return `<div class="genrow"><div class="genpanel">
+    <div class="gp-head"><span class="gp-title">Génération — ${TARGET_MOIS} ${TARGET_ANNEE}</span>
+      <button type="button" class="gp-close" data-act="gen-close" data-id="${c.id}" aria-label="Fermer">Fermer ✕</button></div>
+    ${body}
+  </div></div>`;
+}
+
+function renderList(){
+  const rows = clients
+    .filter(c => filterEtat === "all" || c.etat === filterEtat)
+    .filter(c => filterFreq === 0 || c.freq === filterFreq)
+    .filter(c => !query || c.search.includes(query))
+    .sort((a,b) => ETAT_ORDER[a.etat] - ETAT_ORDER[b.etat]
+      || (a.date ? 1 : 0) - (b.date ? 1 : 0)
+      || (a.date && b.date ? a.date.localeCompare(b.date) : 0)
+      || a.nom.localeCompare(b.nom,"fr"));
+  $("#list").innerHTML = rows.length
+    ? rows.map(rowHtml).join("")
+    : `<p class="empty">Aucun client ne correspond à ce filtre.</p>`;
+}
+
+function renderHors(){
+  $("#hors").innerHTML = DATA.hors.map(h =>
+    `<a class="chip" href="${docUrl(h.doc)}" target="_blank" rel="noopener">${esc(h.nom)} <em>${MOIS_LABEL[h.mois]||h.mois}</em></a>`
+  ).join("");
+}
+
+function renderAll(){ renderLegend(); renderBar(); renderList(); }
+renderAll();
+renderHors();
+
+// --- interactions ---
+$("#legend").addEventListener("click", e => {
+  const b = e.target.closest("button[data-etat]"); if (!b) return;
+  filterEtat = b.dataset.etat; renderLegend(); renderList();
+});
+$("#freqseg").addEventListener("click", e => {
+  const b = e.target.closest("button[data-freq]"); if (!b) return;
+  filterFreq = Number(b.dataset.freq);
+  [...e.currentTarget.querySelectorAll("button")].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  renderList();
+});
+$("#q").addEventListener("input", e => { query = norm(e.target.value.trim()); renderList(); });
+
+$("#list").addEventListener("click", e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const id = b.dataset.id;
+  if (b.dataset.act === "note") {
+    if (openNotes.has(id)) openNotes.delete(id); else openNotes.add(id);
+    renderList();
+    const input = document.getElementById("note-" + id);
+    if (input) input.focus();
+    return;
+  }
+  if (b.dataset.act === "statut") {
+    if (!store) return;
+    const cur = suivi.get(id) || {};
+    save(id, { statut: b.dataset.v, note: cur.note || "" });
+  }
+});
+$("#list").addEventListener("change", e => {
+  const input = e.target.closest("input[data-act='noteinput']"); if (!input) return;
+  const id = input.dataset.id;
+  const cur = suivi.get(id) || {};
+  if (!store) return;
+  save(id, { statut: cur.statut || "a_traiter", note: input.value.trim() });
+});
+
+function save(id, body){
+  suivi.set(id, body);
+  renderList();
+  store.doc(id).set({ statut: body.statut, note: body.note, maj: new Date().toISOString() })
+    .catch(err => { $("#foot").textContent = "Enregistrement impossible (" + (err && err.code || "erreur") + ") — les changements ne sont pas conservés."; });
+}
+
+function recomputeCounts(){
+  counts.ok = 0; counts.warn = 0; counts.alert = 0;
+  clients.forEach(c => counts[c.etat]++);
+}
+
+// --- génération assistée : lecture Drive (mcp) + rédaction (sample) ---
+const METHODO = `Tu es un coach sportif expert (méthode "PEDRO") qui rédige le bloc d'entraînement mensuel d'un·e client·e de la salle Ultimate Physical Bordeaux, à partir de son historique de séances et de son bilan.
+
+STRUCTURE FIXE d'une séance, toujours dans cet ordre (les intitulés peuvent être adaptés au client mais jamais la structure ni les tours T) :
+- Activ (≈3T) : mobilité / activation, ciblée sur les axes prioritaires du client.
+- B1 (≈4T) : superset antagoniste n°1 — un mouvement bas du corps (ischios / quadriceps / hanche) + un mouvement haut du corps (dos, pecs / épaules), avec charge.
+- B2 (≈4T) : superset antagoniste n°2 — même logique que B1 mais exercices différents, en faisant varier le matériel et la dominante par rapport à B1.
+- B3 (≈3T) : gainage / core, 2 exercices en superset.
+- Finisher (≈4T) : conditionnement cardio/métabolique, au niveau d'impact toléré par le client.
+
+PROGRESSION :
+- Repartir de la trame et des charges RÉELLEMENT faites lors des dernières séances (pas des charges prévues).
+- Progresser d'au moins une variable (charge, reps, tempo, complexité) par exercice clé chaque semaine.
+- Renouveler au moins 30% des exercices d'une semaine sur l'autre, tout en gardant 1 à 2 exercices "fil rouge" par bloc pour mesurer la progression.
+- Périodisation sur le mois (4 semaines) : S1 reprise de contact ; S2 progression ; S3 pic (intensité/volume max) ; S4 deload (allégée), ou semaine de test/validation si le client est en réathlétisation.
+
+SÉLECTION DES EXERCICES — 3 filtres dans cet ordre : 1) sécurité par rapport à la douleur/blessure du client (protocole ci-dessous) ; 2) pertinence par rapport à l'objectif du client ; 3) matériel réellement disponible. Piocher dans les banques fournies plus bas (par groupe musculaire × matériel × dominante). Une variante créative cohérente avec une dominante listée reste recevable si la logique est bonne.
+
+PROTOCOLE DOULEUR (échelle 0-10, à appliquer à toute douleur/gêne mentionnée dans l'historique ou le bilan) :
+- 0-3/10 : poursuivre et progresser normalement.
+- 4-6/10, ou douleur qui apparaît pendant l'exercice sans s'aggraver après : réduire amplitude/charge/vitesse, proposer une variante isométrique ou excentrique contrôlée de la même dominante.
+- >6/10, ou douleur qui s'aggrave, ou symptôme nouveau (gonflement, instabilité franche, douleur nocturne) : retirer l'exercice, proposer une alternative sans contrainte sur la zone, et recommander explicitement un avis médical/kiné en présentiel. Ne jamais poser de diagnostic.
+Documenter chaque adaptation liée à une douleur dans la note d'en-tête du document.
+
+NOTATION dans les cellules : "Bloc (XT) : Exercice @charge xREPS / Exercice …" — @ = charge, x = répétitions, '' = secondes, /c = par côté, T = tours, AR = aller-retour, PDC = poids de corps. Abréviations courantes : DL/RDL (deadlift/romanian deadlift), DC (développé couché), EC (écarté couché), SP (strict press), IJ (ischio-jambiers), WGS (world's greatest stretch), MW AR (marche wilko aller-retour), KB (kettlebell), db (dumbbell/haltère), AB (assault bike), BR (rameur/rower), TRX 45° (TRX en angle 45°).
+
+FORMAT HTML EXACT DU DOCUMENT ATTENDU :
+- Un paragraphe d'en-tête <p><i>...</i></p> en tout début de document : PRIORISE en premier toute douleur ou gêne mentionnée dans les commentaires de séances de l'historique (y compris ce qui a pu être surligné/écrit en rouge dans le document — le texte brut ne conserve pas la couleur, donc base-toi sur toute mention explicite de douleur, gêne, ou note du type "mal à…", "douleur", "sensible", note sur 10, etc.), avant les constats de simple performance ou de déficit de force ; puis objectif du mois, adaptations appliquées à ces douleurs, base de progression (dernières charges réelles), résumé de la périodisation semaine par semaine, et une réserve explicite si une partie du bilan semble générique/non spécifique à ce client (contenu qui contredit l'historique ou ressemble à du texte type recopié).
+- Puis, pour chaque séance : <h3>SÉANCE N</h3> suivi d'un <table> à 2 colonnes — <tr><th>Bloc</th><th>Commentaire</th></tr> puis une ligne <tr><td>…</td><td class="c"></td></tr> par bloc de la séance. La cellule "Commentaire" est TOUJOURS VIDE (<td class="c"></td>), elle est réservée aux retours du coach après la séance.
+- Numérotation des séances en ordre DÉCROISSANT : la séance la plus avancée/récente du mois en haut (numéro le plus haut), SÉANCE 1 tout en bas.
+- Nombre de séances ≈ fréquence hebdomadaire du client × 4 semaines (2×/semaine → 8 séances, 3×/semaine → 12, 1×/semaine → 4).
+
+Réponds UNIQUEMENT avec le HTML du corps du document (le paragraphe d'en-tête puis les <h3>/<table>), sans balise <style>, sans <html>/<head>/<body>, sans markdown, sans aucun commentaire avant ou après. La mise en forme (police, taille) est appliquée séparément — ne mets pas d'attributs de style toi-même.`;
+
+const BANQUES_TXT = JSON.stringify(BANQUES);
+
+// Mise en forme fixe des documents publiés sur Drive — police Montserrat, taille 8,
+// même présentation que la référence "Séance Beatrice Piquard".
+const DOC_STYLE = `<style>
+body{font-family:'Montserrat',Arial,sans-serif;font-size:8pt;}
+h3{margin:14pt 0 4pt 0;font-size:8pt;font-weight:700;font-family:'Montserrat',Arial,sans-serif;}
+p{font-size:8pt;font-family:'Montserrat',Arial,sans-serif;}
+table{border-collapse:collapse;width:100%;font-size:8pt;margin-bottom:6pt;font-family:'Montserrat',Arial,sans-serif;}
+th,td{border:1px solid #999;padding:4px 6px;vertical-align:top;text-align:left;font-size:8pt;font-family:'Montserrat',Arial,sans-serif;}
+th{background:#e8e8e8;}
+td.c{width:200px;}
+</style>
+`;
+
+function capBytes(str, maxBytes){
+  if (!str) return "";
+  const enc = new TextEncoder();
+  const bytes = enc.encode(str);
+  if (bytes.length <= maxBytes) return str;
+  const dec = new TextDecoder("utf-8", { fatal:false });
+  return dec.decode(bytes.slice(0, maxBytes)) + "\n[…tronqué…]";
+}
+
+function buildPrompt(c, histoText, bilanText, truncated){
+  let p = METHODO
+    + "\n\nBANQUES D'EXERCICES DISPONIBLES (JSON — nom du groupe, puis sous-groupes matériel/dominante/exercices) :\n" + BANQUES_TXT
+    + "\n\nCLIENT·E : " + c.nom + " — fréquence : " + c.freq + "×/semaine."
+    + "\n\nHISTORIQUE DES SÉANCES (document Drive) :\n" + histoText
+    + (bilanText ? "\n\nBILAN (document Drive) :\n" + bilanText : "\n\n(Aucun bilan trouvé dans le dossier du client — base-toi uniquement sur l'historique.)")
+    + "\n\nRédige le bloc de " + TARGET_MOIS + " " + TARGET_ANNEE + " pour ce·tte client·e, en respectant strictement le format demandé ci-dessus."
+    + (truncated ? "\n\n(Note : l'historique fourni ci-dessus a été tronqué pour tenir dans la limite — base-toi sur les séances les plus récentes qu'il contient.)" : "");
+  return p;
+}
+
+const MCP_ERR_MSG = {
+  needs_reauth: "Le connecteur Google Drive doit être reconnecté (Réglages → Connecteurs sur claude.ai).",
+  server_not_connected: "Google Drive n'est pas connecté sur ce compte (Réglages → Connecteurs sur claude.ai).",
+  selection_required: "Plusieurs comptes Google Drive sont disponibles — choisis-en un depuis le message de connexion, puis réessaie.",
+  not_in_manifest: "Cette page n'est pas autorisée à utiliser Google Drive pour ce client.",
+  blocked_by_policy: "L'accès à Google Drive est bloqué par la politique de l'organisation.",
+  approval_required: "Cette action nécessite une approbation supplémentaire, pas encore prise en charge ici.",
+  tool_error: "Google Drive a refusé l'opération.",
+  not_granted: "L'accès à Google Drive ou à Claude n'a pas été autorisé pour cette page.",
+  rate_limited: "Trop d'appels pour le moment — réessaie dans quelques instants.",
+  cancelled: "Génération annulée.",
+  refused: "Claude a refusé cette génération — modifie la demande ou réessaie.",
+  empty_completion: "Claude n'a rien renvoyé — réessaie.",
+  sampling_disabled: "La génération par IA n'est pas disponible sur ce compte.",
+};
+function friendlyErr(err, fallback){
+  return (err && MCP_ERR_MSG[err.code]) || fallback || ("Erreur inattendue" + (err && err.code ? " (" + err.code + ")" : "") + ".");
+}
+
+async function doGenerate(c){
+  const ctl = new AbortController();
+  gen.set(c.id, { status:"loading", step:"métadonnées", ctl });
+  renderList();
+  try {
+    const meta = await mcpNS.callTool("Google Drive", "get_file_metadata", { fileId:c.histo, excludeContentSnippets:true }, { signal:ctl.signal });
+    const parentId = meta.payload && meta.payload.parentId;
+    if (!parentId) throw { code:"tool_error", message:"dossier introuvable" };
+
+    gen.set(c.id, { status:"loading", step:"recherche du bilan", ctl }); renderList();
+    let bilanFile = null;
+    try {
+      const found = await mcpNS.callTool("Google Drive", "search_files", { query:"parentId = '" + parentId + "'", excludeContentSnippets:true }, { signal:ctl.signal });
+      const files = (found.payload && found.payload.files) || [];
+      bilanFile = files.find(f => f.id !== c.histo && /bilan/i.test(f.title || "")) || null;
+    } catch (e) { /* pas de bilan trouvable, on continue sans */ }
+
+    gen.set(c.id, { status:"loading", step:"lecture de l'historique", ctl }); renderList();
+    const histoRes = await mcpNS.callTool("Google Drive", "read_file_content", { fileId:c.histo }, { signal:ctl.signal });
+    let histoText = (histoRes.payload && histoRes.payload.fileContent) || "";
+    let truncated = false;
+    const histoCapped = capBytes(histoText, 24000);
+    if (histoCapped !== histoText) truncated = true;
+    histoText = histoCapped;
+
+    let bilanText = "";
+    if (bilanFile) {
+      gen.set(c.id, { status:"loading", step:"lecture du bilan", ctl }); renderList();
+      try {
+        const bilanRes = await mcpNS.callTool("Google Drive", "read_file_content", { fileId:bilanFile.id }, { signal:ctl.signal });
+        bilanText = capBytes((bilanRes.payload && bilanRes.payload.fileContent) || "", 8000);
+      } catch (e) { bilanText = ""; }
+    }
+
+    gen.set(c.id, { status:"loading", step:"rédaction du bloc", ctl }); renderList();
+    let prompt = buildPrompt(c, histoText, bilanText, truncated);
+    if (new TextEncoder().encode(prompt).length > 60000) {
+      histoText = capBytes(histoText, 14000);
+      bilanText = capBytes(bilanText, 5000);
+      truncated = true;
+      prompt = buildPrompt(c, histoText, bilanText, truncated);
+    }
+
+    const result = await sampleFn(prompt, { modelTier:"complex", cache:false, signal:ctl.signal });
+    const title = "Séances " + TARGET_MOIS + " " + TARGET_ANNEE + " - " + c.nom;
+    gen.set(c.id, { status:"draft", text:result.text.trim(), parentId, title, bilanUsed:!!bilanFile, truncated, ctl:null });
+    renderList();
+  } catch (err) {
+    if (err && err.code === "cancelled") { gen.delete(c.id); renderList(); return; }
+    gen.set(c.id, { status:"error", msg:friendlyErr(err, "La lecture du dossier Drive ou la génération a échoué."), ctl:null });
+    renderList();
+  }
+}
+
+async function doPublish(c){
+  const g = gen.get(c.id);
+  if (!g || g.status !== "draft" && g.status !== "publish-error") return;
+  const text = g.text, title = g.title, parentId = g.parentId, bilanUsed = g.bilanUsed, truncated = g.truncated;
+  gen.set(c.id, { status:"publishing", text, title, parentId, bilanUsed, truncated });
+  renderList();
+  try {
+    const created = await mcpNS.callTool("Google Drive", "create_file", {
+      title, parentId, contentMimeType:"text/html", textContent: DOC_STYLE + text
+    });
+    const newId = created.payload && created.payload.id;
+    if (!newId) throw { code:"tool_error", message:"identifiant du document manquant" };
+    gen.set(c.id, { status:"done", newId, title });
+    const client = clients.find(x => x.id === c.id);
+    if (client) {
+      client.doc = newId;
+      client.mois = TARGET_MOIS;
+      client.date = new Date().toISOString().slice(0,10);
+      client.etat = etat(client);
+      recomputeCounts();
+    }
+    if (store) {
+      const cur = suivi.get(c.id) || {};
+      save(c.id, { statut:"envoye", note:cur.note || "" });
+    }
+    renderAll();
+  } catch (err) {
+    gen.set(c.id, { status:"publish-error", msg:friendlyErr(err, "L'écriture sur Drive a échoué."), text, title, parentId, bilanUsed, truncated });
+    renderList();
+  }
+}
+
+$("#list").addEventListener("click", e => {
+  const b = e.target.closest("button[data-act^='gen']"); if (!b) return;
+  const id = b.dataset.id;
+  const client = clients.find(x => x.id === id);
+  if (b.dataset.act === "gen") { if (client) doGenerate(client); }
+  else if (b.dataset.act === "gen-retry") { if (client) doGenerate(client); }
+  else if (b.dataset.act === "gen-publish") { if (client) doPublish(client); }
+  else if (b.dataset.act === "gen-close") {
+    const g = gen.get(id);
+    if (g && g.ctl) g.ctl.abort();
+    gen.delete(id);
+    renderList();
+  }
+});
+$("#list").addEventListener("change", e => {
+  const ta = e.target.closest("textarea[data-act='gen-edit']"); if (!ta) return;
+  const g = gen.get(ta.dataset.id);
+  if (g) g.text = ta.value;
+});
+
+
+// --- vues ---
+const views = document.querySelectorAll(".views button");
+views.forEach(b => b.addEventListener("click", () => {
+  const v = b.dataset.view;
+  views.forEach(x => x.setAttribute("aria-selected", String(x === b)));
+  document.getElementById("view-suivi").hidden = v !== "suivi";
+  document.getElementById("view-methode").hidden = v !== "methode";
+  document.getElementById("view-onboarding").hidden = v !== "onboarding";
+  document.getElementById("view-distanciel").hidden = v !== "distanciel";
+  document.getElementById("view-retours").hidden = v !== "retours";
+  if (v === "methode") renderBanks();
+  if (v === "distanciel" && !distancielLoaded) loadDistanciel();
+  if (v === "retours") renderRetours();
+}));
+
+// --- banques d'exercices ---
+const MATS = ["Élastique","Kettlebell / haltères","Barre","TRX","Poulie / machine"];
+let bankGroup = "all", bankMat = "all", bankQuery = "";
+let banksReady = false;
+const BANK_SHOW = 8;
+const bankShown = {}; // "<groupId>|<subIndex>" -> indices into e currently affichés
+function bankKey(gid, si){ return gid + "|" + si; }
+function ensureBankShown(gid, si, e){
+  const key = bankKey(gid, si);
+  if (!bankShown[key] || bankShown[key].some(i => i >= e.length)) {
+    bankShown[key] = e.map((_, i) => i).slice(0, BANK_SHOW);
+  }
+  return bankShown[key];
+}
+
+function renderBankFilters(){
+  document.getElementById("bankgroups").innerHTML =
+    [["all","Tous les groupes"]].concat(BANQUES.map(b => [b.id, b.nom]))
+      .map(([k,l]) => `<button type="button" class="pill" data-g="${k}" aria-pressed="${bankGroup===k}">${l}</button>`).join("");
+  document.getElementById("bankmats").innerHTML =
+    [["all","Tout matériel"]].concat(MATS.map(m => [m, m]))
+      .map(([k,l]) => `<button type="button" class="pill" data-m="${k}" aria-pressed="${bankMat===k}">${l}</button>`).join("");
+}
+
+function hl(txt, q){
+  if (!q) return esc(txt);
+  const i = norm(txt).indexOf(q);
+  if (i < 0) return esc(txt);
+  return esc(txt.slice(0,i)) + "<mark>" + esc(txt.slice(i, i+q.length)) + "</mark>" + esc(txt.slice(i+q.length));
+}
+
+function renderBanks(){
+  if (!banksReady) { renderBankFilters(); banksReady = true; }
+  let n = 0;
+  const cards = [];
+  BANQUES.forEach(b => {
+    if (bankGroup !== "all" && b.id !== bankGroup) return;
+    b.g.forEach((g, si) => {
+      if (bankMat !== "all" && g.m !== bankMat) return;
+      const header = `<header><span class="t">${esc(b.nom)}${g.m === "—" ? "" : " · " + esc(g.m)}</span><span class="d">${esc(g.d)}</span></header>`;
+      if (bankQuery) {
+        const exos = g.e.filter(e => norm(e).includes(bankQuery));
+        if (!exos.length) return;
+        n += exos.length;
+        cards.push(`<div class="bank">${header}<ul>${exos.map(e => `<li>${hl(e, bankQuery)}</li>`).join("")}</ul></div>`);
+        return;
+      }
+      n += g.e.length;
+      const shown = ensureBankShown(b.id, si, g.e);
+      const canSwap = g.e.length > shown.length;
+      const hiddenCount = g.e.length - shown.length;
+      const pills = shown.map((idx, pos) =>
+        `<li>${esc(g.e[idx])}${canSwap ? `<button type="button" class="swap" data-g="${b.id}" data-si="${si}" data-pos="${pos}" title="Remplacer par un autre exercice du même groupe musculaire">⇄</button>` : ""}</li>`
+      ).join("");
+      cards.push(`<div class="bank">${header}<ul>${pills}</ul>${hiddenCount > 0 ? `<p class="bankmore">+${hiddenCount} autre${hiddenCount > 1 ? "s" : ""} du même groupe — ⇄ pour varier</p>` : ""}</div>`);
+    });
+  });
+  document.getElementById("bankcount").innerHTML = `<b>${n}</b> exercice${n > 1 ? "s" : ""} dans la sélection`;
+  document.getElementById("bankgrid").innerHTML = cards.length ? cards.join("")
+    : `<p class="empty">Aucun exercice ne correspond à ces filtres.</p>`;
+}
+
+document.getElementById("bankgroups").addEventListener("click", e => {
+  const b = e.target.closest("button[data-g]"); if (!b) return;
+  bankGroup = b.dataset.g; renderBankFilters(); renderBanks();
+});
+document.getElementById("bankmats").addEventListener("click", e => {
+  const b = e.target.closest("button[data-m]"); if (!b) return;
+  bankMat = b.dataset.m; renderBankFilters(); renderBanks();
+});
+document.getElementById("bq").addEventListener("input", e => { bankQuery = norm(e.target.value.trim()); renderBanks(); });
+document.getElementById("bankgrid").addEventListener("click", e => {
+  const btn = e.target.closest("button.swap"); if (!btn) return;
+  const gid = btn.dataset.g, si = Number(btn.dataset.si), pos = Number(btn.dataset.pos);
+  const grp = BANQUES.find(x => x.id === gid);
+  const sub = grp && grp.g[si];
+  if (!sub) return;
+  const shown = bankShown[bankKey(gid, si)];
+  if (!shown) return;
+  const hidden = sub.e.map((_, i) => i).filter(i => !shown.includes(i));
+  if (!hidden.length) return;
+  shown[pos] = hidden[Math.floor(Math.random() * hidden.length)];
+  renderBanks();
+});
+
+// --- db: light up when available ---
+(async () => {
+  try {
+    const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+    if (!db) {
+      $("#foot").textContent = "Suivi « où j'en suis » indisponible dans cette vue — la page reste consultable.";
+      return;
+    }
+    store = db.collection("suivi/2026-10/clients");
+    store.onSnapshot(snap => {
+      suivi.clear();
+      snap.docs.forEach(d => { const v = d.data() || {}; suivi.set(d.id, { statut: v.statut, note: v.note }); });
+      renderList();
+    }, err => {
+      $("#foot").textContent = "Suivi interrompu (" + err.code + ") — recharge la page pour le réactiver.";
+    });
+    storeDistanciel = db.collection("suivi-distanciel/clients");
+    storeDistanciel.onSnapshot(snap => {
+      distancielSuivi.clear();
+      snap.docs.forEach(d => { const v = d.data() || {}; distancielSuivi.set(d.id, { statut: v.statut, note: v.note }); });
+      renderDistanciel();
+    }, () => { /* le suivi distanciel reste local si interrompu */ });
+    $("#foot").textContent = "Les états « où j'en suis » et les notes sont enregistrés sur cette page.";
+    renderList();
+  } catch (e) {
+    $("#foot").textContent = "Suivi « où j'en suis » indisponible dans cette vue — la page reste consultable.";
+  }
+})();
+
+// --- onboarding : nouveau client, dossier Drive + bilan initial ---
+const OB_DRIVE_PARENT_ID = "17XI8WIysv5g1sm7nZ0fa_A9JYiOvyCft"; // Séances Clients — Ultimate Physical Bordeaux
+
+const OB_POSTURE_ROWS = [
+  { key:"squat", label:"Squat" }, { key:"ohs", label:"OHS" }, { key:"lunge", label:"Incline Lunge" },
+  { key:"hurdle", label:"Hurdle step" }, { key:"epauleMobilite", label:"Mobilité épaule" }
+];
+const OB_TIME_ROWS = [
+  { key:"cervicales", label:"Cervicales Swiss ball", ref:"Min requis : 1'30" },
+  { key:"gainage", label:"Gainage planche avant-bras", ref:"Min requis : 1'30 (ok) / 3' (sportifs)" },
+  { key:"ghd", label:"GHD", ref:"Min requis : 1'40 (ok) / 3' (sportifs)" }
+];
+const OB_FORCE_ROWS = [
+  { key:"quad", label:"K-pull leg extension quad", note:"100% PDC (95% si +40 ans) — 5% d'écart max en unilatéral" },
+  { key:"ij", label:"K-pull leg curl 90° IJ", note:"50% PDC sédentaire / 60% sportif / 70% sport pivot ou contact" },
+  { key:"add", label:"K-pull adducteurs assis", note:"30% PDC" },
+  { key:"abd", label:"K-pull abducteurs assis", note:"30% PDC" }
+];
+const OB_SHOULDER_RATIOS = [
+  { key:"1", riKey:"epauleRI1", reKey:"epauleRE1", label:"Rotation 1 (RI1/RE1)", min:0.7 },
+  { key:"2", riKey:"epauleRI2", reKey:"epauleRE2", label:"Rotation 2 (RI2/RE2)", min:0.6 }
+];
+
+const OB_BILAN_PROMPT = `Tu rédiges des bilans d'évaluation physique initiale pour Ultimate Physical Bordeaux (UPB), avec le ton et le vocabulaire d'un kinésithérapeute / coach sportif professionnel s'adressant à un dossier client sérieux.
+Rédige un compte-rendu complet, en français, EXCLUSIVEMENT à partir des données fournies ci-dessous. N'invente aucune valeur, aucun antécédent, aucun résultat qui ne serait pas donné. Si une information est absente, n'aborde simplement pas ce point plutôt que de le deviner.
+Structure attendue, avec des titres de section :
+1) Présentation et objectifs
+2) Hygiène de vie (sommeil, travail, alimentation)
+3) Évaluation posturale et mobilité
+4) Tests de gainage et de force (mentionne explicitement si les normes sont atteintes ou non, les asymétries relevées, et les ratios épaule)
+5) Analyse par zone corporelle (membres inférieurs, tronc, membres supérieurs) — développe et professionnalise les notes brutes du coach sans en trahir le sens
+6) Conclusion et axes de travail prioritaires
+Ton : professionnel, factuel, bienveillant, en phrases complètes et fluides — surtout pas une liste brute de champs recopiés. C'est un document destiné au suivi clinique et sportif du client.
+--- DONNÉES DU BILAN ---
+`;
+
+let obClient = null;
+
+function obDefaultBilan(){
+  return {
+    connu:"", connuAutre:"", metier:"", sports:"", objectifs:"", antecedents:"",
+    sommeilAmplitude:"", sommeilQualite:"", amplitudeTravail:"", alimentation:"",
+    pdc:"", age40plus:false, profilActivite:"sedentaire",
+    posture:{ squat:"", ohs:"", lunge:"", hurdle:"", epauleMobilite:"" },
+    cervicales:{actual:"",comment:""}, gainage:{actual:"",comment:""}, ghd:{actual:"",comment:""},
+    quad:{l:"",r:""}, ij:{l:"",r:""}, add:{l:"",r:""}, abd:{l:"",r:""},
+    epauleRI1:{l:"",r:""}, epauleRE1:{l:"",r:""}, epauleRI2:{l:"",r:""}, epauleRE2:{l:"",r:""},
+    analyseMI:"", analyseTronc:"", analyseMS:"", conclusion:""
+  };
+}
+function obSetNested(obj, path, val){
+  const parts = path.split(".");
+  let cur = obj;
+  for (let i=0;i<parts.length-1;i++) cur = cur[parts[i]];
+  cur[parts[parts.length-1]] = val;
+}
+function obNum(v){ const n = parseFloat(String(v==null?"":v).replace(",", ".")); return isNaN(n) ? null : n; }
+
+function obFieldWrap(label, inputHtml){ return `<div class="ob-field"><label>${label}</label>${inputHtml}</div>`; }
+function obText(path,label,val){ return obFieldWrap(label, `<input type="text" class="ob-f" data-field="${path}" value="${esc(val||"")}">`); }
+function obTextarea(path,label,val){ return obFieldWrap(label, `<textarea class="ob-f" data-field="${path}">${esc(val||"")}</textarea>`); }
+function obSelect(path,label,options,val){ const opts = options.map(o => `<option value="${o}"${o===val?" selected":""}>${o===""?"—":o}</option>`).join(""); return obFieldWrap(label, `<select class="ob-f" data-field="${path}">${opts}</select>`); }
+function obInline(path,label,val){ return `<div class="ob-inline"><label>${label}</label><input type="text" class="ob-f" data-field="${path}" value="${esc(val||"")}"></div>`; }
+function obSelectInline(path,label,pairs,val){ const opts = pairs.map(p => `<option value="${p[0]}"${p[0]===val?" selected":""}>${p[1]}</option>`).join(""); return `<div class="ob-inline"><label>${label}</label><select class="ob-f" data-field="${path}">${opts}</select></div>`; }
+
+function renderObFields(){
+  if (!obClient) return;
+  const b = obClient.bilan;
+  let html = "";
+  html += obSelect("connu", "Comment as-tu connu le centre ?", ["", "Google", "Réseaux sociaux", "Recommandation", "Autre"], b.connu);
+  html += obText("connuAutre", 'Si "Autre", précise', b.connuAutre);
+  html += obText("metier", "Métier", b.metier);
+  html += obText("sports", "Sports pratiqués", b.sports);
+  html += obTextarea("objectifs", "Objectifs", b.objectifs);
+  html += obTextarea("antecedents", "Antécédents médicaux - Blessures - Douleurs", b.antecedents);
+  html += obText("sommeilAmplitude", "Analyse du sommeil (amplitude horaire)", b.sommeilAmplitude);
+  html += obText("sommeilQualite", "Qualité du sommeil (note 1-10)", b.sommeilQualite);
+  html += obText("amplitudeTravail", "Amplitude de travail", b.amplitudeTravail);
+  html += obTextarea("alimentation", "Habitudes alimentaires (journée type)", b.alimentation);
+
+  html += '<div class="ob-h3">Analyse posturale / mobilité</div>';
+  OB_POSTURE_ROWS.forEach(r => { html += obTextarea("posture." + r.key, r.label, b.posture[r.key]); });
+
+  html += '<div class="ob-h3">Tests de gainage</div>';
+  OB_TIME_ROWS.forEach(r => {
+    html += `<div class="ob-row"><span class="ob-row-title">${r.label} — ${r.ref}</span>`;
+    html += obInline(r.key + ".actual", "Résultat", b[r.key].actual);
+    html += obInline(r.key + ".comment", "Commentaire", b[r.key].comment);
+    html += "</div>";
+  });
+
+  html += '<div class="ob-h3">Tests de force (K-pull)</div>';
+  html += '<div class="ob-row">';
+  html += obInline("pdc", "Poids de corps — PDC (kg)", b.pdc);
+  html += `<div class="ob-inline"><label>Âge</label><label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:normal;"><input type="checkbox" class="ob-f" data-field="age40plus"${b.age40plus ? " checked" : ""}> 40 ans ou +</label></div>`;
+  html += obSelectInline("profilActivite", "Profil (pour IJ)", [["sedentaire", "Sédentaire (50%)"], ["sportif", "Sportif (60%)"], ["pivot", "Pivot/contact (70%)"]], b.profilActivite);
+  html += "</div>";
+
+  OB_FORCE_ROWS.forEach(r => {
+    html += `<div class="ob-row"><span class="ob-row-title">${r.label} — ${r.note}</span>`;
+    html += obInline(r.key + ".l", "Gauche (kg)", b[r.key].l);
+    html += obInline(r.key + ".r", "Droite (kg)", b[r.key].r);
+    html += "</div>";
+  });
+
+  html += '<div class="ob-h3">Épaule — ratios RE/RI</div>';
+  OB_SHOULDER_RATIOS.forEach(sr => {
+    html += `<div class="ob-row"><span class="ob-row-title">${sr.label} — min requis ${sr.min}</span>`;
+    html += obInline(sr.riKey + ".l", "RI gauche", b[sr.riKey].l);
+    html += obInline(sr.reKey + ".l", "RE gauche", b[sr.reKey].l);
+    html += obInline(sr.riKey + ".r", "RI droite", b[sr.riKey].r);
+    html += obInline(sr.reKey + ".r", "RE droite", b[sr.reKey].r);
+    html += "</div>";
+  });
+
+  html += '<div class="ob-h3">Notes brutes du coach</div>';
+  html += obTextarea("analyseMI", "Membres inférieurs", b.analyseMI);
+  html += obTextarea("analyseTronc", "Tronc", b.analyseTronc);
+  html += obTextarea("analyseMS", "Membres supérieurs", b.analyseMS);
+  html += obTextarea("conclusion", "Conclusion générale", b.conclusion);
+
+  document.getElementById("ob-fields").innerHTML = html;
+  document.querySelectorAll("#ob-fields .ob-f").forEach(el => {
+    const evt = (el.tagName === "SELECT" || el.type === "checkbox") ? "change" : "input";
+    el.addEventListener(evt, () => {
+      const path = el.getAttribute("data-field");
+      const val = el.type === "checkbox" ? el.checked : el.value;
+      obSetNested(obClient.bilan, path, val);
+    });
+  });
+}
+
+function assembleObRawData(){
+  const b = obClient.bilan;
+  const pdc = obNum(b.pdc);
+  const lines = [];
+  lines.push("Client : " + obClient.name);
+  lines.push("Comment connu le centre : " + (b.connu || "") + (b.connuAutre ? " (" + b.connuAutre + ")" : ""));
+  lines.push("Métier : " + (b.metier || ""));
+  lines.push("Sports pratiqués : " + (b.sports || ""));
+  lines.push("Objectifs : " + (b.objectifs || ""));
+  lines.push("Antécédents médicaux / blessures / douleurs : " + (b.antecedents || ""));
+  lines.push("Sommeil - amplitude horaire : " + (b.sommeilAmplitude || ""));
+  lines.push("Sommeil - qualité (1-10) : " + (b.sommeilQualite || ""));
+  lines.push("Amplitude de travail : " + (b.amplitudeTravail || ""));
+  lines.push("Alimentation - journée type : " + (b.alimentation || ""));
+  lines.push("");
+  lines.push("Analyse posturale / mobilité :");
+  OB_POSTURE_ROWS.forEach(r => { if (b.posture[r.key]) lines.push("- " + r.label + " : " + b.posture[r.key]); });
+  lines.push("");
+  lines.push("Tests de gainage :");
+  OB_TIME_ROWS.forEach(r => { if (b[r.key].actual || b[r.key].comment) lines.push("- " + r.label + " (" + r.ref + ") : résultat " + (b[r.key].actual || "non renseigné") + (b[r.key].comment ? ", " + b[r.key].comment : "")); });
+  lines.push("");
+  lines.push("Tests de force K-pull — PDC = " + (b.pdc || "non renseigné") + " kg" + (b.age40plus ? " (40 ans ou +)" : "") + ", profil activité : " + b.profilActivite + " :");
+  OB_FORCE_ROWS.forEach(r => {
+    const l = obNum(b[r.key].l), rr = obNum(b[r.key].r);
+    if (l === null && rr === null) return;
+    const normPct = r.key === "quad" ? (b.age40plus ? 0.95 : 1.0) : (r.key === "ij" ? (b.profilActivite === "sportif" ? 0.6 : (b.profilActivite === "pivot" ? 0.7 : 0.5)) : 0.30);
+    const norm = pdc !== null ? (pdc * normPct).toFixed(1) : "?";
+    lines.push("- " + r.label + " : gauche " + (l !== null ? l + "kg" : "?") + ", droite " + (rr !== null ? rr + "kg" : "?") + " (norme attendue : " + norm + "kg par côté)");
+  });
+  lines.push("");
+  lines.push("Ratios épaule RE/RI :");
+  OB_SHOULDER_RATIOS.forEach(sr => {
+    const riL = obNum(b[sr.riKey].l), reL = obNum(b[sr.reKey].l), riR = obNum(b[sr.riKey].r), reR = obNum(b[sr.reKey].r);
+    if (riL === null && riR === null) return;
+    const rL = (riL && reL) ? (reL / riL).toFixed(2) : "?";
+    const rR = (riR && reR) ? (reR / riR).toFixed(2) : "?";
+    lines.push("- " + sr.label + " (min requis " + sr.min + ") : gauche " + rL + ", droite " + rR);
+  });
+  lines.push("");
+  lines.push("Notes brutes du coach :");
+  if (b.analyseMI) lines.push("- Membres inférieurs : " + b.analyseMI);
+  if (b.analyseTronc) lines.push("- Tronc : " + b.analyseTronc);
+  if (b.analyseMS) lines.push("- Membres supérieurs : " + b.analyseMS);
+  if (b.conclusion) lines.push("- Conclusion : " + b.conclusion);
+  return lines.join("\n");
+}
+
+function obTextToHtml(text){
+  const paras = text.split(/\n\s*\n/);
+  return paras.map(p => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>").join("");
+}
+
+function obSlug(name){
+  return norm(name).replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+document.getElementById("ob-create-folder").addEventListener("click", async () => {
+  const btn = document.getElementById("ob-create-folder");
+  const status = document.getElementById("ob-folder-status");
+  const name = document.getElementById("ob-name").value.trim();
+  const freq = Math.max(1, Math.min(7, parseInt(document.getElementById("ob-freq").value, 10) || 2));
+  if (!name) { status.innerHTML = '<p class="gp-err">Indique un nom de client.</p>'; return; }
+  if (!mcpNS) { status.innerHTML = '<p class="gp-err">Google Drive n\'est pas connecté sur cette page.</p>'; return; }
+  const id = obSlug(name);
+  if (clients.some(c => c.id === id)) { status.innerHTML = `<p class="gp-err">${esc(name)} est déjà dans le suivi des blocs.</p>`; return; }
+  btn.disabled = true;
+  status.innerHTML = '<p class="gp-msg"><span class="gp-spin" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>Création du dossier…</p>';
+  try {
+    const folderResult = await mcpNS.callTool("Google Drive", "create_file", {
+      title: name, parentId: OB_DRIVE_PARENT_ID, contentMimeType: "application/vnd.google-apps.folder"
+    });
+    const folderPayload = folderResult && folderResult.payload;
+    if (!folderPayload || !folderPayload.id) throw { code:"tool_error", message:"identifiant du dossier manquant" };
+
+    status.innerHTML = '<p class="gp-msg"><span class="gp-spin" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>Création de l\'historique…</p>';
+    const histoResult = await mcpNS.callTool("Google Drive", "create_file", {
+      title: "Historique séances - " + name,
+      parentId: folderPayload.id,
+      contentMimeType: "text/html",
+      textContent: "<p>Historique des séances de " + esc(name) + " — nouveau client, aucune séance réalisée pour le moment.</p>"
+    });
+    const histoPayload = histoResult && histoResult.payload;
+    if (!histoPayload || !histoPayload.id) throw { code:"tool_error", message:"identifiant de l'historique manquant" };
+
+    obClient = { name, folderId: folderPayload.id, folderUrl: folderPayload.viewUrl, bilan: obDefaultBilan() };
+
+    const newClient = { nom: name, freq, histo: histoPayload.id, mois: null, doc: null, date: null, id };
+    newClient.etat = etat(newClient);
+    newClient.search = norm(newClient.nom);
+    clients.push(newClient);
+    TOTAL = clients.length;
+    recomputeCounts();
+    renderAll();
+
+    status.innerHTML = `<p class="gp-done">📁 Dossier + historique créés pour <b>${esc(name)}</b> — <a href="${folderPayload.viewUrl}" target="_blank" rel="noopener">ouvrir le dossier</a>. Ajouté·e dans « Suivi des blocs ».</p>`;
+    document.getElementById("ob-bilan-name").textContent = name;
+    document.getElementById("ob-bilan-wrap").hidden = false;
+    document.getElementById("ob-output-wrap").hidden = true;
+    document.getElementById("ob-output").value = "";
+    document.getElementById("ob-status").textContent = "";
+    renderObFields();
+  } catch (err) {
+    status.innerHTML = `<p class="gp-err">${esc(friendlyErr(err, "La création du dossier ou de l'historique a échoué."))}</p>`;
+  }
+  btn.disabled = false;
+});
+
+document.getElementById("ob-write-btn").addEventListener("click", async () => {
+  const btn = document.getElementById("ob-write-btn");
+  const status = document.getElementById("ob-status");
+  const outputWrap = document.getElementById("ob-output-wrap");
+  const output = document.getElementById("ob-output");
+  if (!obClient) return;
+  if (!sampleFn) { status.textContent = "Rédaction indisponible dans cette vue."; return; }
+  btn.disabled = true;
+  status.textContent = "Rédaction du bilan en cours…";
+  try {
+    const prompt = OB_BILAN_PROMPT + assembleObRawData();
+    const result = await sampleFn(prompt, { onText: (evt) => { output.value = evt.text; outputWrap.hidden = false; } });
+    output.value = result.text;
+    outputWrap.hidden = false;
+    status.textContent = result.truncated ? "Rédigé (tronqué — vérifie la fin)." : "Bilan rédigé.";
+  } catch (err) {
+    status.textContent = friendlyErr(err, "Erreur pendant la rédaction. Réessaie.");
+  }
+  btn.disabled = false;
+});
+
+document.getElementById("ob-doc-btn").addEventListener("click", async () => {
+  const btn = document.getElementById("ob-doc-btn");
+  const status = document.getElementById("ob-status");
+  const output = document.getElementById("ob-output");
+  if (!obClient) return;
+  if (!mcpNS) { status.textContent = "Accès Drive indisponible."; return; }
+  if (!output.value.trim()) { status.textContent = "Rédige d'abord le bilan avant de créer le Doc."; return; }
+  btn.disabled = true;
+  status.textContent = "Création du Doc en cours…";
+  try {
+    const result = await mcpNS.callTool("Google Drive", "create_file", {
+      title: "Bilan initial - " + obClient.name,
+      parentId: obClient.folderId,
+      contentMimeType: "text/html",
+      textContent: obTextToHtml(output.value)
+    });
+    const payload = result && result.payload;
+    if (payload && payload.viewUrl) status.innerHTML = `✅ Doc créé dans le dossier client : <a href="${payload.viewUrl}" target="_blank" rel="noopener">l'ouvrir</a>`;
+    else status.textContent = "Le Doc n'a pas pu être créé.";
+  } catch (err) {
+    status.textContent = friendlyErr(err, "Erreur pendant la création du Doc.");
+  }
+  btn.disabled = false;
+});
+
+document.getElementById("ob-copy-btn").addEventListener("click", () => {
+  const out = document.getElementById("ob-output");
+  out.select();
+  try { navigator.clipboard.writeText(out.value); } catch (e) { document.execCommand && document.execCommand("copy"); }
+});
+
+// --- suivi distanciel : liste les programmes du dossier Drive « Suivi distanciel » ---
+const DISTANCIEL_FOLDER_ID = "1PN2j8QNYdoWjUm-IS4-XVcJUrVntNY0k";
+const DISTANCIEL_TITLE_PREFIX = /^programme distanciel\s*-\s*/i;
+const distGen = new Map(); // id -> {status, text, msg, ctl, bilanUsed, truncated, isNew}
+
+const METHODO_DISTANCIEL = `Tu es un coach sportif expert (méthode "PEDRO") qui rédige un PROGRAMME DISTANCIEL complet pour un·e client·e de la salle Ultimate Physical Bordeaux qui s'entraîne à distance, à partir de son bilan d'entrée et de son historique de séances réalisées au centre.
+
+PRIORITÉ ABSOLUE — DOULEURS : avant tout constat de performance ou de déficit de force, identifie et priorise toute douleur ou gêne mentionnée dans les commentaires de séances de l'historique (y compris ce qui a pu être surligné/écrit en rouge dans le document d'origine — le texte brut ne conserve pas la couleur, donc base-toi sur toute mention explicite de douleur, gêne, "mal à…", "sensible", note sur 10, etc.). Ces points de douleur passent en tête du tableau de vigilance et dictent les adaptations du programme (protocole douleur ci-dessous).
+
+FORMAT HTML EXACT DU DOCUMENT ATTENDU (dans cet ordre) :
+1. Un tableau 2 colonnes d'en-tête : <table><tr><td></td><td>PROGRAMME DISTANCIEL<br>[Nom du client]</td></tr></table>
+2. Un tableau pleine largeur avec une seule cellule résumant : objectif principal, durée (nombre de semaines) et nombre de séances, split (ex. Full body / Upper-Lower), et la phrase "Programme construit à partir du bilan d'entrée et des séances réalisées au centre."
+3. <h2>Comment utiliser ce programme</h2> suivi d'un tableau à puces reprenant TOUJOURS ces 4 points, adaptés aux exercices/douleurs réels du client : Échauffement (toujours réaliser le bloc A1 avant B1), Notation (légende des abréviations utilisées), Douleur (zones sensibles identifiées — arrêter l'exercice concerné, ne pas pousser à travers la douleur), Charges (repères de départ à ajuster, garder 2-3 répétitions de marge).
+4. <h2>Repères du bilan — points de vigilance</h2> suivi d'un tableau 2 colonnes ("Constat du bilan" / "Réponse dans le programme"). Les douleurs identifiées (voir PRIORITÉ ABSOLUE ci-dessus) occupent TOUJOURS les premières lignes du tableau, avant les constats de déficit de force, d'asymétrie ou de mobilité.
+5. <h2>Légende des abréviations</h2> suivi d'un tableau 2 colonnes (Abréviation / Signification) — uniquement les abréviations réellement utilisées dans le programme.
+6. Pour chaque semaine (4 à 6 semaines selon la progression du bilan) : <h2>Semaine N — [reprise / progression / pic / deload]</h2> puis pour chaque séance de la semaine, un tableau pleine largeur avec une cellule "S[n] — [SPLIT]" puis un tableau 2 colonnes <tr><th>Bloc</th><th>Commentaire</th></tr> avec une ligne par bloc (A1 activation, B1, B2, B3, Finisher). La cellule "Commentaire" est TOUJOURS VIDE, réservée aux retours du client.
+
+PROGRESSION ET SÉLECTION DES EXERCICES : mêmes règles que la génération mensuelle — 3 filtres (sécurité douleur > pertinence objectif > matériel disponible), protocole douleur à 3 paliers (0-3 normal, 4-6 adapter, >6 retirer + réserve avis médical explicite), progression sur charges réellement faites, périodisation sur la durée totale du programme (reprise → progression → pic → deload/test final).
+
+NOTATION dans les cellules : "Bloc (XT) : Exercice @charge xREPS / Exercice …" — mêmes conventions que d'habitude (@ = charge, x = répétitions, '' = secondes, /c = par côté, T = tours, db = dumbbell, kb = kettlebell, PDC = poids de corps).
+
+Réponds UNIQUEMENT avec le HTML du corps du document décrit ci-dessus, sans balise <style>, sans <html>/<head>/<body>, sans markdown, sans aucun commentaire avant ou après. La mise en forme (police, taille) est appliquée séparément — ne mets pas d'attributs de style toi-même.`;
+
+function distancielNameFromTitle(title){
+  return (title || "").replace(DISTANCIEL_TITLE_PREFIX, "").trim();
+}
+
+function buildDistPrompt(c, histoText, bilanText, freq, truncated){
+  return METHODO_DISTANCIEL
+    + "\n\nBANQUES D'EXERCICES DISPONIBLES (JSON — nom du groupe, puis sous-groupes matériel/dominante/exercices) :\n" + BANQUES_TXT
+    + "\n\nCLIENT·E : " + c.nom + " — fréquence habituelle en centre : " + (freq || "?") + "×/semaine."
+    + "\n\nHISTORIQUE DES SÉANCES AU CENTRE (document Drive) :\n" + histoText
+    + (bilanText ? "\n\nBILAN (document Drive) :\n" + bilanText : "\n\n(Aucun bilan trouvé dans le dossier du client — base-toi uniquement sur l'historique.)")
+    + "\n\nRédige le programme distanciel complet pour ce·tte client·e, en respectant strictement le format demandé ci-dessus."
+    + (truncated ? "\n\n(Note : l'historique fourni ci-dessus a été tronqué pour tenir dans la limite — base-toi sur les séances les plus récentes qu'il contient.)" : "");
+}
+
+async function distDoGenerate(c){
+  const ctl = new AbortController();
+  distGen.set(c.id, { status:"loading", step:"recherche du client au centre", ctl });
+  renderDistanciel();
+  try {
+    const rosterClient = clients.find(x => x.search === norm(c.nom));
+    if (!rosterClient) throw { code:"tool_error", message:"Aucun client « " + c.nom + " » trouvé dans le dossier « Séances Clients » — impossible de récupérer son historique. Vérifie l'orthographe du nom, ou onboarde-le d'abord." };
+
+    distGen.set(c.id, { status:"loading", step:"métadonnées", ctl }); renderDistanciel();
+    const meta = await mcpNS.callTool("Google Drive", "get_file_metadata", { fileId: rosterClient.histo, excludeContentSnippets:true }, { signal:ctl.signal });
+    const parentId = meta.payload && meta.payload.parentId;
+    if (!parentId) throw { code:"tool_error", message:"dossier introuvable" };
+
+    distGen.set(c.id, { status:"loading", step:"recherche du bilan", ctl }); renderDistanciel();
+    let bilanFile = null;
+    try {
+      const found = await mcpNS.callTool("Google Drive", "search_files", { query:"parentId = '" + parentId + "'", excludeContentSnippets:true }, { signal:ctl.signal });
+      const files = (found.payload && found.payload.files) || [];
+      bilanFile = files.find(f => f.id !== rosterClient.histo && /bilan/i.test(f.title || "")) || null;
+    } catch (e) { /* pas de bilan trouvable, on continue sans */ }
+
+    distGen.set(c.id, { status:"loading", step:"lecture de l'historique", ctl }); renderDistanciel();
+    const histoRes = await mcpNS.callTool("Google Drive", "read_file_content", { fileId: rosterClient.histo }, { signal:ctl.signal });
+    let histoText = (histoRes.payload && histoRes.payload.fileContent) || "";
+    let truncated = false;
+    const histoCapped = capBytes(histoText, 24000);
+    if (histoCapped !== histoText) truncated = true;
+    histoText = histoCapped;
+
+    let bilanText = "";
+    if (bilanFile) {
+      distGen.set(c.id, { status:"loading", step:"lecture du bilan", ctl }); renderDistanciel();
+      try {
+        const bilanRes = await mcpNS.callTool("Google Drive", "read_file_content", { fileId: bilanFile.id }, { signal:ctl.signal });
+        bilanText = capBytes((bilanRes.payload && bilanRes.payload.fileContent) || "", 8000);
+      } catch (e) { bilanText = ""; }
+    }
+
+    distGen.set(c.id, { status:"loading", step:"rédaction du programme", ctl }); renderDistanciel();
+    let prompt = buildDistPrompt(rosterClient, histoText, bilanText, rosterClient.freq, truncated);
+    if (new TextEncoder().encode(prompt).length > 60000) {
+      histoText = capBytes(histoText, 14000);
+      bilanText = capBytes(bilanText, 5000);
+      truncated = true;
+      prompt = buildDistPrompt(rosterClient, histoText, bilanText, rosterClient.freq, truncated);
+    }
+
+    const result = await sampleFn(prompt, { modelTier:"complex", cache:false, signal:ctl.signal });
+    const title = "Programme Distanciel - " + c.nom;
+    distGen.set(c.id, { status:"draft", text:result.text.trim(), title, bilanUsed:!!bilanFile, truncated, isNew:!c.docId, ctl:null });
+    renderDistanciel();
+  } catch (err) {
+    if (err && err.code === "cancelled") { distGen.delete(c.id); renderDistanciel(); return; }
+    distGen.set(c.id, { status:"error", msg:friendlyErr(err, "La lecture du dossier Drive ou la génération a échoué."), ctl:null });
+    renderDistanciel();
+  }
+}
+
+async function distDoPublish(c){
+  const g = distGen.get(c.id);
+  if (!g || (g.status !== "draft" && g.status !== "publish-error")) return;
+  const text = g.text, title = g.title, bilanUsed = g.bilanUsed, truncated = g.truncated;
+  distGen.set(c.id, { status:"publishing", text, title, bilanUsed, truncated });
+  renderDistanciel();
+  try {
+    const created = await mcpNS.callTool("Google Drive", "create_file", {
+      title, parentId: DISTANCIEL_FOLDER_ID, contentMimeType:"text/html", textContent: DOC_STYLE + text
+    });
+    const newId = created.payload && created.payload.id;
+    if (!newId) throw { code:"tool_error", message:"identifiant du document manquant" };
+    distGen.set(c.id, { status:"done", newId, title, viewUrl: created.payload.viewUrl });
+    await loadDistanciel();
+  } catch (err) {
+    distGen.set(c.id, { status:"publish-error", msg:friendlyErr(err, "L'écriture sur Drive a échoué."), text, title, bilanUsed, truncated });
+    renderDistanciel();
+  }
+}
+
+function distGenPanelHtml(c){
+  const g = distGen.get(c.id);
+  if (!g) return "";
+  let body = "";
+  if (g.status === "loading") {
+    body = `<div class="gp-msg"><span class="gp-spin" aria-hidden="true"></span> &nbsp;${g.step ? esc(g.step) : "Lecture"}…</div>`;
+  } else if (g.status === "error") {
+    body = `<div class="gp-err">${esc(g.msg)}</div>
+      <div class="gp-actions"><button type="button" data-act="dist-gen-retry" data-id="${c.id}">Réessayer</button></div>`;
+  } else if (g.status === "draft") {
+    body = `<div class="gp-draft"><textarea data-act="dist-gen-edit" data-id="${c.id}" spellcheck="false" aria-label="Brouillon du programme distanciel pour ${esc(c.nom)}">${esc(g.text)}</textarea></div>
+      <p class="gp-note">Brouillon généré par l'IA${g.bilanUsed ? ", historique + bilan" : " (aucun bilan trouvé dans le dossier)"}${g.truncated ? " — historique tronqué pour tenir dans la limite" : ""}. Relis avant de publier : rien n'est encore écrit sur Drive. La publication crée un NOUVEAU document (l'ancien programme, s'il existe, reste sur Drive).</p>
+      <div class="gp-actions">
+        <button type="button" class="primary" data-act="dist-gen-publish" data-id="${c.id}">Publier sur Drive</button>
+        <button type="button" data-act="dist-gen-retry" data-id="${c.id}">Régénérer</button>
+      </div>`;
+  } else if (g.status === "publishing") {
+    body = `<div class="gp-msg"><span class="gp-spin" aria-hidden="true"></span> &nbsp;Écriture du document sur Drive…</div>`;
+  } else if (g.status === "publish-error") {
+    body = `<div class="gp-err">${esc(g.msg)}</div>
+      <div class="gp-draft"><textarea data-act="dist-gen-edit" data-id="${c.id}" spellcheck="false">${esc(g.text)}</textarea></div>
+      <div class="gp-actions"><button type="button" class="primary" data-act="dist-gen-publish" data-id="${c.id}">Réessayer la publication</button></div>`;
+  } else if (g.status === "done") {
+    body = `<div class="gp-done">Document créé : <a href="${g.viewUrl}" target="_blank" rel="noopener">${esc(g.title)}</a>. La liste a été actualisée.</div>`;
+  }
+  return `<div class="genrow"><div class="genpanel">
+    <div class="gp-head"><span class="gp-title">Génération — programme distanciel</span>
+      <button type="button" class="gp-close" data-act="dist-gen-close" data-id="${c.id}" aria-label="Fermer">Fermer ✕</button></div>
+    ${body}
+  </div></div>`;
+}
+
+function distancielRowHtml(c){
+  const s = distancielSuivi.get(c.id) || {};
+  const genReady = mcpNS && sampleFn;
+  const statut = s.statut || "a_traiter";
+  const note = s.note || "";
+  const open = distOpenNotes.has(c.id);
+  const steps = STEPS.map(([k, lab]) =>
+    `<button type="button" data-etat="${k}" data-id="${c.id}" aria-pressed="${statut === k}">${esc(lab)}</button>`
+  ).join("");
+  const modif = c.modified ? fmtDate(c.modified.slice(0, 10)) : "—";
+  return `<div class="client">
+    <div class="crow">
+      <div class="who">
+        <div class="nm">${esc(c.nom)}</div>
+        <div class="meta"><a href="${c.viewUrl}" target="_blank" rel="noopener">Programme distanciel</a></div>
+      </div>
+      <span class="jours">${esc(modif)}</span>
+      <div class="suivi">
+        <div class="steps">${steps}</div>
+        <button type="button" class="noteb" data-act="notetoggle" data-id="${c.id}" data-has="${note ? "1" : "0"}" title="${note ? "Note : " + esc(note) : "Ajouter une note"}" aria-expanded="${open}">✎</button>
+        <button type="button" class="genb" data-act="dist-gen" data-id="${c.id}" ${genReady ? "" : "disabled"}
+                title="${genReady ? "Générer / régénérer ce programme via l'IA, à partir du bilan et de l'historique du client" : "Génération indisponible dans cette vue"}">Générer</button>
+      </div>
+    </div>
+    ${open ? `<div class="noterow"><input type="text" data-act="noteinput" data-id="${c.id}" placeholder="Note libre…" value="${esc(note)}"></div>` : ""}
+    ${distGenPanelHtml(c)}
+  </div>`;
+}
+
+function renderDistanciel(){
+  const listEl = document.getElementById("dist-list");
+  if (!distancielClients.length) {
+    listEl.innerHTML = '<div class="empty">Aucun programme trouvé dans le dossier « Suivi distanciel ».</div>';
+    return;
+  }
+  const sorted = distancielClients.slice().sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+  listEl.innerHTML = sorted.map(distancielRowHtml).join("");
+}
+
+async function loadDistanciel(){
+  const status = document.getElementById("dist-status");
+  if (!mcpNS) { status.innerHTML = '<p class="gp-err">Google Drive n\'est pas connecté sur cette page.</p>'; return; }
+  status.innerHTML = '<p class="gp-msg"><span class="gp-spin" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>Lecture du dossier « Suivi distanciel »…</p>';
+  try {
+    const found = await mcpNS.callTool("Google Drive", "search_files", { query: "parentId = '" + DISTANCIEL_FOLDER_ID + "'", excludeContentSnippets: true });
+    const files = (found.payload && found.payload.files) || [];
+    distancielClients = files
+      .filter(f => f.mimeType === "application/vnd.google-apps.document")
+      .map(f => ({
+        id: obSlug(distancielNameFromTitle(f.title)) || f.id,
+        nom: distancielNameFromTitle(f.title) || f.title,
+        docId: f.id,
+        viewUrl: f.viewUrl,
+        modified: f.modifiedTime
+      }));
+    distancielLoaded = true;
+    status.innerHTML = distancielClients.length
+      ? `<p class="gp-done">${distancielClients.length} programme(s) trouvé(s).</p>`
+      : '<p class="gp-msg">Dossier vide pour le moment.</p>';
+    renderDistanciel();
+  } catch (err) {
+    status.innerHTML = `<p class="gp-err">${esc(friendlyErr(err, "La lecture du dossier a échoué."))}</p>`;
+  }
+}
+
+const distOpenNotes = new Set();
+
+document.getElementById("dist-refresh").addEventListener("click", () => loadDistanciel());
+
+document.getElementById("dist-list").addEventListener("click", e => {
+  const genBtn = e.target.closest("button[data-act^='dist-gen']");
+  if (genBtn) {
+    const id = genBtn.dataset.id;
+    const c = distancielClients.find(x => x.id === id);
+    if (genBtn.dataset.act === "dist-gen" || genBtn.dataset.act === "dist-gen-retry") { if (c) distDoGenerate(c); }
+    else if (genBtn.dataset.act === "dist-gen-publish") { if (c) distDoPublish(c); }
+    else if (genBtn.dataset.act === "dist-gen-close") {
+      const g = distGen.get(id);
+      if (g && g.ctl) g.ctl.abort();
+      distGen.delete(id);
+      renderDistanciel();
+    }
+    return;
+  }
+  const etatBtn = e.target.closest("button[data-etat]");
+  if (etatBtn) {
+    const id = etatBtn.dataset.id;
+    const cur = distancielSuivi.get(id) || {};
+    distancielSaveDistanciel(id, { statut: etatBtn.dataset.etat, note: cur.note || "" });
+    return;
+  }
+  const noteBtn = e.target.closest("button[data-act='notetoggle']");
+  if (noteBtn) {
+    const id = noteBtn.dataset.id;
+    if (distOpenNotes.has(id)) distOpenNotes.delete(id); else distOpenNotes.add(id);
+    renderDistanciel();
+  }
+});
+document.getElementById("dist-list").addEventListener("change", e => {
+  const ta = e.target.closest("textarea[data-act='dist-gen-edit']");
+  if (ta) { const g = distGen.get(ta.dataset.id); if (g) g.text = ta.value; return; }
+  const input = e.target.closest("input[data-act='noteinput']");
+  if (!input) return;
+  const id = input.dataset.id;
+  const cur = distancielSuivi.get(id) || {};
+  distancielSaveDistanciel(id, { statut: cur.statut || "a_traiter", note: input.value.trim() });
+});
+
+function distancielSaveDistanciel(id, body){
+  if (!storeDistanciel) { distancielSuivi.set(id, body); renderDistanciel(); return; }
+  storeDistanciel.doc(id).set(body).catch(() => {});
+}
+
+// --- retours coach : rendu ---
+const RC_TAG = { alert:["t-alert","Aggravation"], warn:["t-warn","À surveiller"], ok:["t-ok","Progrès acté"] };
+
+function rcClient(id){ return id ? clients.find(x => x.id === id) : null; }
+
+function rcLinks(id){
+  const c = rcClient(id);
+  if (!c) return "";
+  const out = [`<a href="${docUrl(c.histo)}" target="_blank" rel="noopener">Historique</a>`];
+  if (c.doc) out.push(`<a href="${docUrl(c.doc)}" target="_blank" rel="noopener">Dernier bloc</a>`);
+  return out.join('<span class="sep">·</span>');
+}
+
+// Croisement des deux jeux de données : qui s'est entraîné sur la période
+// sans avoir encore de bloc d'octobre généré.
+function renderRcAGenerer(){
+  const manquants = RETOURS.detail
+    .map(d => ({ d, c: rcClient(d.id) }))
+    .filter(x => x.c && x.c.mois !== "Octobre" && x.c.mois !== "Septembre-Octobre");
+  const el = document.getElementById("rc-agenerer");
+  if (!manquants.length) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML =
+    `<h3>${manquants.length} clients se sont entraînés sans bloc d'octobre</h3>
+     <p>Ils ont au moins une séance enregistrée entre le 08 et le 16/09, mais la génération mensuelle
+        ne leur a pas encore produit de bloc d'octobre. Ce sont les plus urgents à générer : leurs
+        charges réelles de septembre sont fraîches et exploitables.</p>
+     <div class="rc-names">${manquants.map(x =>
+        `<span><a href="#" data-rcgen="${x.c.id}" title="Aller à ${esc(x.c.nom)} dans le suivi des blocs">${esc(x.c.nom)}</a></span>`
+     ).join("")}</div>`;
+}
+
+document.getElementById("rc-agenerer").addEventListener("click", e => {
+  const a = e.target.closest("a[data-rcgen]"); if (!a) return;
+  e.preventDefault();
+  const id = a.dataset.rcgen;
+  const b = [...document.querySelectorAll(".views button")].find(x => x.dataset.view === "suivi");
+  if (b) b.click();
+  filterEtat = "all"; filterFreq = 0;
+  const c = clients.find(x => x.id === id);
+  query = c ? c.search : "";
+  const q = $("#q"); if (q) q.value = c ? c.nom : "";
+  [...document.querySelectorAll("#freqseg button")].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.freq === "0")));
+  renderLegend(); renderList();
+  window.scrollTo({ top:0, behavior:"smooth" });
+});
+
+function renderRcPrio(){
+  document.getElementById("rc-prio").innerHTML = RETOURS.prio.map(p => {
+    const [tagCls, tagTxt] = RC_TAG[p.niveau];
+    const hors = p.horsFeuille ? `<span class="rc-tag t-info">Hors feuille</span>` : "";
+    return `<article class="rc-card n-${p.niveau}">
+      <div class="rc-ctop">
+        <span class="rc-nm">${esc(p.nom)}</span>
+        <span class="rc-dt">${esc(p.date)}</span>
+        <span class="rc-tag ${tagCls}">${tagTxt}</span>${hors}
+        <span class="rc-lk">${rcLinks(p.id)}</span>
+      </div>
+      <p class="rc-quote">${esc(p.constat)}</p>
+      <p class="rc-do">${esc(p.implique)}</p>
+    </article>`;
+  }).join("");
+}
+
+function renderRcEcheance(){
+  const e = RETOURS.echeance;
+  document.getElementById("rc-echeance").innerHTML =
+    `<h3>${esc(e.nom)} — ${esc(e.quoi)}</h3>
+     <span class="rc-cd">${esc(e.date)} · dans 4 semaines</span>
+     <p>${esc(e.texte)}</p>
+     <p style="margin-top:9px;"><span class="rc-lk" style="display:flex;gap:9px;font-size:11.5px;">${rcLinks(e.id)}</span></p>`;
+}
+
+let rcFilter = "all", rcQuery = "";
+
+function rcRowHtml(d){
+  const dates = d.seances.join(" · ");
+  const tags = [];
+  if (d.prio) tags.push(`<span class="rc-tag t-alert">Point d'attention</span>`);
+  if (d.nouveau) tags.push(`<span class="rc-tag t-ok">Nouveau</span>`);
+  if (d.anomalie) tags.push(`<span class="rc-tag t-warn">Bilan douteux</span>`);
+  if (d.horsFeuille) tags.push(`<span class="rc-tag t-info">Hors feuille</span>`);
+  const meta = d.meta ? ` <em style="font-style:normal;color:var(--ink-3);font-size:11.5px;">(${esc(d.meta)})</em>` : "";
+  const note = d.note ? esc(d.note) : "";
+  const renvoi = d.prio ? `<em>Détail dans les points d'attention ci-dessus.</em>` : "";
+  return `<div class="rc-row">
+    <div class="rc-who">
+      <div class="rc-nm">${esc(d.nom)}${meta}</div>
+      <div class="rc-sub"><span class="rc-dates">${esc(dates)}</span>${rcLinks(d.id)}</div>
+      ${tags.length ? `<div class="rc-sub" style="margin-top:5px;">${tags.join("")}</div>` : ""}
+    </div>
+    <div class="rc-note">${note}${note && renvoi ? " " : ""}${renvoi}</div>
+  </div>`;
+}
+
+function renderRcList(){
+  const rows = RETOURS.detail.filter(d => {
+    if (rcFilter === "prio" && !d.prio) return false;
+    if (rcFilter === "nouveau" && !d.nouveau) return false;
+    if (rcFilter === "anomalie" && !d.anomalie) return false;
+    if (!rcQuery) return true;
+    return norm(d.nom + " " + (d.note || "") + " " + d.seances.join(" ") + " " + (d.meta || "")).includes(rcQuery);
+  });
+  document.getElementById("rc-list").innerHTML = rows.length
+    ? rows.map(rcRowHtml).join("")
+    : `<p class="empty">Aucun retour ne correspond à ce filtre.</p>`;
+  document.getElementById("rc-sans").innerHTML =
+    "Vérifiés sans séance sur la période : " +
+    RETOURS.sansSeance.map(s => `${esc(s.nom)} (dernière séance le ${esc(s.derniere)})`).join(", ") + ".";
+}
+
+function renderRcAnos(){
+  document.getElementById("rc-anos").innerHTML = RETOURS.anomalies.map(a => {
+    const badge = a.gravite === "alert"
+      ? `<span class="rc-tag t-alert">Prioritaire</span>`
+      : `<span class="rc-tag t-warn">À vérifier</span>`;
+    return `<section class="rc-ano g-${a.gravite}">
+      <h3>${esc(a.titre)} ${badge}</h3>
+      ${a.chapeau ? `<p>${esc(a.chapeau)}</p>` : ""}
+      ${a.points ? `<ul>${a.points.map(p => `<li>${p}</li>`).join("")}</ul>` : ""}
+      ${a.liste ? `<div class="rc-names">${a.liste.map(n => `<span>${esc(n)}</span>`).join("")}</div>` : ""}
+      ${a.chute ? `<p class="rc-chute">${esc(a.chute)}</p>` : ""}
+    </section>`;
+  }).join("");
+}
+
+function renderRcFoot(){
+  document.getElementById("rc-chg").innerHTML = RETOURS.changements.map(c => `<li>${esc(c)}</li>`).join("");
+  document.getElementById("rc-nonouverts").innerHTML = RETOURS.perimetre.nonOuverts.map(n => `<span>${esc(n)}</span>`).join("");
+  document.getElementById("rc-horsfeuille").innerHTML = RETOURS.perimetre.horsFeuille.map(n => `<span>${esc(n)}</span>`).join("");
+}
+
+let rcReady = false;
+function renderRetours(){
+  if (rcReady) { renderRcList(); return; }
+  renderRcAGenerer(); renderRcPrio(); renderRcEcheance(); renderRcAnos(); renderRcFoot(); renderRcList();
+  rcReady = true;
+}
+
+document.getElementById("rc-seg").addEventListener("click", e => {
+  const b = e.target.closest("button[data-rcf]"); if (!b) return;
+  rcFilter = b.dataset.rcf;
+  [...e.currentTarget.querySelectorAll("button")].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  renderRcList();
+});
+document.getElementById("rc-q").addEventListener("input", e => { rcQuery = norm(e.target.value.trim()); renderRcList(); });
+
+function gotoRetours(){
+  const b = [...document.querySelectorAll(".views button")].find(x => x.dataset.view === "retours");
+  if (b) b.click();
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+$("#list").addEventListener("click", e => {
+  const f = e.target.closest("a.rc-flag"); if (!f) return;
+  e.preventDefault();
+  gotoRetours();
+});
+
+// --- mcp (Google Drive) + sample (IA) : light up le bouton « Générer » ---
+(async () => {
+  try { mcpNS = window.claude && window.claude.use ? await window.claude.use("mcp") : null; } catch (e) { mcpNS = null; }
+  try { sampleFn = window.claude && window.claude.use ? await window.claude.use("sample") : null; } catch (e) { sampleFn = null; }
+  renderList();
+})();
+</script>
+
+
+
+</body></html>
