@@ -91,6 +91,21 @@
   .jours { font-size:11px; color:var(--ink-3); }
   .jours.stale { color:var(--alert); font-weight:600; }
 
+  /* ---------- priorités du jour ---------- */
+  .prio-jour .band-head { margin-bottom:11px; }
+  .pj-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:18px; }
+  .pj-col h3 { margin:0 0 8px; font-size:12px; font-weight:700; color:var(--ink); }
+  .pj-chips { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:7px; }
+  .pj-chips a {
+    font-size:12px; font-weight:600; color:var(--accent); text-decoration:none;
+    background:var(--accent-soft); border-radius:7px; padding:4px 9px; transition:opacity .15s ease;
+  }
+  .pj-chips a:hover { opacity:.8; }
+  .pj-chips a:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .pj-more { font-size:11.5px; color:var(--ink-3); }
+  .pj-link { font-size:12px; font-weight:600; color:var(--accent); text-decoration:none; }
+  .pj-link:hover { text-decoration:underline; }
+
   /* ---------- controls ---------- */
   .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
   .seg { display:flex; gap:3px; padding:3px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; }
@@ -102,6 +117,7 @@
   .seg button:hover { color:var(--ink); }
   .seg button[aria-pressed="true"] { background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(34,26,12,.08), 0 3px 8px -2px rgba(34,26,12,.16); }
   .seg button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .segcount { font-family:"JetBrains Mono",monospace; font-size:10.5px; color:var(--ink-3); margin-left:4px; }
   .search {
     flex:1; min-width:170px;
     font:inherit; font-size:13px; color:var(--ink);
@@ -110,6 +126,18 @@
   }
   .search::placeholder { color:var(--ink-3); }
   .search:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent); }
+  .search-wrap { position:relative; }
+  .controls .search-wrap { flex:1; min-width:170px; }
+  .search-wrap .search { width:100%; padding-right:30px; }
+  .search-wrap .search::-webkit-search-cancel-button { -webkit-appearance:none; display:none; }
+  .search-clear {
+    position:absolute; right:5px; top:50%; transform:translateY(-50%);
+    appearance:none; border:none; background:none; cursor:pointer;
+    width:23px; height:23px; border-radius:6px; color:var(--ink-3); font-size:16px; line-height:1;
+    display:flex; align-items:center; justify-content:center; transition:background-color .15s ease, color .15s ease;
+  }
+  .search-clear:hover { color:var(--ink); background:var(--surface-2); }
+  .search-clear:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
 
   /* ---------- list ---------- */
   .listwrap { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); box-shadow:var(--shadow); overflow:hidden; }
@@ -124,6 +152,8 @@
   .client:hover { background:var(--surface-2); }
   .client.prio { box-shadow:inset 3px 0 0 var(--alert); }
   .client.late { box-shadow:inset 3px 0 0 var(--warn); }
+  .client.flash { animation:flashrow 1.1s ease-out; }
+  @keyframes flashrow { 0% { background:var(--accent-soft); } 100% { background:transparent; } }
   .crow { display:grid; grid-template-columns:1fr 128px 260px; gap:14px; align-items:center; padding:12px 20px; }
   .who { min-width:0; }
   .nm { font-weight:600; font-size:13.5px; letter-spacing:-.01em; }
@@ -175,7 +205,9 @@
     background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:7px 11px;
   }
   .noterow input:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; }
-  .empty { padding:28px 20px; text-align:center; color:var(--ink-2); font-size:13px; }
+  .empty { padding:32px 20px; text-align:center; border:1.5px dashed var(--line-2); border-radius:var(--r); background:var(--surface-2); }
+  .empty p { margin:0; color:var(--ink-2); font-size:13px; }
+  .empty .empty-sub { margin-top:5px; font-size:11.5px; color:var(--ink-3); }
 
   /* génération */
   .genb {
@@ -205,7 +237,7 @@
   .gp-msg { font-size:12px; color:var(--ink-2); line-height:1.5; }
   .gp-msg b { color:var(--ink); font-weight:600; }
   .gp-err { font-size:12px; color:var(--alert); line-height:1.5; background:var(--alert-bg); border:1px solid var(--alert-line); border-radius:8px; padding:9px 11px; }
-  .gp-note { font-size:11px; color:var(--ink-3); margin-top:7px; line-height:1.5; }
+  .gp-note { font-size:11.5px; color:var(--ink-3); margin-top:7px; line-height:1.5; }
   .gp-draft textarea {
     width:100%; min-height:220px; resize:vertical;
     font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11px; line-height:1.5; color:var(--ink);
@@ -402,7 +434,7 @@
   .rc-row:hover { background:var(--surface-2); }
   .rc-who { min-width:0; }
   .rc-who .rc-nm { font-size:13px; font-weight:600; letter-spacing:-.01em; }
-  .rc-who .rc-sub { margin-top:3px; display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; font-size:11px; color:var(--ink-2); }
+  .rc-who .rc-sub { margin-top:3px; display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; font-size:11.5px; color:var(--ink-2); }
   .rc-who .rc-sub a { color:var(--accent); text-decoration:none; font-weight:600; }
   .rc-who .rc-sub a:hover { text-decoration:underline; }
   .rc-dates { font-family:"JetBrains Mono",monospace; color:var(--ink-3); }
@@ -650,14 +682,22 @@
     <div class="legend" id="legend"></div>
   </section>
 
+  <section class="band prio-jour" id="priojour" hidden>
+    <div class="band-head"><h2>Priorités du jour</h2></div>
+    <div class="pj-grid" id="priojour-grid"></div>
+  </section>
+
   <div class="controls">
     <div class="seg" id="freqseg" role="group" aria-label="Filtrer par fréquence">
-      <button type="button" data-freq="0" aria-pressed="true">Toutes fréquences</button>
-      <button type="button" data-freq="1" aria-pressed="false">1×/sem</button>
-      <button type="button" data-freq="2" aria-pressed="false">2×/sem</button>
-      <button type="button" data-freq="3" aria-pressed="false">3×/sem</button>
+      <button type="button" data-freq="0" aria-pressed="true">Toutes fréquences <span class="segcount" id="fc-0"></span></button>
+      <button type="button" data-freq="1" aria-pressed="false">1×/sem <span class="segcount" id="fc-1"></span></button>
+      <button type="button" data-freq="2" aria-pressed="false">2×/sem <span class="segcount" id="fc-2"></span></button>
+      <button type="button" data-freq="3" aria-pressed="false">3×/sem <span class="segcount" id="fc-3"></span></button>
     </div>
-    <input class="search" id="q" type="search" placeholder="Chercher un client…" aria-label="Chercher un client">
+    <div class="search-wrap">
+      <input class="search" id="q" type="search" placeholder="Chercher un client…" aria-label="Chercher un client">
+      <button type="button" class="search-clear" data-for="q" aria-label="Effacer la recherche" hidden>&times;</button>
+    </div>
   </div>
 
   <div class="listwrap">
@@ -733,7 +773,10 @@
       <p class="lead">Base de sélection, classée par groupe musculaire, matériel et dominante biomécanique. Une variante créative cohérente avec une dominante listée reste recevable si la logique scientifique tient. Chaque exercice affiché peut être remplacé (⇄) par une variante du même groupe musculaire et de la même dominante.</p>
       <div class="bankbar" id="bankgroups" role="group" aria-label="Filtrer par groupe musculaire"></div>
       <div class="bankbar" id="bankmats" role="group" aria-label="Filtrer par matériel"></div>
-      <input class="search" id="bq" type="search" placeholder="Chercher un exercice…" aria-label="Chercher un exercice" style="margin-bottom:12px">
+      <div class="search-wrap" style="margin-bottom:12px">
+        <input class="search" id="bq" type="search" placeholder="Chercher un exercice…" aria-label="Chercher un exercice">
+        <button type="button" class="search-clear" data-for="bq" aria-label="Effacer la recherche" hidden>&times;</button>
+      </div>
       <p class="bankcount" id="bankcount"></p>
       <div class="bankgrid" id="bankgrid"></div>
     </section>
@@ -833,7 +876,10 @@
         <button type="button" data-rcf="nouveau" aria-pressed="false">Nouveaux clients</button>
         <button type="button" data-rcf="anomalie" aria-pressed="false">Bilan douteux</button>
       </div>
+      <div class="search-wrap">
       <input class="search" id="rc-q" type="search" placeholder="Chercher un client, un exercice, une charge…" aria-label="Chercher dans les retours">
+      <button type="button" class="search-clear" data-for="rc-q" aria-label="Effacer la recherche" hidden>&times;</button>
+    </div>
     </div>
     <div class="listwrap">
       <div class="colhead" style="grid-template-columns:235px 1fr;">
@@ -1180,7 +1226,7 @@ function renderList(){
       || a.nom.localeCompare(b.nom,"fr"));
   $("#list").innerHTML = rows.length
     ? rows.map(rowHtml).join("")
-    : `<p class="empty">Aucun client ne correspond à ce filtre.</p>`;
+    : `<div class="empty"><p>Aucun client ne correspond à ce filtre.</p><p class="empty-sub">Essaie d’élargir la recherche ou de changer de filtre.</p></div>`;
 }
 
 function renderHors(){
@@ -1189,7 +1235,41 @@ function renderHors(){
   ).join("");
 }
 
-function renderAll(){ renderLegend(); renderBar(); renderList(); }
+function flashRow(id){
+  const row = document.querySelector(`.client[data-row="${id}"]`);
+  if (!row) return;
+  row.classList.add("flash");
+  setTimeout(() => row.classList.remove("flash"), 1100);
+}
+
+function renderFreqCounts(){
+  const byFreq = { 1:0, 2:0, 3:0 };
+  clients.forEach(c => { byFreq[c.freq] = (byFreq[c.freq] || 0) + 1; });
+  const fc0 = document.getElementById("fc-0"); if (fc0) fc0.textContent = TOTAL;
+  [1,2,3].forEach(f => { const el = document.getElementById("fc-" + f); if (el) el.textContent = byFreq[f] || 0; });
+}
+
+function renderPrioJour(){
+  const el = document.getElementById("priojour");
+  const grid = document.getElementById("priojour-grid");
+  const alertClients = clients.filter(c => c.etat === "alert").sort((a,b) => a.nom.localeCompare(b.nom,"fr"));
+  const prioAlert = RETOURS.prio.filter(p => p.niveau === "alert");
+  if (!alertClients.length && !prioAlert.length) { el.hidden = true; return; }
+  el.hidden = false;
+  const SHOW = 8;
+  const genBlock = alertClients.length ? `<div class="pj-col">
+      <h3>${alertClients.length} client${alertClients.length > 1 ? "s" : ""} sans bloc récent</h3>
+      <div class="pj-chips">${alertClients.slice(0, SHOW).map(c => `<a href="#" data-pj-goto="${c.id}">${esc(c.nom)}</a>`).join("")}${alertClients.length > SHOW ? `<span class="pj-more">+${alertClients.length - SHOW}</span>` : ""}</div>
+    </div>` : "";
+  const prioBlock = prioAlert.length ? `<div class="pj-col">
+      <h3>${prioAlert.length} point${prioAlert.length > 1 ? "s" : ""} d'attention (douleur)</h3>
+      <div class="pj-chips">${prioAlert.slice(0, SHOW).map(p => `<a href="#" data-goto-retours="1">${esc(p.nom)}</a>`).join("")}</div>
+      <a class="pj-link" href="#" data-goto-retours="1">Voir les retours coach &rarr;</a>
+    </div>` : "";
+  grid.innerHTML = genBlock + prioBlock;
+}
+
+function renderAll(){ renderLegend(); renderBar(); renderList(); renderFreqCounts(); renderPrioJour(); }
 renderAll();
 renderHors();
 
@@ -1205,6 +1285,37 @@ $("#freqseg").addEventListener("click", e => {
   renderList();
 });
 $("#q").addEventListener("input", e => { query = norm(e.target.value.trim()); renderList(); });
+
+function wireSearchClear(inputId){
+  const input = document.getElementById(inputId);
+  const btn = document.querySelector(`.search-clear[data-for="${inputId}"]`);
+  if (!input || !btn) return;
+  const sync = () => { btn.hidden = !input.value; };
+  input.addEventListener("input", sync);
+  btn.addEventListener("click", () => {
+    input.value = "";
+    input.dispatchEvent(new Event("input", { bubbles:true }));
+    input.focus();
+  });
+  sync();
+}
+["q","bq","rc-q"].forEach(wireSearchClear);
+
+document.getElementById("priojour-grid").addEventListener("click", e => {
+  const gotoLink = e.target.closest("a[data-goto-retours]");
+  if (gotoLink) { e.preventDefault(); gotoRetours(); return; }
+  const a = e.target.closest("a[data-pj-goto]"); if (!a) return;
+  e.preventDefault();
+  const id = a.dataset.pjGoto;
+  filterEtat = "all"; filterFreq = 0; query = "";
+  const qEl = $("#q"); if (qEl) qEl.value = "";
+  [...document.querySelectorAll("#freqseg button")].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.freq === "0")));
+  renderLegend(); renderList();
+  requestAnimationFrame(() => {
+    const row = document.querySelector(`.client[data-row="${id}"]`);
+    if (row) { row.scrollIntoView({ behavior:"smooth", block:"center" }); flashRow(id); }
+  });
+});
 
 $("#list").addEventListener("click", e => {
   const b = e.target.closest("button[data-act]"); if (!b) return;
@@ -1231,8 +1342,11 @@ $("#list").addEventListener("change", e => {
 });
 
 function save(id, body){
+  const prev = suivi.get(id) || {};
+  const statutChanged = prev.statut !== body.statut;
   suivi.set(id, body);
   renderList();
+  if (statutChanged) flashRow(id);
   store.doc(id).set({ statut: body.statut, note: body.note, maj: new Date().toISOString() })
     .catch(err => { $("#foot").textContent = "Enregistrement impossible (" + (err && err.code || "erreur") + ") — les changements ne sont pas conservés."; });
 }
@@ -1410,6 +1524,7 @@ async function doPublish(c){
       save(c.id, { statut:"envoye", note:cur.note || "" });
     }
     renderAll();
+    flashRow(c.id);
   } catch (err) {
     gen.set(c.id, { status:"publish-error", msg:friendlyErr(err, "L'écriture sur Drive a échoué."), text, title, parentId, bilanUsed, truncated });
     renderList();
@@ -1511,7 +1626,7 @@ function renderBanks(){
   });
   document.getElementById("bankcount").innerHTML = `<b>${n}</b> exercice${n > 1 ? "s" : ""} dans la sélection`;
   document.getElementById("bankgrid").innerHTML = cards.length ? cards.join("")
-    : `<p class="empty">Aucun exercice ne correspond à ces filtres.</p>`;
+    : `<div class="empty"><p>Aucun exercice ne correspond à ces filtres.</p><p class="empty-sub">Change de groupe musculaire ou de matériel, ou efface la recherche.</p></div>`;
 }
 
 document.getElementById("bankgroups").addEventListener("click", e => {
@@ -2036,7 +2151,7 @@ function distancielRowHtml(c){
 function renderDistanciel(){
   const listEl = document.getElementById("dist-list");
   if (!distancielClients.length) {
-    listEl.innerHTML = '<div class="empty">Aucun programme trouvé dans le dossier « Suivi distanciel ».</div>';
+    listEl.innerHTML = '<div class="empty"><p>Aucun programme trouvé dans le dossier « Suivi distanciel ».</p><p class="empty-sub">Les programmes générés depuis le suivi des blocs apparaîtront ici.</p></div>';
     return;
   }
   const sorted = distancielClients.slice().sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
@@ -2222,7 +2337,7 @@ function renderRcList(){
   });
   document.getElementById("rc-list").innerHTML = rows.length
     ? rows.map(rcRowHtml).join("")
-    : `<p class="empty">Aucun retour ne correspond à ce filtre.</p>`;
+    : `<div class="empty"><p>Aucun retour ne correspond à ce filtre.</p><p class="empty-sub">Essaie un autre filtre ou une autre recherche.</p></div>`;
   document.getElementById("rc-sans").innerHTML =
     "Vérifiés sans séance sur la période : " +
     RETOURS.sansSeance.map(s => `${esc(s.nom)} (dernière séance le ${esc(s.derniere)})`).join(", ") + ".";
