@@ -719,14 +719,14 @@
   </header>
 
   <div class="views" role="tablist" aria-label="Vues">
-    <button type="button" role="tab" data-view="onboarding" aria-selected="false">Onboarding</button>
+    <button type="button" role="tab" data-view="onboarding" aria-selected="true">Onboarding</button>
     <button type="button" role="tab" data-view="methode" aria-selected="false">Méthode PEDRO</button>
-    <button type="button" role="tab" data-view="suivi" aria-selected="true">Suivi des blocs</button>
+    <button type="button" role="tab" data-view="suivi" aria-selected="false">Suivi des blocs</button>
     <button type="button" role="tab" data-view="distanciel" aria-selected="false">Suivi distanciel</button>
     <button type="button" role="tab" data-view="retours" aria-selected="false">Retours coach</button>
   </div>
 
-  <div id="view-suivi">
+  <div id="view-suivi" hidden>
   <section class="band">
     <div class="band-head">
       <h2>Avancement de la génération mensuelle</h2>
@@ -841,7 +841,7 @@
 
   </div>
 
-  <div id="view-onboarding" hidden>
+  <div id="view-onboarding">
     <section class="band">
       <div class="band-head">
         <h2>Nouveau client — bilan initial &amp; dossier Drive</h2>
