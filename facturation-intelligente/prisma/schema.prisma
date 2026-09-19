@@ -1,0 +1,215 @@
+// Schéma de données — Facturation Intelligente
+// SQLite par défaut : aucune base externe à installer pour démarrer.
+// Passer à PostgreSQL en production en changeant `provider` + `DATABASE_URL`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite ne supporte pas les enums natifs Prisma : les statuts et fréquences
+// sont stockés en String et validés côté application (voir lib/constants.ts).
+
+// Le compte = l'entreprise/l'indépendant qui émet les factures.
+model User {
+  id           String @id @default(cuid())
+  email        String @unique
+  passwordHash String
+  name         String // nom de la personne connectée
+
+  // Identité légale de l'émetteur (mentions obligatoires sur facture FR)
+  companyName  String  @default("")
+  legalForm    String  @default("") // EI, auto-entrepreneur, SASU, SARL...
+  siret        String  @default("") // 14 chiffres
+  rcsCity      String  @default("") // ville d'immatriculation RCS/RM
+  shareCapital String  @default("") // capital social, si société
+  vatNumber    String  @default("") // n° TVA intracommunautaire
+  vatExempt    Boolean @default(false) // franchise en base (art. 293 B CGI)
+
+  addressLine1 String @default("")
+  addressLine2 String @default("")
+  postalCode   String @default("")
+  city         String @default("")
+  country      String @default("France")
+
+  iban String @default("")
+  bic  String @default("")
+
+  // Politique de facturation par défaut, reprise sur chaque facture
+  invoicePrefix     String @default("FA")
+  nextInvoiceSeq    Int    @default(1) // prochain numéro dans l'année en cours
+  invoiceSeqYear    Int    @default(0) // année de la séquence en cours (0 = jamais initialisée)
+  paymentTermsDays  Int    @default(30)
+  latePenaltyRate   Float  @default(10) // taux de pénalité de retard annuel (%)
+  recoveryIndemnity Float  @default(40) // indemnité forfaitaire de recouvrement (€, min. légal 40€ en B2B)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clients            Client[]
+  products           Product[]
+  invoices           Invoice[]
+  recurringTemplates RecurringTemplate[]
+}
+
+model Client {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  isCompany Boolean @default(true)
+  siret     String  @default("")
+  vatNumber String  @default("")
+  email     String  @default("")
+  phone     String  @default("")
+
+  addressLine1 String @default("")
+  addressLine2 String @default("")
+  postalCode   String @default("")
+  city         String @default("")
+  country      String @default("France")
+
+  notes String @default("")
+
+  createdAt DateTime @updatedAt @default(now())
+
+  invoices           Invoice[]
+  recurringTemplates RecurringTemplate[]
+
+  @@index([userId])
+}
+
+model Product {
+  id          String @id @default(cuid())
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label       String
+  description String @default("")
+  unit        String @default("unité") // séance, heure, forfait...
+  unitPriceHT Float
+  vatRate     Float  @default(20)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Invoice {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId       String
+  client         Client   @relation(fields: [clientId], references: [id])
+  // Non renseignés tant que la facture est au statut DRAFT : la numérotation
+  // légale (continue, sans trou) n'est attribuée qu'au moment de l'émission.
+  number         String? // ex: FA-2026-0001, immuable une fois émise
+  sequenceNumber Int? // rang dans la séquence annuelle
+
+  issueDate   DateTime @default(now())
+  serviceDate DateTime @default(now()) // date de réalisation de la prestation
+  dueDate     DateTime
+
+  status String @default("DRAFT") // DRAFT | SENT | PARTIALLY_PAID | PAID | OVERDUE | CANCELLED
+
+  subtotalHT  Float @default(0)
+  vatTotal    Float @default(0)
+  totalTTC    Float @default(0)
+  amountPaid  Float @default(0)
+
+  // Mentions légales figées au moment de l'émission (ne doivent pas bouger
+  // rétroactivement si l'utilisateur change ses paramètres plus tard)
+  vatExempt         Boolean @default(false)
+  latePenaltyRate   Float   @default(10)
+  recoveryIndemnity Float   @default(40)
+
+  notes String @default("")
+
+  recurringTemplateId String?
+  recurringTemplate    RecurringTemplate? @relation(fields: [recurringTemplateId], references: [id])
+
+  sentAt DateTime?
+  paidAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items     InvoiceItem[]
+  payments  Payment[]
+  reminders Reminder[]
+
+  @@unique([userId, number])
+  @@index([userId, status])
+  @@index([clientId])
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  position    Int     @default(0)
+  description String
+  quantity    Float   @default(1)
+  unitPriceHT Float
+  vatRate     Float   @default(20)
+  totalHT     Float
+
+  @@index([invoiceId])
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  invoiceId String
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount    Float
+  date      DateTime @default(now())
+  method    String   @default("virement")
+  notes     String   @default("")
+
+  createdAt DateTime @default(now())
+
+  @@index([invoiceId])
+}
+
+// Modèle pour la génération automatique de factures (clients récurrents,
+// abonnements, forfaits mensuels de coaching, etc.)
+model RecurringTemplate {
+  id       String              @id @default(cuid())
+  userId   String
+  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId String
+  client   Client              @relation(fields: [clientId], references: [id])
+  label     String
+  frequency String @default("MONTHLY") // WEEKLY | MONTHLY | QUARTERLY | YEARLY
+
+  // Lignes de facturation stockées en JSON :
+  // [{ description, quantity, unitPriceHT, vatRate }]
+  itemsJson String
+
+  paymentTermsDays Int?
+  nextRunDate      DateTime
+  lastRunAt        DateTime?
+  active           Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+
+  invoices Invoice[]
+
+  @@index([userId, active])
+}
+
+// Historique des relances envoyées pour une facture (impayés)
+model Reminder {
+  id              String   @id @default(cuid())
+  invoiceId       String
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  level           Int // 1 = amicale, 2 = formelle, 3 = mise en demeure
+  sentAt          DateTime @default(now())
+  channel         String   @default("email")
+  messagePreview  String   @default("")
+
+  @@index([invoiceId])
+}
