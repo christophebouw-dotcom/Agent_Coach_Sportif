@@ -1018,6 +1018,13 @@
   <section class="band">
     <div class="band-head"><h2>Nouvelle facture</h2></div>
 
+    <div id="fac-tarifs" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+      <button type="button" class="pill" data-tarif="1-avec">1&times;/sem. avec engagt &mdash; 180&nbsp;&euro;</button>
+      <button type="button" class="pill" data-tarif="1-sans">1&times;/sem. sans engagt &mdash; 230&nbsp;&euro;</button>
+      <button type="button" class="pill" data-tarif="2-avec">2&times;/sem. avec engagt &mdash; 280&nbsp;&euro;</button>
+      <button type="button" class="pill" data-tarif="2-sans">2&times;/sem. sans engagt &mdash; 320&nbsp;&euro;</button>
+    </div>
+
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
       <div class="ob-inline" style="min-width:220px;flex:1;">
         <label>Client</label>
@@ -1048,6 +1055,11 @@
       <input id="fac-iban" type="text" placeholder="FR76 ...">
     </div>
 
+    <div class="ob-inline" style="max-width:320px;margin-top:16px;">
+      <label>Email du client (mémorisé par client)</label>
+      <input id="fac-email" type="email" placeholder="client@exemple.fr">
+    </div>
+
     <p style="margin-top:16px;font-size:12.5px;line-height:1.8;">
       Total TTC : <b id="fac-total-ttc" class="mono">0,00 €</b> &nbsp;·&nbsp;
       dont TVA : <b id="fac-total-tva" class="mono">0,00 €</b> &nbsp;·&nbsp;
@@ -1058,6 +1070,11 @@
       <button type="button" class="primary" id="fac-generate">Générer la facture</button>
     </div>
     <p id="fac-status" style="margin-top:8px;"></p>
+    <div id="fac-email-box" style="display:none;margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);">
+      <p style="margin:0 0 8px;font-weight:700;color:var(--ink);">Envoyer la facture au client</p>
+      <a id="fac-email-send" class="genb" style="text-decoration:none;display:inline-block;padding:8px 14px;" href="#">Ouvrir un email</a>
+      <p class="gp-note" style="margin:8px 0 0;">Ouvre ta messagerie avec le destinataire, l'objet et le message pré-remplis (lien de la facture inclus) — tu relis et tu envoies toi-même.</p>
+    </div>
     <p class="gp-note">Les prix ci-dessus sont TTC ; le montant HT et la TVA sont calculés automatiquement. Le numéro de facture s'incrémente tout seul à chaque génération — utilise le crayon une seule fois si tu dois reprendre une séquence déjà commencée ailleurs.</p>
   </section>
 
@@ -1759,6 +1776,9 @@ let FACTURES_FOLDER_ID = null;
 let facturesListLoaded = false;
 let facCounterNext = 1;
 let facCounterStore = null;
+const FAC_TARIFS = { 1:{ avec:180, sans:230 }, 2:{ avec:280, sans:320 } };
+const clientEmails = new Map(); // id -> email
+let clientEmailsStore = null;
 
 function renderFacClientOptions(){
   const sel = document.getElementById("fac-client");
@@ -1766,6 +1786,45 @@ function renderFacClientOptions(){
   sel.innerHTML = `<option value="">— Choisir un client —</option>` +
     clients.slice().sort((a, b) => a.nom.localeCompare(b.nom, "fr")).map(c => `<option value="${c.id}">${esc(c.nom)}</option>`).join("");
   if (cur) sel.value = cur;
+  const emailEl = document.getElementById("fac-email");
+  if (emailEl) emailEl.value = clientEmails.get(sel.value) || "";
+}
+
+document.getElementById("fac-client").addEventListener("change", () => {
+  const id = document.getElementById("fac-client").value;
+  document.getElementById("fac-email").value = clientEmails.get(id) || "";
+});
+document.getElementById("fac-email").addEventListener("blur", () => {
+  const id = document.getElementById("fac-client").value;
+  if (!id) return;
+  const email = document.getElementById("fac-email").value.trim();
+  clientEmails.set(id, email);
+  if (clientEmailsStore) clientEmailsStore.doc(id).set({ email }).catch(() => {});
+});
+
+document.getElementById("fac-tarifs").addEventListener("click", e => {
+  const b = e.target.closest("button[data-tarif]"); if (!b) return;
+  const [freq, variant] = b.dataset.tarif.split("-");
+  const t = FAC_TARIFS[freq];
+  facLines[0] = {
+    desc: "Coaching sportif – " + freq + (freq === "1" ? " séance" : " séances") + "/semaine",
+    qty: 1, puAvec: t.avec, puSans: t.sans, sansEngagement: variant === "sans"
+  };
+  renderFacLines();
+});
+
+function updateFacEmailBox(client, num, ttc, viewUrl){
+  const box = document.getElementById("fac-email-box");
+  const link = document.getElementById("fac-email-send");
+  const email = document.getElementById("fac-email").value.trim() || clientEmails.get(client.id) || "";
+  const subject = "Facture " + num + " – Ultimate Physical Bordeaux";
+  const body = "Bonjour " + client.nom + ",\n\n"
+    + "Voici votre facture " + num + " d'un montant de " + fmtEUR(ttc) + " TTC.\n\n"
+    + "Vous pouvez la consulter et la télécharger ici :\n" + viewUrl + "\n\n"
+    + "Merci de votre confiance,\nUltimate Physical Bordeaux";
+  link.href = "mailto:" + email + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+  link.textContent = email ? ("Ouvrir un email à " + email) : "Ouvrir un brouillon d'email (ajoute l'adresse du client ci-dessus)";
+  box.style.display = "block";
 }
 
 function facLinePu(l){ return l.sansEngagement ? l.puSans : l.puAvec; }
@@ -1957,6 +2016,8 @@ document.getElementById("fac-generate").addEventListener("click", async () => {
     const payload = created && created.payload;
     if (!payload || !payload.id) throw { code:"tool_error", message:"identifiant du document manquant" };
     status.innerHTML = `<span class="gp-done" style="display:block;">Facture créée : <a href="${payload.viewUrl || docUrl(payload.id)}" target="_blank" rel="noopener">${esc(title)}</a></span>`;
+    const ttcTotal = validLines.reduce((s, l) => s + l.qty * l.pu, 0);
+    updateFacEmailBox(client, num, ttcTotal, payload.viewUrl || docUrl(payload.id));
     facCounterNext += 1;
     refreshFacNumDisplay();
     if (facCounterStore) facCounterStore.doc("valeur").set({ next: facCounterNext }).catch(() => {});
@@ -2223,6 +2284,14 @@ document.getElementById("bankgrid").addEventListener("click", e => {
       if (v && typeof v.next === "number" && v.next > facCounterNext) facCounterNext = v.next;
       refreshFacNumDisplay();
     }, () => { /* la numérotation reste locale si interrompue */ });
+    clientEmailsStore = db.collection("clients-email");
+    clientEmailsStore.onSnapshot(snap => {
+      clientEmails.clear();
+      snap.docs.forEach(d => { const v = d.data() || {}; if (v.email) clientEmails.set(d.id, v.email); });
+      const sel = document.getElementById("fac-client");
+      const emailEl = document.getElementById("fac-email");
+      if (sel && emailEl && document.activeElement !== emailEl) emailEl.value = clientEmails.get(sel.value) || "";
+    }, () => { /* les emails clients restent locaux si interrompus */ });
     tachesWeekKey = tacheWeekKey();
     tachesStore = db.collection("taches-hebdo/" + tachesWeekKey + "/items");
     tachesStore.onSnapshot(snap => {
