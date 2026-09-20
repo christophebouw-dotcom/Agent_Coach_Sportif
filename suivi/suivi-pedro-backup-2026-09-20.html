@@ -322,6 +322,27 @@
   .ob-inline input, .ob-inline select { padding:7px 9px; border-radius:7px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font-size:12px; font:inherit; }
   .ob-h3 { font-size:12px; font-weight:700; margin:18px 0 8px; color:var(--ink); }
 
+  /* ---------- facturation ---------- */
+  .fac-row { display:grid; grid-template-columns:1fr 64px 96px 96px 28px; gap:8px; align-items:center; margin-bottom:7px; }
+  .fac-row input {
+    width:100%; font:inherit; font-size:12.5px; color:var(--ink);
+    background:var(--surface-2); border:1px solid var(--line); border-radius:7px; padding:7px 9px;
+  }
+  .fac-row input:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; }
+  .fac-linetotal { font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-2); text-align:right; }
+  .fac-rm {
+    appearance:none; border:none; background:none; cursor:pointer; color:var(--ink-3); font-size:16px; line-height:1;
+    width:26px; height:26px; border-radius:6px; transition:background-color .15s ease, color .15s ease;
+  }
+  .fac-rm:hover { color:var(--alert); background:var(--alert-bg); }
+  .fac-rm:disabled { opacity:.35; cursor:default; }
+  .fac-rm:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  #fac-num, #fac-date, #fac-tva, #fac-iban {
+    width:100%; font:inherit; font-size:12.5px; color:var(--ink);
+    background:var(--surface-2); border:1px solid var(--line); border-radius:7px; padding:8px 10px;
+  }
+  @media (max-width:760px) { .fac-row { grid-template-columns:1fr; } .fac-linetotal { text-align:left; } }
+
 
   /* ---------- view switcher ---------- */
   .views { display:flex; gap:4px; padding:4px; background:var(--surface-2); border:1px solid var(--line); border-radius:11px; margin-bottom:16px; width:fit-content; }
@@ -724,6 +745,7 @@
     <button type="button" role="tab" data-view="suivi" aria-selected="false">Suivi des blocs</button>
     <button type="button" role="tab" data-view="distanciel" aria-selected="false">Suivi distanciel</button>
     <button type="button" role="tab" data-view="retours" aria-selected="false">Retours coach</button>
+    <button type="button" role="tab" data-view="facturation" aria-selected="false">Facturation</button>
   </div>
 
   <div id="view-suivi" hidden>
@@ -967,6 +989,66 @@
         <p>Des dossiers absents de la feuille ont aussi été modifiés et ne sont pas couverts ici :</p>
         <div class="rc-names" id="rc-horsfeuille"></div>
       </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="view-facturation" hidden style="max-width:1020px;margin:0 auto;">
+
+  <section class="band">
+    <div class="band-head"><h2>Facturation</h2></div>
+    <p class="gp-note" style="margin:0;">Génère une facture au nom de <b>SAS Ultimate Physical Bordeaux</b> pour un client du roster, avec numérotation, TVA et totaux calculés automatiquement. Chaque facture est créée comme un Google Doc dans un dossier « Factures » sur Drive.</p>
+  </section>
+
+  <section class="band">
+    <div class="band-head"><h2>Nouvelle facture</h2></div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+      <div class="ob-inline" style="min-width:220px;flex:1;">
+        <label>Client</label>
+        <select id="fac-client" style="padding:8px 10px;border-radius:7px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit;font-size:12.5px;width:100%;"></select>
+      </div>
+      <div class="ob-inline" style="min-width:170px;">
+        <label>N° de facture</label>
+        <input id="fac-num" type="text">
+      </div>
+      <div class="ob-inline" style="min-width:150px;">
+        <label>Date d'émission</label>
+        <input id="fac-date" type="date">
+      </div>
+      <div class="ob-inline" style="min-width:80px;">
+        <label>TVA %</label>
+        <input id="fac-tva" type="number" min="0" max="100" step="0.1">
+      </div>
+    </div>
+
+    <div id="fac-lines"></div>
+    <button type="button" id="fac-add-line" class="genb" style="margin-top:2px;padding:7px 12px;">+ Ligne</button>
+
+    <div class="ob-inline" style="max-width:320px;margin-top:16px;">
+      <label>IBAN à afficher sur la facture (optionnel, mémorisé sur cet appareil)</label>
+      <input id="fac-iban" type="text" placeholder="FR76 ...">
+    </div>
+
+    <p style="margin-top:16px;font-size:12.5px;line-height:1.8;">
+      Total HT : <b id="fac-total-ht" class="mono">0,00 €</b> &nbsp;·&nbsp;
+      TVA : <b id="fac-total-tva" class="mono">0,00 €</b> &nbsp;·&nbsp;
+      Total TTC : <b id="fac-total-ttc" class="mono">0,00 €</b>
+    </p>
+
+    <div class="gp-actions" style="margin-top:10px;">
+      <button type="button" class="primary" id="fac-generate">Générer la facture</button>
+    </div>
+    <p id="fac-status" style="margin-top:8px;"></p>
+    <p class="gp-note">La numérotation proposée est indicative — vérifie qu'elle suit bien ta séquence de facturation existante avant d'envoyer la facture (la numérotation doit être chronologique et sans rupture).</p>
+  </section>
+
+  <section class="band">
+    <div class="band-head"><h2>Factures émises</h2></div>
+    <div id="fac-list-status" class="gp-msg"></div>
+    <div class="listwrap" style="margin-top:10px;">
+      <div id="fac-list"></div>
     </div>
   </section>
 
@@ -1610,6 +1692,195 @@ $("#list").addEventListener("change", e => {
 });
 
 
+// --- facturation ---
+const FACTURE_SOC = {
+  nom: "SAS Ultimate Physical Bordeaux",
+  adresse: "155 rue Georges Bonnac, 33000 Bordeaux",
+  siret: "980 505 358 00013",
+  tvaDefaut: 20
+};
+const MOIS_FULL = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+function fmtDateFull(d){
+  const [y,m,day] = d.split("-");
+  return Number(day) + " " + MOIS_FULL[Number(m)-1] + " " + y;
+}
+function fmtEUR(n){
+  return (isFinite(n) ? n : 0).toLocaleString("fr-FR", { minimumFractionDigits:2, maximumFractionDigits:2 }) + " €";
+}
+function facSuggestNum(){
+  const d = new Date();
+  const p = n => String(n).padStart(2, "0");
+  return "FACT-" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "-" + p(d.getHours()) + p(d.getMinutes());
+}
+
+let facLines = [{ desc:"Séance de coaching", qty:1, pu:0 }];
+let FACTURES_FOLDER_ID = null;
+let facturesListLoaded = false;
+
+function renderFacClientOptions(){
+  const sel = document.getElementById("fac-client");
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">— Choisir un client —</option>` +
+    clients.slice().sort((a, b) => a.nom.localeCompare(b.nom, "fr")).map(c => `<option value="${c.id}">${esc(c.nom)}</option>`).join("");
+  if (cur) sel.value = cur;
+}
+
+function renderFacLines(){
+  document.getElementById("fac-lines").innerHTML = facLines.map((l, i) => `
+    <div class="fac-row">
+      <input type="text" data-fac="desc" data-i="${i}" value="${esc(l.desc)}" placeholder="Description">
+      <input type="number" min="0" step="0.5" data-fac="qty" data-i="${i}" value="${l.qty}">
+      <input type="number" min="0" step="0.5" data-fac="pu" data-i="${i}" value="${l.pu}">
+      <span class="fac-linetotal">${fmtEUR(l.qty * l.pu)}</span>
+      <button type="button" class="fac-rm" data-fac="rm" data-i="${i}" aria-label="Retirer la ligne" ${facLines.length <= 1 ? "disabled" : ""}>&times;</button>
+    </div>`).join("");
+  updateFacTotals();
+}
+
+function updateFacTotals(){
+  const tvaEl = document.getElementById("fac-tva");
+  const tva = tvaEl ? (parseFloat(tvaEl.value) || 0) : 0;
+  const ht = facLines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.pu) || 0), 0);
+  const montantTva = ht * tva / 100;
+  document.getElementById("fac-total-ht").textContent = fmtEUR(ht);
+  document.getElementById("fac-total-tva").textContent = fmtEUR(montantTva);
+  document.getElementById("fac-total-ttc").textContent = fmtEUR(ht + montantTva);
+}
+
+document.getElementById("fac-add-line").addEventListener("click", () => {
+  facLines.push({ desc:"", qty:1, pu:0 });
+  renderFacLines();
+});
+document.getElementById("fac-lines").addEventListener("input", e => {
+  const el = e.target.closest("input[data-fac]"); if (!el) return;
+  const i = Number(el.dataset.i);
+  if (el.dataset.fac === "desc") facLines[i].desc = el.value;
+  else if (el.dataset.fac === "qty") facLines[i].qty = Number(el.value) || 0;
+  else if (el.dataset.fac === "pu") facLines[i].pu = Number(el.value) || 0;
+  const row = el.closest(".fac-row");
+  row.querySelector(".fac-linetotal").textContent = fmtEUR(facLines[i].qty * facLines[i].pu);
+  updateFacTotals();
+});
+document.getElementById("fac-lines").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-fac='rm']"); if (!btn) return;
+  if (facLines.length <= 1) return;
+  facLines.splice(Number(btn.dataset.i), 1);
+  renderFacLines();
+});
+document.getElementById("fac-tva").addEventListener("input", updateFacTotals);
+
+(() => {
+  const el = document.getElementById("fac-iban");
+  try { const saved = localStorage.getItem("pedro-iban"); if (saved) el.value = saved; } catch (e) {}
+  el.addEventListener("input", () => { try { localStorage.setItem("pedro-iban", el.value); } catch (e) {} });
+})();
+
+const FACTURE_STYLE = `<style>
+body{font-family:'Manrope',Arial,sans-serif;font-size:10.5pt;color:#222;}
+h1{font-size:15pt;margin:0 0 4pt;}
+table{border-collapse:collapse;width:100%;font-size:10pt;margin:10pt 0;}
+th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;vertical-align:top;}
+th{background:#f2ede0;}
+.right{text-align:right;}
+.tot{font-weight:700;font-size:11pt;}
+.hdr td{border:none;padding:0;}
+.muted{color:#666;font-size:9pt;}
+</style>
+`;
+
+function buildFactureHtml(client, num, date, tva, lignes, iban){
+  const ht = lignes.reduce((s, l) => s + l.qty * l.pu, 0);
+  const montantTva = ht * tva / 100;
+  const ttc = ht + montantTva;
+  const rows = lignes.map(l => `<tr><td>${esc(l.desc)}</td><td class="right">${l.qty}</td><td class="right">${fmtEUR(l.pu)}</td><td class="right">${fmtEUR(l.qty * l.pu)}</td></tr>`).join("");
+  return FACTURE_STYLE + `
+    <table class="hdr"><tr>
+      <td><h1>${esc(FACTURE_SOC.nom)}</h1><p class="muted">${esc(FACTURE_SOC.adresse)}<br>SIRET ${esc(FACTURE_SOC.siret)}</p></td>
+      <td class="right"><p><b>FACTURE N° ${esc(num)}</b><br>Date d'émission : ${fmtDateFull(date)}</p></td>
+    </tr></table>
+    <p><b>Facturé à :</b><br>${esc(client.nom)}</p>
+    <table>
+      <tr><th>Description</th><th class="right">Quantité</th><th class="right">Prix unitaire HT</th><th class="right">Total HT</th></tr>
+      ${rows}
+    </table>
+    <table class="hdr"><tr><td></td><td class="right">
+      Total HT : ${fmtEUR(ht)}<br>
+      TVA (${tva}%) : ${fmtEUR(montantTva)}<br>
+      <span class="tot">Total TTC : ${fmtEUR(ttc)}</span>
+    </td></tr></table>
+    <p class="muted">Conditions de paiement : à réception de facture.${iban ? "<br>Coordonnées bancaires : " + esc(iban) : ""}</p>
+  `;
+}
+
+async function ensureFacturesFolder(){
+  if (FACTURES_FOLDER_ID) return FACTURES_FOLDER_ID;
+  const found = await mcpNS.callTool("Google Drive", "search_files", { query:"title = 'Factures' and mimeType = 'application/vnd.google-apps.folder'", excludeContentSnippets:true });
+  const files = (found.payload && found.payload.files) || [];
+  const existing = files.find(f => f.mimeType === "application/vnd.google-apps.folder" && f.title === "Factures");
+  if (existing) { FACTURES_FOLDER_ID = existing.id; return FACTURES_FOLDER_ID; }
+  const created = await mcpNS.callTool("Google Drive", "create_file", { title:"Factures", contentMimeType:"application/vnd.google-apps.folder" });
+  FACTURES_FOLDER_ID = created.payload && created.payload.id;
+  if (!FACTURES_FOLDER_ID) throw { code:"tool_error", message:"impossible de créer le dossier « Factures »" };
+  return FACTURES_FOLDER_ID;
+}
+
+document.getElementById("fac-generate").addEventListener("click", async () => {
+  const status = document.getElementById("fac-status");
+  const btn = document.getElementById("fac-generate");
+  const client = clients.find(c => c.id === document.getElementById("fac-client").value);
+  if (!client) { status.innerHTML = '<span class="gp-err" style="display:block;">Choisis un client.</span>'; return; }
+  const num = document.getElementById("fac-num").value.trim() || facSuggestNum();
+  const date = document.getElementById("fac-date").value || new Date().toISOString().slice(0, 10);
+  const tva = parseFloat(document.getElementById("fac-tva").value) || 0;
+  const iban = document.getElementById("fac-iban").value.trim();
+  const validLines = facLines.filter(l => l.desc.trim() && l.qty > 0);
+  if (!validLines.length) { status.innerHTML = '<span class="gp-err" style="display:block;">Ajoute au moins une ligne avec une description et une quantité.</span>'; return; }
+  if (!mcpNS) { status.innerHTML = '<span class="gp-err" style="display:block;">Google Drive n\'est pas connecté sur cette page.</span>'; return; }
+  btn.disabled = true;
+  status.innerHTML = '<span class="gp-msg"><span class="gp-spin" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>Création de la facture…</span>';
+  try {
+    const folderId = await ensureFacturesFolder();
+    const html = buildFactureHtml(client, num, date, tva, validLines, iban);
+    const title = "Facture " + num + " - " + client.nom;
+    const created = await mcpNS.callTool("Google Drive", "create_file", { title, parentId:folderId, contentMimeType:"text/html", textContent:html });
+    const payload = created && created.payload;
+    if (!payload || !payload.id) throw { code:"tool_error", message:"identifiant du document manquant" };
+    status.innerHTML = `<span class="gp-done" style="display:block;">Facture créée : <a href="${payload.viewUrl || docUrl(payload.id)}" target="_blank" rel="noopener">${esc(title)}</a></span>`;
+    document.getElementById("fac-num").value = "";
+    facLines = [{ desc:"Séance de coaching", qty:1, pu:0 }];
+    renderFacLines();
+    loadFacturesList();
+  } catch (err) {
+    status.innerHTML = `<span class="gp-err" style="display:block;">${esc(friendlyErr(err, "La création de la facture a échoué."))}</span>`;
+  }
+  btn.disabled = false;
+});
+
+async function loadFacturesList(){
+  const statusEl = document.getElementById("fac-list-status");
+  const listEl = document.getElementById("fac-list");
+  if (!mcpNS) { statusEl.innerHTML = '<p class="gp-err">Google Drive n\'est pas connecté sur cette page.</p>'; return; }
+  statusEl.innerHTML = '<p class="gp-msg"><span class="gp-spin" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>Lecture du dossier « Factures »…</p>';
+  try {
+    const folderId = await ensureFacturesFolder();
+    const found = await mcpNS.callTool("Google Drive", "search_files", { query:"parentId = '" + folderId + "'", excludeContentSnippets:true, pageSize:100 });
+    const files = ((found.payload && found.payload.files) || []).filter(f => f.mimeType === "application/vnd.google-apps.document");
+    files.sort((a, b) => (b.createdTime || "").localeCompare(a.createdTime || ""));
+    statusEl.innerHTML = files.length ? "" : '<p class="gp-msg">Aucune facture générée pour le moment.</p>';
+    listEl.innerHTML = files.map(f => `<div class="client"><div class="crow" style="grid-template-columns:1fr 130px;">
+      <div class="who"><div class="nm">${esc(f.title)}</div><div class="meta"><span>${f.createdTime ? fmtDate(f.createdTime.slice(0, 10)) : ""}</span></div></div>
+      <div style="text-align:right;"><a href="${f.viewUrl}" target="_blank" rel="noopener">Ouvrir</a></div>
+    </div></div>`).join("");
+  } catch (err) {
+    statusEl.innerHTML = `<p class="gp-err">${esc(friendlyErr(err, "La lecture du dossier a échoué."))}</p>`;
+  }
+}
+
+document.getElementById("fac-num").value = facSuggestNum();
+document.getElementById("fac-date").value = new Date().toISOString().slice(0, 10);
+document.getElementById("fac-tva").value = FACTURE_SOC.tvaDefaut;
+renderFacLines();
+
 // --- vues ---
 const views = document.querySelectorAll(".views button");
 views.forEach(b => b.addEventListener("click", () => {
@@ -1620,9 +1891,14 @@ views.forEach(b => b.addEventListener("click", () => {
   document.getElementById("view-onboarding").hidden = v !== "onboarding";
   document.getElementById("view-distanciel").hidden = v !== "distanciel";
   document.getElementById("view-retours").hidden = v !== "retours";
+  document.getElementById("view-facturation").hidden = v !== "facturation";
   if (v === "methode") renderBanks();
   if (v === "distanciel" && !distancielLoaded) loadDistanciel();
   if (v === "retours") renderRetours();
+  if (v === "facturation") {
+    renderFacClientOptions();
+    if (!facturesListLoaded) { facturesListLoaded = true; loadFacturesList(); }
+  }
 }));
 
 // --- banques d'exercices ---
