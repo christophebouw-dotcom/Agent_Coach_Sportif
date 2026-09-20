@@ -1910,15 +1910,15 @@ document.getElementById("fac-num").addEventListener("blur", () => {
 const FACTURE_STYLE = `<style>
 body{font-family:'Manrope',Arial,sans-serif;font-size:11pt;color:#2b2110;line-height:1.5;}
 .hdr td{border:none;padding:0;vertical-align:top;}
-.brand-name{font-size:16pt;font-weight:800;margin:0 0 3pt;color:#2b2110;}
-.facture-title{font-size:30pt;font-weight:800;letter-spacing:2pt;color:#a06a1f;margin:0 0 10pt;}
-.eyebrow{font-size:8.5pt;font-weight:700;letter-spacing:1.5pt;text-transform:uppercase;color:#9a8e6f;margin:0 0 5pt;}
+.brand-name{font-size:16pt;font-weight:800;margin:0;color:#2b2110;}
+.facture-title{font-size:30pt;font-weight:800;letter-spacing:2pt;color:#a06a1f;margin:0;}
+.eyebrow{font-size:8.5pt;font-weight:700;letter-spacing:1.5pt;text-transform:uppercase;color:#9a8e6f;margin:0;}
 .billto-name{font-size:13pt;font-weight:700;margin:0;color:#2b2110;}
 table.lines{border-collapse:collapse;width:100%;font-size:10pt;}
 table.lines th{background:#f2e2bd;color:#2b2110;padding:10px 12px;text-align:left;font-size:9pt;text-transform:uppercase;letter-spacing:.5pt;border-bottom:2px solid #a06a1f;}
 table.lines td{padding:11px 12px;border-bottom:1px solid #e6ddc6;vertical-align:top;}
 .right{text-align:right;}
-table.totals{border-collapse:collapse;width:100%;font-size:10.5pt;}
+table.totals{border-collapse:collapse;width:260pt;margin-left:auto;font-size:10.5pt;}
 table.totals td{padding:6px 4px;}
 table.totals tr.grand td{border-top:2px solid #a06a1f;padding-top:10px;font-size:13pt;font-weight:800;color:#a06a1f;}
 .muted{color:#7a7058;font-size:9pt;}
@@ -1926,6 +1926,11 @@ table.totals tr.grand td{border-top:2px solid #a06a1f;padding-top:10px;font-size
 </style>
 `;
 
+// NB : chaque <td> ne doit contenir qu'un seul bloc de texte (une balise, sans <br>) —
+// Google Drive aplatit tout <p>/<br> supplémentaire à l'intérieur d'une cellule sans
+// insérer d'espace lors de la conversion HTML -> Google Doc (vérifié par test réel le 20/09).
+// Un <table> imbriqué dans une <td> est de la même façon rendu en texte brut au lieu
+// d'un tableau : la ligne des totaux est donc un tableau autonome, aligné à droite.
 function buildFactureHtml(client, num, date, tva, lignes, iban){
   const ttc = lignes.reduce((s, l) => s + l.qty * l.pu, 0);
   const ht = ttc / (1 + tva / 100);
@@ -1938,39 +1943,32 @@ function buildFactureHtml(client, num, date, tva, lignes, iban){
       <td class="right">${fmtEUR(l.qty * l.pu)}</td>
     </tr>`).join("");
   return FACTURE_STYLE + `
+    <table class="hdr" style="margin-bottom:2pt;"><tr>
+      <td style="width:58%;"><img src="${FACTURE_LOGO_B64}" width="58" height="58"></td>
+      <td class="right" style="width:42%;"><p class="facture-title">FACTURE</p></td>
+    </tr></table>
+    <table class="hdr" style="margin-bottom:2pt;"><tr>
+      <td style="width:58%;"><p class="brand-name">${esc(FACTURE_SOC.nom)}</p></td>
+      <td class="right" style="width:42%;"><p>N° <b>${esc(num)}</b></p></td>
+    </tr></table>
     <table class="hdr" style="margin-bottom:34pt;"><tr>
-      <td style="width:58%;">
-        <img src="${FACTURE_LOGO_B64}" width="58" height="58" style="margin-bottom:12pt;">
-        <p class="brand-name">${esc(FACTURE_SOC.nom)}</p>
-        <p class="muted">${esc(FACTURE_SOC.adresse)}<br>SIRET ${esc(FACTURE_SOC.siret)}</p>
-      </td>
-      <td class="right" style="width:42%;">
-        <p class="facture-title">FACTURE</p>
-        <p style="margin:0;">N° <b>${esc(num)}</b></p>
-        <p class="muted" style="margin:3pt 0 0;">Date d'émission : ${fmtDateFull(date)}</p>
-      </td>
+      <td style="width:58%;"><p class="muted">${esc(FACTURE_SOC.adresse)} · SIRET ${esc(FACTURE_SOC.siret)}</p></td>
+      <td class="right" style="width:42%;"><p class="muted">Date d'émission : ${fmtDateFull(date)}</p></td>
     </tr></table>
 
-    <table class="hdr" style="margin-bottom:30pt;"><tr><td>
-      <p class="eyebrow">Facturé à</p>
-      <p class="billto-name">${esc(client.nom)}</p>
-    </td></tr></table>
+    <table class="hdr" style="margin-bottom:2pt;"><tr><td><p class="eyebrow">Facturé à</p></td></tr></table>
+    <table class="hdr" style="margin-bottom:30pt;"><tr><td><p class="billto-name">${esc(client.nom)}</p></td></tr></table>
 
     <table class="lines" style="margin-bottom:26pt;">
       <tr><th>Description</th><th>Engagement</th><th class="right">Quantité</th><th class="right">Prix unitaire TTC</th><th class="right">Total TTC</th></tr>
       ${rows}
     </table>
 
-    <table class="hdr" style="margin-bottom:36pt;"><tr>
-      <td style="width:58%;"></td>
-      <td style="width:42%;">
-        <table class="totals">
-          <tr><td>Total HT</td><td class="right">${fmtEUR(ht)}</td></tr>
-          <tr><td>TVA (${tva}%)</td><td class="right">${fmtEUR(montantTva)}</td></tr>
-          <tr class="grand"><td>Total TTC</td><td class="right">${fmtEUR(ttc)}</td></tr>
-        </table>
-      </td>
-    </tr></table>
+    <table class="totals" style="margin-bottom:36pt;">
+      <tr><td>Total HT</td><td class="right">${fmtEUR(ht)}</td></tr>
+      <tr><td>TVA (${tva}%)</td><td class="right">${fmtEUR(montantTva)}</td></tr>
+      <tr class="grand"><td>Total TTC</td><td class="right">${fmtEUR(ttc)}</td></tr>
+    </table>
 
     <p class="muted">Conditions de paiement : à réception de facture.${iban ? "<br>Coordonnées bancaires : " + esc(iban) : ""}</p>
 
