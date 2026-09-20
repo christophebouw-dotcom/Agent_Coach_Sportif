@@ -323,16 +323,22 @@
   .ob-h3 { font-size:12px; font-weight:700; margin:18px 0 8px; color:var(--ink); }
 
   /* ---------- facturation ---------- */
-  .fac-row { display:grid; grid-template-columns:1fr 64px 96px 96px 28px; gap:8px; align-items:center; margin-bottom:7px; }
+  .fac-row { border:1px solid var(--line); border-radius:9px; padding:10px 12px; margin-bottom:8px; background:var(--surface); }
   .fac-row input {
-    width:100%; font:inherit; font-size:12.5px; color:var(--ink);
+    font:inherit; font-size:12.5px; color:var(--ink);
     background:var(--surface-2); border:1px solid var(--line); border-radius:7px; padding:7px 9px;
   }
   .fac-row input:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; }
-  .fac-linetotal { font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-2); text-align:right; }
+  .fac-desc { width:100%; margin-bottom:8px; }
+  .fac-row-2 { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .fac-qty { width:56px; }
+  .fac-row-2 input[type="number"]:not(.fac-qty) { width:118px; }
+  .fac-chk { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-2); white-space:nowrap; }
+  .fac-chk input { width:auto; }
+  .fac-linetotal { margin-left:auto; font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-2); }
   .fac-rm {
     appearance:none; border:none; background:none; cursor:pointer; color:var(--ink-3); font-size:16px; line-height:1;
-    width:26px; height:26px; border-radius:6px; transition:background-color .15s ease, color .15s ease;
+    width:26px; height:26px; border-radius:6px; flex-shrink:0; transition:background-color .15s ease, color .15s ease;
   }
   .fac-rm:hover { color:var(--alert); background:var(--alert-bg); }
   .fac-rm:disabled { opacity:.35; cursor:default; }
@@ -341,7 +347,6 @@
     width:100%; font:inherit; font-size:12.5px; color:var(--ink);
     background:var(--surface-2); border:1px solid var(--line); border-radius:7px; padding:8px 10px;
   }
-  @media (max-width:760px) { .fac-row { grid-template-columns:1fr; } .fac-linetotal { text-align:left; } }
 
 
   /* ---------- view switcher ---------- */
@@ -1713,7 +1718,7 @@ function facSuggestNum(){
   return "FACT-" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "-" + p(d.getHours()) + p(d.getMinutes());
 }
 
-let facLines = [{ desc:"Séance de coaching", qty:1, pu:0 }];
+let facLines = [{ desc:"Séance de coaching", qty:1, puAvec:0, puSans:0, sansEngagement:false }];
 let FACTURES_FOLDER_ID = null;
 let facturesListLoaded = false;
 
@@ -1725,14 +1730,20 @@ function renderFacClientOptions(){
   if (cur) sel.value = cur;
 }
 
+function facLinePu(l){ return l.sansEngagement ? l.puSans : l.puAvec; }
+
 function renderFacLines(){
   document.getElementById("fac-lines").innerHTML = facLines.map((l, i) => `
     <div class="fac-row">
-      <input type="text" data-fac="desc" data-i="${i}" value="${esc(l.desc)}" placeholder="Description">
-      <input type="number" min="0" step="0.5" data-fac="qty" data-i="${i}" value="${l.qty}">
-      <input type="number" min="0" step="0.5" data-fac="pu" data-i="${i}" value="${l.pu}">
-      <span class="fac-linetotal">${fmtEUR(l.qty * l.pu)}</span>
-      <button type="button" class="fac-rm" data-fac="rm" data-i="${i}" aria-label="Retirer la ligne" ${facLines.length <= 1 ? "disabled" : ""}>&times;</button>
+      <input class="fac-desc" type="text" data-fac="desc" data-i="${i}" value="${esc(l.desc)}" placeholder="Description">
+      <div class="fac-row-2">
+        <input class="fac-qty" type="number" min="0" step="0.5" data-fac="qty" data-i="${i}" value="${l.qty}" title="Quantité">
+        <input type="number" min="0" step="0.5" data-fac="puAvec" data-i="${i}" value="${l.puAvec}" placeholder="Prix avec engagt" title="Prix avec engagement">
+        <input type="number" min="0" step="0.5" data-fac="puSans" data-i="${i}" value="${l.puSans}" placeholder="Prix sans engagt" title="Prix sans engagement">
+        <label class="fac-chk"><input type="checkbox" data-fac="sans" data-i="${i}" ${l.sansEngagement ? "checked" : ""}> Sans engagement</label>
+        <span class="fac-linetotal">${fmtEUR(l.qty * facLinePu(l))}</span>
+        <button type="button" class="fac-rm" data-fac="rm" data-i="${i}" aria-label="Retirer la ligne" ${facLines.length <= 1 ? "disabled" : ""}>&times;</button>
+      </div>
     </div>`).join("");
   updateFacTotals();
 }
@@ -1740,7 +1751,7 @@ function renderFacLines(){
 function updateFacTotals(){
   const tvaEl = document.getElementById("fac-tva");
   const tva = tvaEl ? (parseFloat(tvaEl.value) || 0) : 0;
-  const ht = facLines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.pu) || 0), 0);
+  const ht = facLines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(facLinePu(l)) || 0), 0);
   const montantTva = ht * tva / 100;
   document.getElementById("fac-total-ht").textContent = fmtEUR(ht);
   document.getElementById("fac-total-tva").textContent = fmtEUR(montantTva);
@@ -1748,7 +1759,7 @@ function updateFacTotals(){
 }
 
 document.getElementById("fac-add-line").addEventListener("click", () => {
-  facLines.push({ desc:"", qty:1, pu:0 });
+  facLines.push({ desc:"", qty:1, puAvec:0, puSans:0, sansEngagement:false });
   renderFacLines();
 });
 document.getElementById("fac-lines").addEventListener("input", e => {
@@ -1756,10 +1767,17 @@ document.getElementById("fac-lines").addEventListener("input", e => {
   const i = Number(el.dataset.i);
   if (el.dataset.fac === "desc") facLines[i].desc = el.value;
   else if (el.dataset.fac === "qty") facLines[i].qty = Number(el.value) || 0;
-  else if (el.dataset.fac === "pu") facLines[i].pu = Number(el.value) || 0;
+  else if (el.dataset.fac === "puAvec") facLines[i].puAvec = Number(el.value) || 0;
+  else if (el.dataset.fac === "puSans") facLines[i].puSans = Number(el.value) || 0;
+  else return;
   const row = el.closest(".fac-row");
-  row.querySelector(".fac-linetotal").textContent = fmtEUR(facLines[i].qty * facLines[i].pu);
+  row.querySelector(".fac-linetotal").textContent = fmtEUR(facLines[i].qty * facLinePu(facLines[i]));
   updateFacTotals();
+});
+document.getElementById("fac-lines").addEventListener("change", e => {
+  const el = e.target.closest("input[data-fac='sans']"); if (!el) return;
+  facLines[Number(el.dataset.i)].sansEngagement = el.checked;
+  renderFacLines();
 });
 document.getElementById("fac-lines").addEventListener("click", e => {
   const btn = e.target.closest("button[data-fac='rm']"); if (!btn) return;
@@ -1792,7 +1810,7 @@ function buildFactureHtml(client, num, date, tva, lignes, iban){
   const ht = lignes.reduce((s, l) => s + l.qty * l.pu, 0);
   const montantTva = ht * tva / 100;
   const ttc = ht + montantTva;
-  const rows = lignes.map(l => `<tr><td>${esc(l.desc)}</td><td class="right">${l.qty}</td><td class="right">${fmtEUR(l.pu)}</td><td class="right">${fmtEUR(l.qty * l.pu)}</td></tr>`).join("");
+  const rows = lignes.map(l => `<tr><td>${esc(l.desc)}</td><td>${l.sansEngagement ? "Sans engagement" : "Avec engagement"}</td><td class="right">${l.qty}</td><td class="right">${fmtEUR(l.pu)}</td><td class="right">${fmtEUR(l.qty * l.pu)}</td></tr>`).join("");
   return FACTURE_STYLE + `
     <table class="hdr"><tr>
       <td><h1>${esc(FACTURE_SOC.nom)}</h1><p class="muted">${esc(FACTURE_SOC.adresse)}<br>SIRET ${esc(FACTURE_SOC.siret)}</p></td>
@@ -1800,7 +1818,7 @@ function buildFactureHtml(client, num, date, tva, lignes, iban){
     </tr></table>
     <p><b>Facturé à :</b><br>${esc(client.nom)}</p>
     <table>
-      <tr><th>Description</th><th class="right">Quantité</th><th class="right">Prix unitaire HT</th><th class="right">Total HT</th></tr>
+      <tr><th>Description</th><th>Engagement</th><th class="right">Quantité</th><th class="right">Prix unitaire HT</th><th class="right">Total HT</th></tr>
       ${rows}
     </table>
     <table class="hdr"><tr><td></td><td class="right">
@@ -1833,7 +1851,9 @@ document.getElementById("fac-generate").addEventListener("click", async () => {
   const date = document.getElementById("fac-date").value || new Date().toISOString().slice(0, 10);
   const tva = parseFloat(document.getElementById("fac-tva").value) || 0;
   const iban = document.getElementById("fac-iban").value.trim();
-  const validLines = facLines.filter(l => l.desc.trim() && l.qty > 0);
+  const validLines = facLines
+    .filter(l => l.desc.trim() && l.qty > 0)
+    .map(l => ({ desc:l.desc, qty:l.qty, pu:facLinePu(l), sansEngagement:l.sansEngagement }));
   if (!validLines.length) { status.innerHTML = '<span class="gp-err" style="display:block;">Ajoute au moins une ligne avec une description et une quantité.</span>'; return; }
   if (!mcpNS) { status.innerHTML = '<span class="gp-err" style="display:block;">Google Drive n\'est pas connecté sur cette page.</span>'; return; }
   btn.disabled = true;
@@ -1847,7 +1867,7 @@ document.getElementById("fac-generate").addEventListener("click", async () => {
     if (!payload || !payload.id) throw { code:"tool_error", message:"identifiant du document manquant" };
     status.innerHTML = `<span class="gp-done" style="display:block;">Facture créée : <a href="${payload.viewUrl || docUrl(payload.id)}" target="_blank" rel="noopener">${esc(title)}</a></span>`;
     document.getElementById("fac-num").value = "";
-    facLines = [{ desc:"Séance de coaching", qty:1, pu:0 }];
+    facLines = [{ desc:"Séance de coaching", qty:1, puAvec:0, puSans:0, sansEngagement:false }];
     renderFacLines();
     loadFacturesList();
   } catch (err) {
