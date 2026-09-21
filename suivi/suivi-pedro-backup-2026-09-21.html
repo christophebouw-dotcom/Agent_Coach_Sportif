@@ -747,8 +747,8 @@
 </svg></span>
     <h1>Ultimate Physical Bordeaux</h1>
     <p class="srcline">
-      Génération relevée le <b>20 septembre 2026</b><br>
-      Retours coach relevés le <b>16 septembre 2026</b> <span title="Roster complet du 14/09 ; docs Drive re-vérifiés le 15/09. Les retours coach couvrent le 08 au 16/09.">(08→16/09)</span>
+      Génération relevée le <b>21 septembre 2026</b><br>
+      Retours coach relevés le <b>21 septembre 2026</b> <span title="Aucun nouveau bloc généré depuis le 20/09. Les retours coach couvrent le 17 au 20/09.">(17→20/09)</span>
     </p>
   </header>
 
@@ -935,16 +935,16 @@
   <section class="band">
     <div class="rc-head">
       <div>
-        <h2 style="margin:0 0 4px;font-size:14px;font-weight:700;">Relevé du 8 au 16 septembre 2026</h2>
-        <p class="rc-lede">Ce que les coachs ont écrit dans les dossiers depuis l'arrêt du rapport précédent, le 7 septembre. Source : les dossiers Drive du roster « Dossier pedro 2 » modifiés sur la période.</p>
+        <h2 style="margin:0 0 4px;font-size:14px;font-weight:700;">Relevé du 17 au 20 septembre 2026</h2>
+        <p class="rc-lede">Ce que les coachs ont écrit dans les dossiers depuis l'arrêt du rapport précédent, le 16 septembre. Source : les dossiers Drive du roster « Dossier pedro 2 » modifiés sur la période.</p>
       </div>
       <div class="rc-figs">
-        <div class="rc-fig"><b>36</b><span>dossiers vérifiés</span></div>
-        <div class="rc-fig"><b>33</b><span>avec séance</span></div>
-        <div class="rc-fig is-alert"><b>10</b><span>points d'attention</span></div>
+        <div class="rc-fig"><b>31</b><span>dossiers vérifiés</span></div>
+        <div class="rc-fig"><b>29</b><span>avec séance</span></div>
+        <div class="rc-fig is-alert"><b>11</b><span>points d'attention</span></div>
       </div>
     </div>
-    <p class="gp-note" style="margin:0;">Cinq clients signalent une fatigue marquée sur la même quinzaine — Solène Lebihan, Mathilde Piaux, Sandra Messibah, Nathan Gattegno, Julien Lacroix. Dans quatre cas sur cinq la séance a été raccourcie : blocs ramenés de 4 tours à 3, finisher sauté.</p>
+    <p class="gp-note" style="margin:0;">Deux douleurs se confirment sur une deuxième semaine — le dos d'Elea Rivière et l'appréhension lombaire de Catarina Barros. Sandra Messibah signale une fatigue pour la troisième semaine de suite (en atténuation) ; Dhyana Noel, elle aussi fatiguée, a annoncé quitter le programme dans environ un mois.</p>
   </section>
 
   <section class="rc-sec rc-agenerer" id="rc-agenerer" hidden></section>
@@ -962,7 +962,7 @@
 
   <section class="rc-sec">
     <h2>Retours détaillés</h2>
-    <p class="lead">Les 33 clients vus sur la période, avec les annotations de coach et les écarts entre charge prévue et charge réellement soulevée.</p>
+    <p class="lead">Les 29 clients vus sur la période, avec les annotations de coach et les écarts entre charge prévue et charge réellement soulevée.</p>
     <div class="controls">
       <div class="seg" id="rc-seg" role="group" aria-label="Filtrer les retours">
         <button type="button" data-rcf="all" aria-pressed="true">Tous</button>
@@ -1117,96 +1117,93 @@ const BANQUES = [{"nom":"Ischio-jambiers","id":"ij","g":[{"m":"Élastique","d":"
 const MOIS_LABEL = { "Octobre":"Octobre", "Septembre-Octobre":"Sept.–Oct.", "Septembre":"Septembre" };
 const STEPS = [["a_traiter","À traiter"],["en_cours","En cours"],["envoye","Envoyé"]];
 // ============================================================
-// Relevé des retours coach — 08 au 16 septembre 2026
-// Source : dossiers Drive du roster « Dossier pedro 2 » modifiés depuis le 07/09.
-// Suite du rapport « Suivi des retours coach — Septembre 2026 » (arrêté au 07/09).
+// Relevé des retours coach — 17 au 20 septembre 2026
+// Source : dossiers Drive du roster « Dossier pedro 2 » modifiés depuis le 16/09.
+// Suite du rapport « Suivi des retours coach — Septembre 2026 » (arrêté au 16/09).
 // ============================================================
 const RETOURS = {
-  periode: { debut: "2026-09-08", fin: "2026-09-16", precedent: "2026-09-07" },
-  chiffres: { verifies: 36, avecSeance: 33, sansSeance: 3, prioritaires: 10 },
+  periode: { debut: "2026-09-17", fin: "2026-09-20", precedent: "2026-09-16" },
+  chiffres: { verifies: 31, avecSeance: 29, sansSeance: 2, prioritaires: 11 },
 
   // niveau : "alert" douleur nouvelle ou aggravée · "warn" à surveiller · "ok" progrès à acter
   prio: [
-    { id:"pascal-ramondou", nom:"Pascal Ramoudou", date:"12/09", niveau:"alert",
-      constat:"« beaucoup trop de valgus sur les squats. Douleurs sur l'avant-bras droit (tendinite) »",
-      implique:"Aggravation double en une semaine. Le cue « genou dans l'axe » du 05/09 n'a pas suffi : passer au squat sur cale avec renfo moyen fessier avant toute charge. Prises neutres et pas de préhension lourde tant que l'avant-bras parle." },
-    { id:"elea-riviere", nom:"Elea Rivière", date:"14/09", niveau:"alert",
-      constat:"« séance adaptée suite douleur au dos »",
-      implique:"Douleur nouvelle, rien d'équivalent dans son historique récent. À requalifier à la prochaine séance avant de reprendre le hip thrust à 75 kg." },
-    { id:"justine-boissou", nom:"Justine Boissou", date:"11/09 et 14/09", niveau:"alert",
-      constat:"11/09 : RDL ramené de 16 à 12 kg, « technique à travailler, elle tire trop sur le dos ». 14/09 : « faire attention à la posture sur le DL sumo »",
-      implique:"Deux séances consécutives avec le même défaut de hip hinge. Geler la progression sur DL et RDL, repasser par le good morning bâton et le RDL en tempo." },
-    { id:"mathilde-piaux", nom:"Mathilde Piaux", date:"14/09", niveau:"alert",
-      constat:"« fatigue générale ». RDL descendu à 20 kg, pull-over à 8 kg",
-      implique:"Troisième séance d'affilée adaptée après la douleur dorsale + genou du 07/09. Le signal n'est plus ponctuel." },
-    { id:"jean-pujol", nom:"Jean Pujol", date:"10/09", niveau:"warn",
-      constat:"« cervicales ok, toujours gêné au genou »",
-      implique:"Les cervicales sont réglées, la gêne au genou persiste. Squat bulgare reste plafonné à 14-15 kg, pas de saut ni de pliométrie." },
-    { id:"philippe-heraudet", nom:"Philippe Heraudet", date:"15/09", niveau:"warn",
-      constat:"Développé épaule prévu à 8 kg, fait à 2×4 kg : « déjà très dur, technique pas folle malgré de nombreuses corrections »",
-      implique:"C'est un blocage technique, pas un problème de charge. Sortir le SP du schéma de progression et le retravailler en analytique (rotateurs externes, gainage scapulaire) avant de le recharger." },
-    { id:"sandra-messibah", nom:"Sandra Messibah", date:"12/09", niveau:"warn",
-      constat:"« grosse fatigue suite à l'emploi du temps chargé, chaque bloc a été fait sur 3T au lieu de 4T ». Goblet squat ramené de 16 à 12 kg",
-      implique:"À croiser avec ses déficits de bilan : ischio-jambiers à la limite du pathologique, sangle abdominale en échec au test. Ne pas rattraper le volume perdu à la séance suivante." },
-    { id:null, nom:"Nathan Gattegno", date:"10/09", niveau:"warn", horsFeuille:true,
-      constat:"« pas en forme sur la séance, un peu comme d'hab »",
-      implique:"La baisse de forme est décrite comme habituelle. À traiter comme une donnée de programmation (séances plus courtes, moins de tours) et non comme un aléa." },
-    { id:"sophie-collantier", nom:"Sophie Collantier", date:"12/09", niveau:"warn",
-      constat:"Opération du grain de beauté toujours à venir",
-      implique:"Rappel du 01/09, non encore daté dans le dossier." },
-    { id:"armand-azencot", nom:"Armand Azencot", date:"16/09", niveau:"ok",
-      constat:"« belle évolution ! Toujours le coude à surveiller avec une tendinite mais le renfo contrôlé sur les triceps a l'air de bien fonctionner »",
-      implique:"Bonne nouvelle à acter : le protocole triceps contrôlé fonctionne. À maintenir tel quel, sans augmenter." }
+    { id:"elea-riviere", nom:"Elea Rivière", date:"17/09", niveau:"alert",
+      constat:"« toujours mal au dos séance adaptée »",
+      implique:"Deuxième semaine de suite avec cette douleur dorsale (déjà « séance adaptée suite douleur au dos » le 14/09) : ce n'est plus un épisode isolé. Requalifier avant de remettre du hip thrust chargé, envisager un avis kiné si ça ne se résorbe pas d'ici la prochaine séance." },
+    { id:"catarina-barros", nom:"Catarina Barros", date:"18/09", niveau:"alert",
+      constat:"« 8 kg sur terre, sumo, toujours très craintif par rapport à son dos, ne pas charger »",
+      implique:"Charge quasiment divisée par deux par rapport au prévu (16-20 kg). Cohérent avec la note permanente de son bloc (hernie/douleur L4-L5, aucune flexion lombaire chargée) mais l'appréhension elle-même ne se réduit pas : renforcer le travail de confiance en isométrique avant de retenter du dynamique." },
+    { id:"caroline-gregori", nom:"Caroline Gregori", date:"17/09", niveau:"warn",
+      constat:"« bonne séance un peu moins lourd sur les fentes car gêne au genou »",
+      implique:"Nouvelle gêne (genou), non présente les semaines précédentes. À surveiller à la prochaine séance avant de remonter la charge sur les fentes." },
+    { id:"dhyana-noel", nom:"Dhyana Noel", date:"17/09", niveau:"warn",
+      constat:"« pas en forme du tout donc pas de hip thrust et charges moins lourde sur les fentes et le tirage »",
+      implique:"Fatigue franche ayant fait sauter un exercice entier. À surveiller sur la prochaine séance — voir aussi le départ annoncé du programme dans ~1 mois (ci-dessous)." },
+    { id:"sandra-messibah", nom:"Sandra Messibah", date:"17/09", niveau:"warn",
+      constat:"« ptite fatigue »",
+      implique:"Troisième semaine consécutive avec une mention de fatigue (grosse fatigue le 12/09, fatiguée le 16/09), mais l'intensité décrite baisse d'une semaine à l'autre. Bonne série au DL le 18/09 (95 kg propre) : la fatigue ne semble pas s'aggraver, continuer à surveiller sans réduire le volume par anticipation." },
+    { id:"pascal-ramondou", nom:"Pascal Ramoudou", date:"19/09", niveau:"warn",
+      constat:"Rowing ramené à 10 kg, bloc gainage annoté « reeduc tendinite coude », finisher non fait",
+      implique:"Suite de l'alerte du 12/09 (valgus + tendinite avant-bras) : la charge est maintenant activement adaptée avec un protocole de rééducation dédié sur le coude. Le signal s'atténue mais n'est pas résolu — garder les prises neutres et ne pas recharger le rowing tant que le coude parle." },
+    { id:"kate-janecek", nom:"Kate Janecek", date:"18/09", niveau:"warn",
+      constat:"« elle adore les Exo, il faut soulever des poids donc continue dans ce sens, mais plutôt sur des Exo assisté avec des bancs parce qu'elle a peur pour son dos »",
+      implique:"Appréhension dos à mettre en regard de sa sclérose en plaques (déjà notée le 09/09 : problème d'équilibre). Basculer les mouvements chargés vers des versions assistées par banc plutôt que de réduire le volume — c'est ce qu'elle demande elle-même." },
+    { id:"marc-vernet", nom:"Marc Vernet", date:"18/09", niveau:"ok",
+      constat:"« bonne séance de plus en plus de contrôle géré quand même sa vitesse d'exécution »",
+      implique:"Progrès net sur le contrôle du mouvement (RDL notamment). À maintenir, continuer à travailler le tempo avant d'augmenter les charges." },
+    { id:null, nom:"Perrine Courtellemont", date:"18/09", niveau:"ok", horsFeuille:true,
+      constat:"« gérer sa vitesse d'exécution et elle a du potentiel donc pas hésiter à charger »",
+      implique:"Le coach identifie une marge de progression claire : augmenter les charges à la prochaine séance." },
+    { id:"noic-gouhizoun", nom:"Noic Gouhizoun", date:"18/09", niveau:"ok",
+      constat:"« il kiffe bosser le développé couché en premier Exo comme ça isolé. Donc continue dans ce sens, il veut progresser, progresser, dessus »",
+      implique:"Préférence forte et progrès actés sur le DC (60 kg × 8 le 18/09). Garder le DC en tête de séance comme demandé." },
+    { id:null, nom:"Beatrice Piquard", date:"18/09 et 19/09", niveau:"ok", horsFeuille:true,
+      constat:"18/09 : « amélioration de la posture claire en apprenant de bien décomposer le RDL [...] on a un tout petit peu déchargé [...] parce qu'elle était malade ». 19/09 : « focus sur la posture qui s'améliore, faire attention au long de la séance car le diabète peut influer sur l'intensité »",
+      implique:"Progrès réel sur la posture du RDL, à consolider. Deux points de vigilance opérationnels à garder en tête à chaque séance : ajuster la charge si elle est malade, et surveiller l'intensité vu le diabète." }
   ],
 
   echeance: {
     id:"julian-helissey", nom:"Julian Helissey", quoi:"Compétition de trail", date:"16 octobre 2026",
-    texte:"La douleur sous le pied du 01/09 n'est plus mentionnée et les charges sont remontées (squat bulgare à 2×16 kg le 11/09). Aucun affûtage n'apparaît encore dans son dossier : c'est la décision de programmation la plus urgente du mois."
+    texte:"Aucune séance retrouvée dans son dossier entre le 17 et le 20/09 (dernière entrée datée : le 11/09). La course se rapproche (moins de 4 semaines) et aucun affûtage n'apparaît toujours dans la programmation : c'est plus urgent que la semaine dernière, il faut caler la période de tapering dès la prochaine séance."
   },
 
   detail: [
-    { id:"alex-roussel", nom:"Alex Roussel", seances:["10/09","15/09"], note:"« adore les pyramides en série ». Goblet squat prévu 12 kg → 25 kg en top série ; rowing unilat 10 → 14 kg" },
-    { id:"alexandre-desse", nom:"Alexandre Desse", seances:["11/09","15/09"], note:"SP prévu 30-35 kg → 30 kg. DL 75 kg ×5, hip thrust 75 kg ×8" },
-    { id:"antoine-feix", nom:"Antoine Feix", seances:["08/09","11/09","15/09"], note:"Tractions supi prévues @5 kg → faites @6 kg. DL 105 kg ×5, hip thrust 90 kg ×8. Aucune douleur" },
-    { id:"armand-azencot", nom:"Armand Azencot", seances:["10/09","16/09"], note:"Tirage vertical unilat prévu 25 kg → 30 kg.", prio:true },
-    { id:"benoit-pradignac", nom:"Benoit Pradignac", seances:["09/09"], note:"Hip thrust 115 kg ×6, nordic excentrique ×6, squat bulgare 60 kg ×6/c" },
-    { id:"bertrand-marty", nom:"Bertrand Marty", seances:["09/09","14/09","16/09"], note:"« je veux apprendre les muscle ups, posture à corriger et technique à apprendre ». Travail false grip et tractions contrôlées engagé. Step up ramené de 18 à 15 kg" },
-    { id:"caroline-gregori", nom:"Caroline Gregori", seances:["09/09","10/09","16/09"], note:"Squat box tenu à 60 kg, « rester à ce poids pour le moment ». RDL 55 kg « limitée par le grip ». DC prévu 16 kg → 15 kg (8-8-7-7)" },
-    { id:"catherine-leonard", nom:"Catherine Leonard", seances:["10/09"], note:"« appréhension sur le squat barre ». Squat box 35 kg ×6" },
-    { id:"christophe-car", nom:"Christophe Car", seances:["09/09","16/09"], note:"Squat barre 35-40 kg → fait 40 kg. Squat box 40 kg, tirage vertical 45 kg. Suite du « focus posture, il est trop bancal » du 07/09" },
-    { id:"elea-riviere", nom:"Elea Rivière", seances:["14/09"], note:"Séance adaptée, douleur au dos.", prio:true },
-    { id:"emilie-laporte", nom:"Emilie Laporte", seances:["14/09"], note:"Goblet squat 20 kg ×12, RDL kb 32 kg. Rappel du 01/09 : hip thrust trop rapide, pas de temps d'arrêt en haut" },
-    { id:"florence-aparico", nom:"Florence Aparico", seances:["11/09"], note:"« bonne posture sur la plupart des exercices, on peut augmenter un peu les charges, sauf sur le haut du corps où c'est son point faible ». Finisher ski non fait", anomalie:true },
-    { id:"gilles-piaux", nom:"Gilles Piaux", seances:["14/09"], note:"« 3T au lieu de 4 sur le B1, finisher non fait. Posture à améliorer sur le DL ». DL 75 kg ×6" },
-    { id:"jena-guillaume-rocher", nom:"Jean Guillaume Rocher", seances:["10/09","15/09"], note:"« analyser systématiquement la posture suite aux exercices donnés et prioriser l'exécution plutôt que la charge. Le travail peut être souvent bâclé s'il n'est pas suivi. » Squat 45 → 40 kg, hip thrust 60 → 55 kg" },
-    { id:"jean-noel-lacour", nom:"Jean Noël Lacour", meta:"74 ans", seances:["09/09","15/09"], note:"Goblet squat talons surélevés 14 kg, RDL kb 16 kg, SP 6 kg. Suite de « pas de douleur particulière, reprend de bon positionnement »", anomalie:true },
-    { id:"jean-pierre-catherin", nom:"Jean Pierre Catherin", seances:["15/09"], note:"Client récent. DL 35 kg ×6, hip thrust 35-40 kg. Préférence actée : « il n'aime pas le statique » → gainage dynamique uniquement", nouveau:true },
-    { id:"jean-pujol", nom:"Jean Pujol", seances:["10/09","14/09"], note:"DL 55 kg ×6 le 14/09.", prio:true },
-    { id:"julien-lacroix", nom:"Julien Lacroix", seances:["15/09"], note:"Hip thrust 105 kg ×8, SP barre 45 kg ×6. Finisher sled push barré" },
-    { id:"justine-boissou", nom:"Justine Boissou", seances:["11/09","14/09"], note:"", prio:true },
-    { id:"kate-janecek", nom:"Kate Janecek", meta:"sclérose en plaques", seances:["09/09","16/09"], note:"« elle adore soulever des poids donc ne pas hésiter à mettre des exos où y en a ». Fentes faites au TRX à 15 kg, « elle peut pas l'équilibre avec sa maladie »" },
-    { id:"mathilde-piaux", nom:"Mathilde Piaux", seances:["14/09"], note:"", prio:true },
-    { id:null, nom:"Nathan Gattegno", seances:["08/09","10/09"], note:"Blocs ramenés de 4T à 3T le 08/09, dead bug bâton « trop dur ».", prio:true, horsFeuille:true },
-    { id:"pascal-ramondou", nom:"Pascal Ramoudou", seances:["12/09"], note:"", prio:true },
-    { id:"philippe-heraudet", nom:"Philippe Heraudet", seances:["15/09"], note:"", prio:true },
-    { id:"philippe-herve", nom:"Philippe Hervé", seances:["10/09","16/09"], note:"« le repère dans l'espace est très compliqué donc à suivre attentivement l'exécution des exercices ». DL 30 kg : « posture à travailler ++ avant de monter en charge »" },
-    { id:"quitterie-madelin", nom:"Quitterie Madelin", seances:["10/09"], note:"« grosse amélioration sur la posture sur les fentes, il faut juste améliorer l'exécution sur le push press ». Fentes 2×15 kg, RDL kb 32 kg" },
-    { id:"sandra-messibah", nom:"Sandra Messibah", seances:["12/09"], note:"", prio:true },
-    { id:"sebastien-thalamy", nom:"Sébastien Thalamy", seances:["09/09","11/09"], note:"Squat box prévu 60 kg → fait 70 kg ×10. Dips lestés 10 kg ×10" },
-    { id:"solene-lebihan", nom:"Solène Lebihan", seances:["09/09","11/09","12/09","16/09"], note:"12/09 : « grosse fatigue de la semaine » ; « la posture s'améliore de séance en séance sur le squat depuis qu'on a enlevé les chaussures ». 16/09 : « RAS mais fatiguée en ce moment, ne pas hésiter à adapter »" },
-    { id:"sophie-collantier", nom:"Sophie Collantier", seances:["12/09"], note:"Finisher rameur intermittent remplacé par 2×10 cal au ski.", prio:true },
-    { id:"adrien-lalut", nom:"Adrien Lalut", seances:["14/09","15/09"], note:"« bonne posture de manière générale, bon repère dans l'espace ». Séance 2 faite en accès libre", nouveau:true, anomalie:true },
-    { id:"henry-lemoine", nom:"Henry Lemoine", seances:["15/09"], note:"« bonne posture, il est propre sur les mouvements et il cherche les sensations ». Consigne : « monter le poids au rowing progressivement »", nouveau:true },
-    { id:"julian-helissey", nom:"Julian Helissey", seances:["11/09"], note:"Squat bulgare prévu 20 kg → 2×16 kg. Voir l'échéance trail du 16 octobre." }
+    { id:"antoine-feix", nom:"Antoine Feix", seances:["19/09"], note:"« bonne séance sur l'ensemble des blocs ». Squat box remonté à 35 kg." },
+    { id:"pascal-ramondou", nom:"Pascal Ramoudou", seances:["19/09"], note:"", prio:true },
+    { id:"solene-lebihan", nom:"Solène Lebihan", seances:["17/09","18/09"], note:"Aucune remarque particulière cette semaine — la fatigue notée à la mi-septembre n'est pas reconduite." },
+    { id:"anne-lise-medalin", nom:"Anne Lise Medalin", seances:["19/09"], note:"« bonne séance sur l'ensemble des blocs ». Squat box remonté à 35 kg (prévu 32,5 kg)." },
+    { id:"armand-azencot", nom:"Armand Azencot", seances:["19/09"], note:"Séance stable, pas de nouveau commentaire — le coude reste sous surveillance (cf. semaine du 16/09)." },
+    { id:"sandra-messibah", nom:"Sandra Messibah", seances:["17/09","18/09"], note:"", prio:true },
+    { id:"sophie-collantier", nom:"Sophie Collantier", seances:["19/09"], note:"Tirage vertical ramené de 35 à 30 kg, finisher passé du rameur au vélo (AB)." },
+    { id:"emilie-white", nom:"Emilie White", seances:["19/09"], note:"Séance légère standard, aucune remarque du coach." },
+    { id:"noic-gouhizoun", nom:"Noic Gouhizoun", seances:["18/09"], note:"", prio:true },
+    { id:"francoise-sucre", nom:"Françoise Sucré", seances:["17/09"], note:"Séance standard, aucune remarque." },
+    { id:"marc-vernet", nom:"Marc Vernet", seances:["18/09"], note:"", prio:true },
+    { id:null, nom:"Beatrice Piquard", seances:["18/09","19/09"], note:"", prio:true, horsFeuille:true },
+    { id:"kate-janecek", nom:"Kate Janecek", seances:["18/09"], note:"", prio:true },
+    { id:null, nom:"Perrine Courtellemont", seances:["18/09"], note:"", prio:true, horsFeuille:true },
+    { id:"catarina-barros", nom:"Catarina Barros", seances:["18/09"], note:"", prio:true },
+    { id:"sebastien-thalamy", nom:"Sébastien Thalamy", seances:["18/09"], note:"Séance standard, charges lourdes maintenues (hip thrust 105 kg)." },
+    { id:null, nom:"Nathan Gattegno", seances:["17/09"], note:"35 kg au squat au lieu des 45 kg prévus, sans raison indiquée dans le dossier.", horsFeuille:true },
+    { id:"caroline-gregori", nom:"Caroline Gregori", seances:["17/09"], note:"", prio:true },
+    { id:"justine-boissou", nom:"Justine Boissou", seances:["17/09"], note:"Aucun commentaire du coach cette semaine — pas de nouvelle sur le défaut de hip hinge signalé mi-septembre." },
+    { id:null, nom:"Valeria Castelletto", seances:["17/09"], note:"Écarts charge prescrite / charge réalisée non expliqués dans les colonnes Commentaire (b-stance, tirage). À faire vérifier auprès du coach.", horsFeuille:true, anomalie:true },
+    { id:"christophe-camicas", nom:"Christophe Camicas", seances:["17/09"], note:"Aucune remarque de fond ; la ligne du 17/09 a une structure de cellule mal formée dans le document (probable artefact de mise en forme).", anomalie:true },
+    { id:"alexandre-desse", nom:"Alexandre Desse", seances:["17/09"], note:"« on a fait cette séance parce que la séance d'avant était presque la même que celle faite plus tôt dans la semaine » — note d'organisation, aucune douleur." },
+    { id:"dhyana-noel", nom:"Dhyana Noel", seances:["17/09"], note:"", prio:true },
+    { id:"elea-riviere", nom:"Elea Rivière", seances:["17/09"], note:"", prio:true },
+    { id:null, nom:"Nelly Deschamps", seances:["17/09"], note:"Notes techniques uniquement (amplitude sur le squat b-stance, technique au wall ball), aucune douleur.", horsFeuille:true },
+    { id:"pauline-delpon", nom:"Pauline Delpon", seances:["17/09"], note:"« reprise » — reprise de l'entraînement après une interruption, sans détail supplémentaire." },
+    { id:"quitterie-madelin", nom:"Quitterie Madelin", seances:["17/09"], note:"« dur ce le front squat avec la rotation d'épaule, séance un peu longue » — difficulté d'exécution plutôt qu'une douleur. Date notée « 17/089 » dans le document (coquille probable).", anomalie:true },
+    { id:"jena-guillaume-rocher", nom:"Jean Guillaume Rocher", seances:["17/09"], note:"« corriger la technique de manière systémique ». Squat et tirage vertical réalisés sous la charge prévue (52,5 → 60 kg cible)." }
   ],
 
   sansSeance: [
-    { id:"catherine-vienne", nom:"Catherine Vienne", derniere:"07/09" },
-    { id:"charles-de-resseguier", nom:"Charles de Resseguier", derniere:"07/09" },
-    { id:"francoise-sucre", nom:"Françoise Sucré", derniere:"07/09" }
+    { id:"julian-helissey", nom:"Julian Helissey", derniere:"11/09" },
+    { id:"gilles-piaux", nom:"Gilles Piaux", derniere:"14/09" }
   ],
 
-  fatigue: ["solene-lebihan","mathilde-piaux","sandra-messibah","julien-lacroix"],
+  fatigue: ["sandra-messibah","dhyana-noel"],
 
   anomalies: [
     { titre:"Contamination des bilans entre clients", gravite:"alert",
@@ -1216,37 +1213,38 @@ const RETOURS = {
         "<b>Florence Aparico</b> — le poids de corps de référence de son bilan est de 119,2 kg, ce qui sert de base à tous ses ratios K-pull. Le chiffre est incohérent avec son profil et avec les charges qu'elle soulève.",
         "<b>Adrien Lalut</b> — son bilan indique un poids de corps de 119,2 kg. <b>C'est le chiffre qui a été injecté dans le bilan de Florence Aparico.</b>"
       ],
-      chute:"Les normes calculées à partir de ces bilans ne sont pas utilisables pour piloter les charges. Tant que l'export n'est pas fiabilisé, la programmation s'appuie sur les charges réellement soulevées, pas sur les ratios du bilan." },
+      chute:"Toujours non corrigé depuis le rapport du 16/09. Les normes calculées à partir de ces bilans ne sont pas utilisables pour piloter les charges ; la programmation continue de s'appuyer sur les charges réellement soulevées." },
 
     { titre:"Treize clients suivis hors de la feuille « Dossier pedro 2 »", gravite:"warn",
       chapeau:"Cette page pilote la génération sur 94 clients ; la feuille « Dossier pedro 2 » n'en contient que 81. Treize clients reçoivent un bloc sans figurer dans la feuille qui sert de référence au relevé des retours coach — ils y échappent donc.",
       liste:["Christophe Camicas","Corinne Napal","Deborah Foulonneau","Dhyana Noel","Gaelle Labadie","Guillaume Petitpas","Jean Sébastien Lacam","Julien Nguyen van","Ruth Gertrudix","Satya Pilot","Ségolène Berger","Valerie Franck","Vincent Garcia"],
-      chute:"La section « Traités hors roster » ci-contre ne nomme que trois personnes (Florent Parade, Marion Laurans, Valeria Castelletto) : les treize ci-dessus y passent pour du roster." },
+      chute:"Toujours non corrigé. La section « Traités hors roster » ci-contre ne nomme que trois personnes (Florent Parade, Marion Laurans, Valeria Castelletto) : les treize ci-dessus y passent pour du roster." },
 
-    { titre:"Doublons et orthographes dans la feuille", gravite:"warn",
+    { titre:"Doublons, orthographes et coquilles de dates", gravite:"warn",
       points:[
         "Une ligne « Xavier » sans nom de famille pointe vers le même document que <b>Xavier Thomas</b> : doublon à supprimer.",
         "La feuille écrit <b>Pascal Ramoudou</b> là où les dossiers Drive portent <b>Pascal Ramondou</b>.",
-        "La feuille écrit <b>Jena Guillaume Rocher</b>, <b>Alexendra APARD</b> et <b>Gaspard farine</b> : à harmoniser avec les dossiers."
+        "La feuille écrit <b>Marc Vernet</b> là où le dossier et le document Drive portent <b>Marc Veyret</b> : à harmoniser (nouveau cette semaine).",
+        "La feuille écrit <b>Jena Guillaume Rocher</b>, <b>Alexendra APARD</b> et <b>Gaspard farine</b> : à harmoniser avec les dossiers.",
+        "<b>Quitterie Madelin</b> : la séance du 17/09 est datée « 17/089 » dans son document (chiffre en trop, coquille probable — nouveau cette semaine)."
       ] },
 
     { titre:"Reste du rapport précédent", gravite:"warn",
       points:[
         "<b>Le fileId de Gaspard Farine</b> reste à corriger dans « Dossier pedro 2 ».",
-        "<b>Les dates postérieures à la séance</b> signalées au 07/09 (Anne Lise Medalin, Catherine Leonard, Jean Pujol, Sandra Messibah au 29/09, Laurence Poulain au 08/09, Arthur Marien au 11/09) n'ont pas été corrigées.",
-        "<b>Julie Leonard et Philippe Heraudet</b>, dont la grille était entièrement à « Pas validé » sans commentaire le 01/09 : le cas de Philippe Heraudet est levé — son coach annote bien, c'est la grille qui n'était pas remplie."
+        "<b>Les dates postérieures à la séance</b> signalées au 07/09 (Anne Lise Medalin, Catherine Leonard, Jean Pujol, Sandra Messibah au 29/09, Laurence Poulain au 08/09, Arthur Marien au 11/09) n'ont toujours pas été corrigées.",
+        "<b>La structure de cellule de Christophe Camicas</b> pour la séance du 17/09 est mal formée dans le document (colonne Activ vide, fusionnée avec B3) — probablement un artefact de mise en forme plutôt qu'une vraie erreur de contenu."
       ] }
   ],
 
   changements: [
-    "La grille « Retours Coach » a été simplifiée le 08/09, comme recommandé au rapport précédent : une ligne par bloc, Validé / Commentaire.",
-    "Un document de procédure a été créé le 16/09 — « SOP UPB — Onboarding client & Génération des séances ».",
-    "Plusieurs clients sont passés au bloc mensuel structuré en 8 à 12 séances numérotées avec colonne « Commentaire » dédiée, nettement plus exploitable que le tableau de mois libre.",
-    "Trois nouveaux clients sont entrés dans le suivi : Adrien Lalut, Henry Lemoine, Jean Pierre Catherin."
+    "Dhyana Noël a annoncé son départ du programme dans environ un mois (note du 17/09) — à anticiper pour la suite de sa programmation.",
+    "Pascal Ramondou a maintenant un protocole de rééducation dédié pour sa tendinite au coude (prises neutres, rowing allégé) : la gestion est devenue active plutôt que réactive.",
+    "Deux clients suivis n'ont eu aucune séance enregistrée sur la période (Julian Helissey depuis le 11/09, Gilles Piaux depuis le 14/09) — à vérifier auprès du coach."
   ],
 
   perimetre: {
-    nonOuverts: ["Emilie White","Guillaume Puygrenier","Célia Lina","Pauline Delpon","Marie Fourmey","Martine Viard","Noic Gouhizoun","Marc Vernet","Ludovic Mauger","Xavier Josseaume","Anne Lise Medalin","Xavier Thomas"],
+    nonOuverts: ["Anne Lise Medalin","Aurelie Oudry","Benoit Pradignac","Caroline Gregori","Charles de Resseguier","Christophe Camicas","Célia Lina","Guillaume Puygrenier","Jean Pierre Catherin","Jean Pujol","Jean Sébastien Lacam","Jena Guillaume Rocher","Julie Leonard","Justine Boissou","Marc Vernet","Martine Viard","Philippe Heraudet","Audrey Ahmed","Sebastien Daumur"],
     horsFeuille: ["Beatrice Piquard","Perrine Courtellemont","Dhyana Noel","Christophe Camicas","Ruth Gertrudix","Florent Parade","Marion Laurans","Valeria Castelletto","Fanny Gaillard","Safouane Rihani","Marika Dufour","Frédérique Haliche","Caroline Decombe"]
   }
 };
@@ -1256,12 +1254,16 @@ const RETOURS = {
 const RC_PRIO_BY_ID = new Map();
 RETOURS.prio.forEach(p => { if (p.id) RC_PRIO_BY_ID.set(p.id, p.niveau); });
 const RC_FLAG = { alert:["", "Douleur"], warn:["f-warn","À surveiller"], ok:["f-ok","Progrès"] };
+const RC_PERIODE_LBL = (() => {
+  const ddmm = s => s.slice(8, 10) + "/" + s.slice(5, 7);
+  return ddmm(RETOURS.periode.debut) + " au " + ddmm(RETOURS.periode.fin);
+})();
 
 function rcFlagHtml(id){
   const n = RC_PRIO_BY_ID.get(id);
   if (!n) return "";
   const [cls, txt] = RC_FLAG[n];
-  return `<span class="sep">·</span><a class="rc-flag ${cls}" href="#retours" title="Point d'attention relevé du 08 au 16/09 — ouvrir les retours coach">${txt}</a>`;
+  return `<span class="sep">·</span><a class="rc-flag ${cls}" href="#retours" title="Point d'attention relevé du ${RC_PERIODE_LBL} — ouvrir les retours coach">${txt}</a>`;
 }
 
 function etat(c){
