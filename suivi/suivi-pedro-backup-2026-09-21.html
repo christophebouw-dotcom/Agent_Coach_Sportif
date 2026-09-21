@@ -234,6 +234,12 @@
     background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:7px 11px;
   }
   .noterow input:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; }
+  .ce-fields { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .ce-fields input { font:inherit; font-size:12.5px; color:var(--ink); background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:7px 11px; }
+  .ce-fields input:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; }
+  .ce-fields input[data-act="ce-nom"] { flex:1; min-width:160px; }
+  .ce-fields input[data-act="ce-freq"] { width:64px; }
+  .ce-fields input[data-act="ce-email"] { flex:1; min-width:180px; }
   .empty { padding:32px 20px; text-align:center; border:1.5px dashed var(--line-2); border-radius:var(--r); background:var(--surface-2); }
   .empty p { margin:0; color:var(--ink-2); font-size:13px; }
   .empty .empty-sub { margin-top:5px; font-size:11.5px; color:var(--ink-3); }
@@ -1311,6 +1317,9 @@ let distancielLoaded = false;
 let store = null;
 let storeDistanciel = null;
 const openNotes = new Set();
+const openEditClients = new Set();
+const clientOverrides = new Map(); // id -> {nom, freq}
+let clientOverridesStore = null;
 let filterEtat = "all", filterFreq = 0, query = "";
 
 // --- génération assistée (mcp + sample) ---
@@ -1355,6 +1364,7 @@ function rowHtml(c){
     `<button type="button" data-act="statut" data-id="${c.id}" data-v="${k}" aria-pressed="${statut===k}">${lab}</button>`
   ).join("");
   const open = openNotes.has(c.id);
+  const openEdit = openEditClients.has(c.id);
   return `<div class="client${cls}" data-row="${c.id}">
     <div class="crow">
       <div class="who">
@@ -1371,12 +1381,20 @@ function rowHtml(c){
         <div class="steps" ${store ? "" : 'data-off="1"'} role="group" aria-label="Suivi de ${esc(c.nom)}">${steps}</div>
         <button type="button" class="noteb" data-act="note" data-id="${c.id}" data-has="${note ? 1 : 0}"
                 aria-label="Note sur ${esc(c.nom)}" aria-expanded="${open}">✎</button>
+        <button type="button" class="noteb" data-act="editclient" data-id="${c.id}"
+                aria-label="Modifier les infos de ${esc(c.nom)}" aria-expanded="${openEdit}" title="Modifier nom / fréquence / email">⚙</button>
         <button type="button" class="genb" data-act="gen" data-id="${c.id}" ${genReady ? "" : "disabled"}
                 title="${genReady ? "Générer le bloc " + TARGET_MOIS + " via l'IA, à partir de l'historique Drive" : "Génération indisponible dans cette vue"}">Générer</button>
       </div>
     </div>
     ${open ? `<div class="noterow"><input id="note-${c.id}" data-act="noteinput" data-id="${c.id}" value="${esc(note)}"
        placeholder="Douleur, contrainte, matériel, rappel…" aria-label="Note sur ${esc(c.nom)}"></div>` : ""}
+    ${openEdit ? `<div class="noterow"><div class="ce-fields">
+       <input id="ce-nom-${c.id}" data-act="ce-nom" data-id="${c.id}" value="${esc(c.nom)}" placeholder="Nom du client" aria-label="Nom de ${esc(c.nom)}">
+       <input id="ce-freq-${c.id}" type="number" min="1" max="7" data-act="ce-freq" data-id="${c.id}" value="${c.freq}" aria-label="Fréquence de ${esc(c.nom)}">
+       <input id="ce-email-${c.id}" type="email" data-act="ce-email" data-id="${c.id}" value="${esc(clientEmails.get(c.id) || "")}" placeholder="Email (facturation)" aria-label="Email de ${esc(c.nom)}">
+       <button type="button" class="genb" data-act="ce-save" data-id="${c.id}">Enregistrer</button>
+     </div></div>` : ""}
     ${genPanelHtml(c)}
   </div>`;
 }
@@ -1527,6 +1545,33 @@ $("#list").addEventListener("click", e => {
     if (input) input.focus();
     return;
   }
+  if (b.dataset.act === "editclient") {
+    if (openEditClients.has(id)) openEditClients.delete(id); else openEditClients.add(id);
+    renderList();
+    const input = document.getElementById("ce-nom-" + id);
+    if (input) input.focus();
+    return;
+  }
+  if (b.dataset.act === "ce-save") {
+    const nomInput = document.getElementById("ce-nom-" + id);
+    const freqInput = document.getElementById("ce-freq-" + id);
+    const emailInput = document.getElementById("ce-email-" + id);
+    const nom = nomInput.value.trim();
+    if (!nom) { nomInput.focus(); return; }
+    const freq = Math.max(1, Math.min(7, parseInt(freqInput.value, 10) || 1));
+    const email = emailInput.value.trim();
+    clientOverrides.set(id, { nom, freq });
+    if (clientOverridesStore) clientOverridesStore.doc(id).set({ nom, freq }).catch(() => {});
+    if (email) {
+      clientEmails.set(id, email);
+      if (clientEmailsStore) clientEmailsStore.doc(id).set({ email }).catch(() => {});
+    }
+    applyClientOverride(id, { nom, freq });
+    openEditClients.delete(id);
+    renderAll();
+    flashRow(id);
+    return;
+  }
   if (b.dataset.act === "statut") {
     if (!store) return;
     const cur = suivi.get(id) || {};
@@ -1554,6 +1599,16 @@ function save(id, body){
 function recomputeCounts(){
   counts.ok = 0; counts.warn = 0; counts.alert = 0;
   clients.forEach(c => counts[c.etat]++);
+}
+
+function applyClientOverride(id, patch){
+  const c = clients.find(x => x.id === id);
+  if (!c) return;
+  if (patch.nom) c.nom = patch.nom;
+  if (patch.freq) c.freq = patch.freq;
+  c.search = norm(c.nom);
+  c.etat = etat(c);
+  recomputeCounts();
 }
 
 // --- génération assistée : lecture Drive (mcp) + rédaction (sample) ---
@@ -2293,6 +2348,14 @@ document.getElementById("bankgrid").addEventListener("click", e => {
       const emailEl = document.getElementById("fac-email");
       if (sel && emailEl && document.activeElement !== emailEl) emailEl.value = clientEmails.get(sel.value) || "";
     }, () => { /* les emails clients restent locaux si interrompus */ });
+    clientOverridesStore = db.collection("clients-overrides");
+    clientOverridesStore.onSnapshot(snap => {
+      snap.docs.forEach(d => {
+        const v = d.data() || {};
+        if (v.nom || v.freq) applyClientOverride(d.id, { nom: v.nom, freq: v.freq });
+      });
+      renderAll();
+    }, () => { /* les modifications client restent locales si interrompues */ });
     tachesWeekKey = tacheWeekKey();
     tachesStore = db.collection("taches-hebdo/" + tachesWeekKey + "/items");
     tachesStore.onSnapshot(snap => {
