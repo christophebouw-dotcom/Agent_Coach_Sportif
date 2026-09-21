@@ -922,9 +922,13 @@
   <section class="band">
     <div class="band-head">
       <h2>Suivi distanciel</h2>
-      <button type="button" id="dist-refresh" class="genb" style="padding:6px 12px;font-size:11px;">Actualiser depuis Drive</button>
+      <div style="display:flex;gap:8px;">
+        <button type="button" id="dist-add-toggle" class="genb" style="padding:6px 12px;font-size:11px;">+ Nouveau client</button>
+        <button type="button" id="dist-refresh" class="genb" style="padding:6px 12px;font-size:11px;">Actualiser depuis Drive</button>
+      </div>
     </div>
     <p class="gp-note" style="margin:0 0 14px;">Liste tous les programmes du dossier Drive « Suivi distanciel » (un doc « Programme Distanciel - [nom] » par client à distance). Le lien ouvre le programme ; le statut « où j'en suis » est enregistré sur cette page.</p>
+    <div id="dist-add-row"></div>
     <div id="dist-status" class="gp-msg"></div>
     <div class="listwrap" style="margin-top:12px;">
       <div class="colhead">
@@ -2853,11 +2857,14 @@ function distancielRowHtml(c){
     `<button type="button" data-etat="${k}" data-id="${c.id}" aria-pressed="${statut === k}">${esc(lab)}</button>`
   ).join("");
   const modif = c.modified ? fmtDate(c.modified.slice(0, 10)) : "—";
-  return `<div class="client">
+  const lien = c.viewUrl
+    ? `<a href="${c.viewUrl}" target="_blank" rel="noopener">Programme distanciel</a>`
+    : `<span style="color:var(--ink-3);">Aucun programme généré — clique sur « Générer »</span>`;
+  return `<div class="client" data-row="${c.id}">
     <div class="crow">
       <div class="who">
         <div class="nm">${esc(c.nom)}</div>
-        <div class="meta"><a href="${c.viewUrl}" target="_blank" rel="noopener">Programme distanciel</a></div>
+        <div class="meta">${lien}</div>
       </div>
       <span class="jours">${esc(modif)}</span>
       <div class="suivi">
@@ -2872,10 +2879,34 @@ function distancielRowHtml(c){
   </div>`;
 }
 
+function renderDistancielAddRow(){
+  const el = document.getElementById("dist-add-row");
+  if (!distAddOpen) { el.innerHTML = ""; return; }
+  const already = new Set(distancielClients.map(c => norm(c.nom)));
+  const options = clients
+    .filter(c => !already.has(norm(c.nom)))
+    .slice()
+    .sort((a, b) => a.nom.localeCompare(b.nom, "fr"))
+    .map(c => `<option value="${esc(c.nom)}"></option>`)
+    .join("");
+  el.innerHTML = `<div class="ob-row" style="margin-bottom:12px;">
+    <div class="ob-inline" style="flex:1;min-width:220px;">
+      <label for="dist-add-input">Client (issu du suivi des blocs)</label>
+      <input id="dist-add-input" list="dist-add-options" placeholder="Nom du client…" autocomplete="off">
+      <datalist id="dist-add-options">${options}</datalist>
+    </div>
+    <button type="button" class="genb" id="dist-add-confirm" style="padding:9px 14px;">Ajouter</button>
+    <button type="button" id="dist-add-cancel" style="appearance:none;border:none;background:none;cursor:pointer;color:var(--ink-3);font:inherit;font-size:12px;padding:9px 4px;">Annuler</button>
+    <div id="dist-add-err"></div>
+  </div>`;
+  document.getElementById("dist-add-input").focus();
+}
+
 function renderDistanciel(){
+  renderDistancielAddRow();
   const listEl = document.getElementById("dist-list");
   if (!distancielClients.length) {
-    listEl.innerHTML = '<div class="empty"><p>Aucun programme trouvé dans le dossier « Suivi distanciel ».</p><p class="empty-sub">Les programmes générés depuis le suivi des blocs apparaîtront ici.</p></div>';
+    listEl.innerHTML = '<div class="empty"><p>Aucun programme trouvé dans le dossier « Suivi distanciel ».</p><p class="empty-sub">Ajoute un client avec « + Nouveau client », ou les programmes générés depuis le suivi des blocs apparaîtront ici.</p></div>';
     return;
   }
   const sorted = distancielClients.slice().sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
@@ -2909,8 +2940,34 @@ async function loadDistanciel(){
 }
 
 const distOpenNotes = new Set();
+let distAddOpen = false;
 
 document.getElementById("dist-refresh").addEventListener("click", () => loadDistanciel());
+
+document.getElementById("dist-add-toggle").addEventListener("click", () => {
+  distAddOpen = !distAddOpen;
+  renderDistancielAddRow();
+});
+
+document.getElementById("dist-add-row").addEventListener("click", e => {
+  if (e.target.closest("#dist-add-cancel")) { distAddOpen = false; renderDistancielAddRow(); return; }
+  if (e.target.closest("#dist-add-confirm")) {
+    const input = document.getElementById("dist-add-input");
+    const name = input.value.trim();
+    const errEl = document.getElementById("dist-add-err");
+    if (!name) { errEl.innerHTML = '<p class="gp-err" style="margin-top:6px;">Indique un nom de client.</p>'; return; }
+    const rosterClient = clients.find(x => x.search === norm(name));
+    if (!rosterClient) { errEl.innerHTML = '<p class="gp-err" style="margin-top:6px;">Aucun client « ' + esc(name) + ' » trouvé dans le suivi des blocs. Vérifie l\'orthographe, ou onboarde-le d\'abord.</p>'; return; }
+    if (distancielClients.some(c => norm(c.nom) === rosterClient.search)) {
+      errEl.innerHTML = '<p class="gp-err" style="margin-top:6px;">Ce client a déjà une entrée dans le suivi distanciel.</p>';
+      return;
+    }
+    distancielClients.push({ id: obSlug(rosterClient.nom) || rosterClient.id, nom: rosterClient.nom, docId: null, viewUrl: null, modified: null, search: rosterClient.search });
+    distAddOpen = false;
+    renderDistanciel();
+    flashRow(obSlug(rosterClient.nom) || rosterClient.id);
+  }
+});
 
 document.getElementById("dist-list").addEventListener("click", e => {
   const genBtn = e.target.closest("button[data-act^='dist-gen']");
