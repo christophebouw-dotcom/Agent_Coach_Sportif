@@ -886,9 +886,10 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
         <input id="ob-name" class="search" type="text" placeholder="Nom du nouveau client" style="flex:1;min-width:220px;">
         <div class="ob-inline" style="min-width:130px;"><label>Séances / semaine</label><input id="ob-freq" type="number" min="1" max="7" value="2" style="padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit;font-size:12.5px;"></div>
+        <div class="ob-inline" style="min-width:220px;"><label>Email (pour la facturation)</label><input id="ob-email" type="email" placeholder="client@exemple.fr" style="padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit;font-size:12.5px;"></div>
         <button id="ob-create-folder" type="button" class="genb" style="padding:9px 16px;font-size:12.5px;">Créer le dossier + l'historique</button>
       </div>
-      <p class="gp-note" style="margin:8px 0 0;">Crée le dossier, un doc historique vide (prêt pour la 1ère génération) et ajoute le client dans « Suivi des blocs » ci-contre, sans passer par la feuille « Dossier pedro 2 ».</p>
+      <p class="gp-note" style="margin:8px 0 0;">Crée le dossier, un doc historique vide (prêt pour la 1ère génération) et ajoute le client dans « Suivi des blocs » ci-contre, sans passer par la feuille « Dossier pedro 2 ». L'email (facultatif) est mémorisé et réutilisé automatiquement dans l'onglet Facturation.</p>
       <div id="ob-folder-status" style="margin-top:12px;"></div>
 
       <div id="ob-bilan-wrap" hidden style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line);">
@@ -2536,6 +2537,12 @@ document.getElementById("ob-create-folder").addEventListener("click", async () =
     TOTAL = clients.length;
     recomputeCounts();
     renderAll();
+
+    const email = document.getElementById("ob-email").value.trim();
+    if (email) {
+      clientEmails.set(id, email);
+      if (clientEmailsStore) clientEmailsStore.doc(id).set({ email }).catch(() => {});
+    }
 
     status.innerHTML = `<p class="gp-done">📁 Dossier + historique créés pour <b>${esc(name)}</b> — <a href="${folderPayload.viewUrl}" target="_blank" rel="noopener">ouvrir le dossier</a>. Ajouté·e dans « Suivi des blocs ».</p>`;
     document.getElementById("ob-bilan-name").textContent = name;
