@@ -1,0 +1,691 @@
+<title>Frisson Sous Pression</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Yellowtail&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme:dark;
+    --ink:#140403;
+    --cream:#f5e8d8;
+    --cream-2:#e4cfbc;
+    --muted:#b58f7a;
+    --hot:#ff8a3d;
+    --cap:#cf2e1d;
+    --cap-hi:#e8452f;
+    --line:rgba(245,232,216,.15);
+  }
+  html,body{background:var(--ink);color:var(--cream)}
+  body{font:400 16px/1.55 "Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;padding-inline:16px;-webkit-font-smoothing:antialiased}
+  .ad{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);align-items:center;gap:24px;min-height:min(100svh,1000px)}
+  .copy{display:flex;flex-direction:column;gap:28px;padding-block:48px;max-width:520px}
+  .eyebrow{font:600 12px/1.3 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0}
+  .eyebrow b{color:var(--hot);font-weight:600}
+  h1{font:900 clamp(64px,8.6vw,136px)/.84 "Big Shoulders Display","Arial Narrow",Impact,sans-serif;text-transform:uppercase;letter-spacing:-.005em;margin:0}
+  h1 span{display:block;color:var(--hot)}
+  .lede{font-size:18px;line-height:1.55;color:var(--cream-2);max-width:40ch;margin:0}
+  .gauge{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-block:1px solid var(--line)}
+  .cell{padding-block:14px;min-width:0}
+  .cell + .cell{padding-left:16px;border-left:1px solid var(--line)}
+  .cell:not(:last-child){padding-right:12px}
+  .k{font:600 10.5px/1.2 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .v{font:600 clamp(20px,2.2vw,26px)/1.1 "JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;margin-top:8px;white-space:nowrap}
+  .v small{font-size:12px;color:var(--muted);font-weight:400;margin-left:4px}
+  .meter{height:3px;background:var(--line);margin-top:10px;overflow:hidden}
+  .meter i{display:block;height:100%;background:var(--hot);transform-origin:left center}
+  .actions{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .btn{appearance:none;border:0;cursor:pointer;background:var(--cap);color:var(--cream);font:600 13px/1 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;padding:17px 26px;border-radius:2px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25);transition:background .15s,transform .1s}
+  .btn:hover{background:var(--cap-hi)}
+  .btn:active{transform:translateY(1px)}
+  .btn:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
+  .hint{font-size:13px;color:var(--muted);margin:0}
+  .stage{position:relative;height:min(94svh,940px);min-height:520px}
+  .stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .fine{max-width:1280px;margin:0 auto;padding-block:20px 36px;border-top:1px solid var(--line);font-size:12px;line-height:1.5;color:var(--muted);display:flex;justify-content:space-between;gap:8px 24px;flex-wrap:wrap}
+  .fine p{margin:0;max-width:70ch}
+  @media (max-width:860px){
+    .ad{grid-template-columns:minmax(0,1fr);gap:0;min-height:0}
+    .stage{order:-1;height:74svh;min-height:460px}
+    .copy{padding-block:4px 40px;max-width:none}
+  }
+  @media (max-width:420px){
+    .cell + .cell{padding-left:10px}
+    .k{letter-spacing:.1em}
+  }
+</style>
+
+<main class="ad">
+  <section class="copy" aria-labelledby="titre">
+    <p class="eyebrow"><b>Frisson</b> · Cola original · 33 cl verre</p>
+    <h1 id="titre">Sous <span>pression.</span></h1>
+    <p class="lede">Sous la capsule, 2,6 bars de gaz carbonique attendent. Un geste, un psschhht, et tout le verre s'emplit de bulles.</p>
+    <div class="gauge" aria-live="off">
+      <div class="cell">
+        <div class="k">Pression</div>
+        <div class="v"><span id="pv">2,60</span><small>bar</small></div>
+        <div class="meter"><i id="pm"></i></div>
+      </div>
+      <div class="cell">
+        <div class="k">Service</div>
+        <div class="v">4<small>°C</small></div>
+        <div class="meter"><i style="transform:scaleX(.18)"></i></div>
+      </div>
+      <div class="cell">
+        <div class="k">Bulles</div>
+        <div class="v"><span id="bv">0</span></div>
+        <div class="meter"><i id="bm" style="transform:scaleX(0)"></i></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="toggle" type="button">Décapsuler</button>
+      <p class="hint" id="hint">Bouteille scellée. Le gaz reste dissous, presque aucune bulle.</p>
+    </div>
+  </section>
+  <div class="stage" id="stage">
+    <canvas id="scene" role="img" aria-label="Bouteille de cola Frisson en verre, couverte de condensation, avec ses bulles qui montent"></canvas>
+  </div>
+</main>
+<footer class="fine">
+  <p>À servir très frais, entre 3 et 5 °C. Frisson est une marque fictive.</p>
+  <p>Aucune photo : le verre, le cola, la condensation et les bulles sont calculés en direct dans le navigateur.</p>
+</footer>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const cv = document.getElementById('scene');
+  const ctx = cv.getContext('2d');
+  const pvEl = document.getElementById('pv'), pmEl = document.getElementById('pm');
+  const bvEl = document.getElementById('bv'), bmEl = document.getElementById('bm');
+  const btn = document.getElementById('toggle'), hint = document.getElementById('hint');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const clamp = (x, a = 0, b = 1) => x < a ? a : x > b ? b : x;
+  const sm = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+  const box = (x, a, b, s) => sm(a - s, a + s, x) * (1 - sm(b - s, b + s, x));
+  const band = (x, a, b, c, d) => sm(a, b, x) * (1 - sm(c, d, x));
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  /* ---------- Profil de la bouteille (unités : hauteur totale = 1) ---------- */
+  const PTS = [[0,.094],[.006,.112],[.03,.121],[.12,.118],[.215,.104],[.32,.117],[.43,.127],[.52,.124],[.6,.108],[.68,.083],[.76,.058],[.83,.045],[.92,.0405],[.952,.041],[.962,.0492],[.984,.0492],[.996,.046],[1,.0435]];
+  const N = 1200, RT = new Float32Array(N + 1), DRT = new Float32Array(N + 1);
+  (() => {
+    const raw = new Float32Array(N + 1);
+    for (let i = 0; i <= N; i++) {
+      const t = i / N; let k = 0;
+      while (k < PTS.length - 2 && PTS[k + 1][0] < t) k++;
+      const [t0, r0] = PTS[k], [t1, r1] = PTS[k + 1];
+      raw[i] = r0 + (r1 - r0) * clamp((t - t0) / (t1 - t0));
+    }
+    for (let i = 0; i <= N; i++) {
+      const t = i / N, sig = t > .935 ? 2.5 : 13, span = Math.ceil(sig * 3);
+      let s = 0, w = 0;
+      for (let j = -span; j <= span; j++) {
+        const q = Math.min(N, Math.max(0, i + j)), ww = Math.exp(-(j * j) / (2 * sig * sig));
+        s += raw[q] * ww; w += ww;
+      }
+      RT[i] = s / w;
+    }
+    for (let i = 0; i <= N; i++) {
+      const a = Math.max(0, i - 1), b = Math.min(N, i + 1);
+      DRT[i] = (RT[b] - RT[a]) / ((b - a) / N);
+    }
+  })();
+  const R = t => { const f = clamp(t) * N, i = Math.min(N - 1, f | 0), u = f - i; return RT[i] + (RT[i + 1] - RT[i]) * u; };
+  const dR = t => DRT[Math.round(clamp(t) * N)];
+  const Ri = t => Math.min(R(t) - .0068, t > .9 ? .0335 : 1);
+  const LEVEL = .848;
+  const LT0 = .378, LT1 = .502; // bande de l'étiquette imprimée
+
+  /* ---------- État de la scène ---------- */
+  let W, Hc, dpr, Hp, cx, baseY, horizonY, glowY;
+  let stat, labelCv, specCv, dropCv, bx, by, bw, bh;
+  let liquidPath, innerPath, foamPat;
+  let labelA = null, TW = 2048, TH = 620;
+
+  function bgAt(x, y, o) {
+    const u = (x - cx) / Hp;
+    const ex = sm(0, W * .2, x) * sm(0, W * .2, W - x) * sm(0, Hc * .08, y) * sm(0, Hc * .1, Hc - y);
+    let r = 20, g = 4, b = 3;
+    if (y < horizonY) {
+      const v = (y - glowY) / Hp, d2 = u * u + v * v * .28;
+      const g1 = Math.exp(-d2 / .15), g2 = Math.exp(-d2 / .024);
+      r += ex * (140 * g1 + 215 * g2); g += ex * (24 * g1 + 150 * g2); b += ex * (12 * g1 + 78 * g2);
+    } else {
+      const vv = (y - horizonY) / Hp;
+      const h1 = Math.exp(-u * u / .09) * Math.exp(-vv / .05), h2 = Math.exp(-u * u / .45) * Math.exp(-vv / .22);
+      r += ex * (95 * h1 + 48 * h2); g += ex * (26 * h1 + 9 * h2); b += ex * (12 * h1 + 5 * h2);
+    }
+    o[0] = r; o[1] = g; o[2] = b;
+  }
+
+  function makeLabelTexture() {
+    const c = document.createElement('canvas'); c.width = TW; c.height = TH;
+    const g = c.getContext('2d');
+    g.fillStyle = '#fff'; g.strokeStyle = '#fff';
+    g.lineWidth = 7; g.beginPath(); g.moveTo(0, 16); g.lineTo(TW, 16); g.stroke();
+    g.lineWidth = 3; g.beginPath(); g.moveTo(0, 34); g.lineTo(TW, 34); g.stroke();
+    g.lineWidth = 3; g.beginPath(); g.moveTo(0, TH - 34); g.lineTo(TW, TH - 34); g.stroke();
+    g.lineWidth = 7; g.beginPath(); g.moveTo(0, TH - 16); g.lineTo(TW, TH - 16); g.stroke();
+    g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+    g.font = `${Math.round(TH * .6)}px Yellowtail, "Brush Script MT", cursive`;
+    g.fillText('Frisson', TW / 2, TH * .66);
+    g.font = `600 ${Math.round(TH * .075)}px "Instrument Sans", sans-serif`;
+    const small = 'COLA  ·  ORIGINAL  ·  DEPUIS 1921';
+    if ('letterSpacing' in g) { g.letterSpacing = `${Math.round(TH * .03)}px`; g.fillText(small, TW / 2, TH * .86); }
+    else g.fillText(small.split('').join(' '), TW / 2, TH * .86);
+    const d = g.getImageData(0, 0, TW, TH).data;
+    labelA = new Uint8Array(TW * TH);
+    for (let i = 0; i < TW * TH; i++) labelA[i] = d[i * 4 + 3];
+  }
+
+  /* ---------- Rendu physique du verre (une fois par taille) ---------- */
+  function build() {
+    const rect = stage.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = Math.max(2, Math.round(rect.width * dpr)); Hc = Math.max(2, Math.round(rect.height * dpr));
+    cv.width = W; cv.height = Hc;
+    Hp = Math.min(Hc * .74, W * 2.9);
+    cx = W / 2; baseY = Hc * .12 + Hp * 1.004 + (Hc * .74 - Hp) * .5;
+    horizonY = baseY - Hp * .06; glowY = baseY - Hp * .52;
+
+    // fond
+    stat = document.createElement('canvas'); stat.width = W; stat.height = Hc;
+    const sc = stat.getContext('2d');
+    const bgImg = sc.createImageData(W, Hc), BD = bgImg.data, o = [0, 0, 0];
+    for (let y = 0; y < Hc; y++) for (let x = 0; x < W; x++) {
+      bgAt(x + .5, y + .5, o);
+      const n = (Math.random() - .5) * 3.2, k = (y * W + x) * 4;
+      BD[k] = o[0] + n; BD[k + 1] = o[1] + n; BD[k + 2] = o[2] + n; BD[k + 3] = 255;
+    }
+    sc.putImageData(bgImg, 0, 0);
+
+    // bouteille
+    const x0 = Math.floor(cx - .14 * Hp), x1 = Math.ceil(cx + .14 * Hp);
+    const y0 = Math.floor(baseY - 1.01 * Hp), y1 = Math.ceil(baseY + 1);
+    bx = x0; by = y0; bw = x1 - x0; bh = y1 - y0;
+    const bottleCv = document.createElement('canvas'); bottleCv.width = bw; bottleCv.height = bh;
+    specCv = document.createElement('canvas'); specCv.width = bw; specCv.height = bh;
+    labelCv = document.createElement('canvas'); labelCv.width = bw; labelCv.height = bh;
+    const bImg = new ImageData(bw, bh), sImg = new ImageData(bw, bh), lImg = new ImageData(bw, bh);
+    const B = bImg.data, S = sImg.data, L = lImg.data;
+    let Lx = -.62, Ly = -.38, Lz = .69; const ln = Math.hypot(Lx, Ly, Lz); Lx /= ln; Ly /= ln; Lz /= ln;
+
+    for (let j = 0; j < bh; j++) {
+      const py = y0 + j + .5, t = (baseY - py) / Hp;
+      if (t < -.003 || t > 1.003) continue;
+      const tc = clamp(t), r = R(tc), dr = dR(tc), rp = r * Hp;
+      const av = clamp(t * Hp + .5) * clamp((1 - t) * Hp + .5);
+      const ri = Ri(tc), rip = ri * Hp;
+      const flute = .2 * band(tc, .03, .06, .17, .24) + .13 * band(tc, .55, .6, .68, .73);
+      const inLabel = tc > LT0 && tc < LT1 && labelA;
+      for (let i = 0; i < bw; i++) {
+        const px = x0 + i + .5, dx = px - cx;
+        const a = clamp(rp - Math.abs(dx) + .5) * av;
+        if (a <= 0) continue;
+        const s = clamp(dx / rp, -.999, .999);
+        const th = Math.asin(s), c = Math.cos(th);
+        const thn = th + flute * Math.sin(th * 18);
+        let nx = Math.sin(thn), nz = Math.cos(thn), ny = dr;
+        const inv = 1 / Math.hypot(nx, ny, nz); nx *= inv; ny *= inv; nz *= inv;
+        const F = .04 + .96 * Math.pow(1 - nz, 5);
+
+        // réflexion de l'environnement studio
+        const rx = 2 * nz * nx, ry = 2 * nz * ny, rz = 2 * nz * nz - 1;
+        const az = Math.atan2(rx, rz), el = Math.asin(clamp(-ry, -1, 1));
+        let er = 0, eg = 0, eb = 0;
+        const key = 22 * box(az, -1.2, -.66, .07) * box(el, -.45, .8, .12); er += key; eg += key * .98; eb += key * .94;
+        const rim = 11 * box(az, 1.78, 2.02, .05) * box(el, -.6, .85, .12); er += rim; eg += rim * .9; eb += rim * .8;
+        const top = 3.2 * sm(.32, .75, el); er += top; eg += top * .96; eb += top * .92;
+        const back = .9 * sm(2.1, 2.9, Math.abs(az)); er += back; eg += back * .42; eb += back * .2;
+        const fl = .35 * (1 - sm(-.6, -.2, el)); er += fl * .5; eg += fl * .14; eb += fl * .08;
+        const k4 = (j * bw + i) * 4;
+        S[k4] = 255 * (1 - Math.exp(-F * er * 1.25));
+        S[k4 + 1] = 255 * (1 - Math.exp(-F * eg * 1.25));
+        S[k4 + 2] = 255 * (1 - Math.exp(-F * eb * 1.25));
+        S[k4 + 3] = 255 * a;
+
+        // transmission : verre teinté + cola (Beer-Lambert)
+        let g = .0068 / Math.max(c, .1) * 2, lf = 0, Lc = 0;
+        const si = dx / rip, inside = Math.abs(si) < 1;
+        if (inside) {
+          const q = Math.sqrt(1 - si * si), lb = .022 + .02 * q;
+          if (t < lb) g += 2 * r * c * .3 * clamp((lb - t) * Hp * .5);
+          else { lf = clamp((LEVEL - t) * Hp + .5) * clamp((t - lb) * Hp + .5); Lc = 2 * ri * q; }
+        }
+        const tgR = Math.exp(-g * 9), tgG = Math.exp(-g * 2.6), tgB = Math.exp(-g * 6.5);
+        const tlR = 1 + lf * (Math.exp(-Lc * 15) - 1), tlG = 1 + lf * (Math.exp(-Lc * 42) - 1), tlB = 1 + lf * (Math.exp(-Lc * 95) - 1);
+        bgAt(lf > .5 ? cx - dx * .5 : cx + dx * .86, py - (lf > .5 ? .02 * Hp : 0), o);
+        const T = 1 - F;
+        let cr = o[0] * tgR * tlR * T, cg = o[1] * tgG * tlG * T, cb = o[2] * tgB * tlB * T;
+        if (lf > 0) { const k = lf * (1 - Math.exp(-Lc * 20)); cr += k * 14; cg += k * 3; cb += k * 1; }
+        if (inside) {
+          const md = Math.abs((t - LEVEL) * Hp);
+          if (md < 1.6 * dpr) { const m = (1 - md / (1.6 * dpr)) * .5; cr += m * 200; cg += m * 120; cb += m * 60; }
+        }
+        B[k4] = cr; B[k4 + 1] = cg; B[k4 + 2] = cb; B[k4 + 3] = 255 * a;
+
+        // étiquette peinte sur le verre
+        if (inLabel && c > .05) {
+          const u = Math.min(TW - 1, ((th / Math.PI + .5) * TW) | 0);
+          const v = Math.min(TH - 1, (((LT1 - tc) / (LT1 - LT0)) * TH) | 0);
+          const al = labelA[v * TW + u];
+          if (al) {
+            const d = Math.max(0, nx * Lx + ny * Ly + nz * Lz), shd = .3 + .82 * d;
+            L[k4] = 247 * shd; L[k4 + 1] = 239 * shd; L[k4 + 2] = 227 * shd; L[k4 + 3] = al * a;
+          }
+        }
+      }
+    }
+    bottleCv.getContext('2d').putImageData(bImg, 0, 0);
+    specCv.getContext('2d').putImageData(sImg, 0, 0);
+    labelCv.getContext('2d').putImageData(lImg, 0, 0);
+
+    // ombre de contact
+    sc.save();
+    sc.translate(cx, baseY); sc.scale(1, .1);
+    let gr = sc.createRadialGradient(0, 0, 0, 0, 0, .17 * Hp);
+    gr.addColorStop(0, 'rgba(0,0,0,.75)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    sc.fillStyle = gr; sc.beginPath(); sc.arc(0, 0, .17 * Hp, 0, 7); sc.fill();
+    sc.restore();
+
+    // reflet sur la table
+    const tmp = document.createElement('canvas'); tmp.width = bw; tmp.height = bh;
+    const tc2 = tmp.getContext('2d');
+    tc2.drawImage(bottleCv, 0, 0); tc2.drawImage(labelCv, 0, 0);
+    tc2.globalCompositeOperation = 'lighter'; tc2.drawImage(specCv, 0, 0);
+    const refl = document.createElement('canvas'); refl.width = W; refl.height = Hc;
+    const rc = refl.getContext('2d');
+    rc.setTransform(1, 0, 0, -1, 0, 2 * baseY);
+    if ('filter' in rc) rc.filter = `blur(${1.2 * dpr}px)`;
+    rc.drawImage(tmp, bx, by);
+    rc.setTransform(1, 0, 0, 1, 0, 0); rc.filter = 'none';
+    rc.globalCompositeOperation = 'destination-in';
+    gr = rc.createLinearGradient(0, baseY, 0, baseY + .3 * Hp);
+    gr.addColorStop(0, 'rgba(0,0,0,.3)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    rc.fillStyle = gr; rc.fillRect(0, baseY, W, .3 * Hp);
+    sc.drawImage(refl, 0, 0);
+
+    // caustique ambrée projetée par le cola
+    sc.save(); sc.globalCompositeOperation = 'lighter';
+    sc.translate(cx, baseY + .03 * Hp); sc.scale(1, .16);
+    gr = sc.createRadialGradient(0, 0, 0, 0, 0, .2 * Hp);
+    gr.addColorStop(0, 'rgba(255,128,44,.42)'); gr.addColorStop(.5, 'rgba(210,70,20,.16)'); gr.addColorStop(1, 'rgba(160,30,10,0)');
+    sc.fillStyle = gr; sc.beginPath(); sc.arc(0, 0, .2 * Hp, 0, 7); sc.fill();
+    sc.restore();
+
+    sc.drawImage(bottleCv, bx, by);
+
+    buildDrops();
+    buildPaths();
+    buildFoam();
+  }
+
+  /* ---------- Condensation ---------- */
+  function buildDrops() {
+    dropCv = document.createElement('canvas'); dropCv.width = bw; dropCv.height = bh;
+    const c = dropCv.getContext('2d');
+    c.translate(-bx, -by);
+    const P = (th, t) => [cx + R(t) * Hp * Math.sin(th), baseY - t * Hp];
+
+    // voile de buée
+    c.save();
+    const outer = new Path2D();
+    for (let t = .02; t <= .74; t += .004) outer.lineTo(cx - R(t) * Hp, baseY - t * Hp);
+    for (let t = .74; t >= .02; t -= .004) outer.lineTo(cx + R(t) * Hp, baseY - t * Hp);
+    outer.closePath();
+    const fog = c.createLinearGradient(0, baseY, 0, baseY - .76 * Hp);
+    fog.addColorStop(0, 'rgba(255,226,208,.035)'); fog.addColorStop(.85, 'rgba(255,226,208,.02)'); fog.addColorStop(1, 'rgba(255,226,208,0)');
+    c.fillStyle = fog; c.fill(outer);
+    c.restore();
+
+    // coulures
+    const trails = [];
+    for (let k = 0; k < 7; k++) {
+      const th0 = rand(-1.05, 1.05), t0 = rand(.52, .74), t1 = rand(.06, .3), ph = rand(0, 6);
+      const pts = [];
+      for (let t = t0; t >= t1; t -= .004) pts.push([th0 + .03 * Math.sin(t * 40 + ph) + .015 * Math.sin(t * 97), t]);
+      trails.push({ pts, th0, t1, r: rand(.0055, .0085) });
+    }
+    const nearTrail = (th, t) => trails.some(tr => t < tr.pts[0][1] + .004 && t > tr.t1 - .006 && Math.abs(th - tr.pts[Math.min(tr.pts.length - 1, Math.max(0, Math.round((tr.pts[0][1] - t) / .004)))][0]) * .12 < .0062);
+
+    // micro-gouttelettes
+    const n = Math.round(16000 * (Hp / 1300));
+    for (let i = 0; i < n; i++) {
+      const th = rand(-1.45, 1.45), t = .03 + Math.pow(Math.random(), .85) * .74;
+      if (t > .64 && Math.random() > (.76 - t) / .12) continue;
+      if (nearTrail(th, t)) continue;
+      const cs = Math.cos(th), [x, y] = P(th, t), s = rand(.35, 1.15) * dpr;
+      c.fillStyle = `rgba(255,236,222,${(rand(.05, .22) * Math.sqrt(cs)).toFixed(3)})`;
+      c.fillRect(x - s * cs / 2, y - s / 2, s * cs, s);
+    }
+
+    // traces nettes des coulures
+    for (const tr of trails) {
+      c.beginPath();
+      tr.pts.forEach(([th, t], i) => { const [x, y] = P(th, t); i ? c.lineTo(x, y) : c.moveTo(x, y); });
+      const cs = Math.cos(tr.th0);
+      c.lineCap = 'round';
+      c.strokeStyle = 'rgba(0,0,0,.16)'; c.lineWidth = .0045 * Hp * cs; c.stroke();
+      c.strokeStyle = 'rgba(255,238,226,.22)'; c.lineWidth = .7 * dpr; c.stroke();
+    }
+
+    const drop = (th, t, r) => {
+      const cs = Math.cos(th); if (cs < .15) return;
+      const [x, y] = P(th, t), rx = r * Hp * cs, ry = r * Hp * 1.12;
+      const lit = .45 + .55 * clamp(-Math.sin(th) * 1.4 + .35);
+      c.save(); c.translate(x, y); c.scale(rx, ry);
+      let g = c.createRadialGradient(0, .15, .1, 0, 0, 1);
+      g.addColorStop(0, 'rgba(255,190,130,.10)'); g.addColorStop(.7, 'rgba(60,10,5,.10)');
+      g.addColorStop(.9, 'rgba(0,0,0,.45)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = g; c.beginPath(); c.arc(0, 0, 1, 0, 7); c.fill();
+      g = c.createRadialGradient(.05, .5, 0, .05, .5, .6);
+      g.addColorStop(0, 'rgba(255,214,170,.55)'); g.addColorStop(1, 'rgba(255,214,170,0)');
+      c.fillStyle = g; c.beginPath(); c.arc(0, 0, .95, 0, 7); c.fill();
+      c.globalAlpha = lit;
+      g = c.createRadialGradient(-.32, -.42, 0, -.32, -.42, .32);
+      g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.45, 'rgba(255,255,255,.4)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+      c.fillStyle = g; c.beginPath(); c.arc(-.32, -.42, .32, 0, 7); c.fill();
+      c.restore();
+    };
+    for (let i = 0; i < 280; i++) {
+      const t = .05 + Math.pow(Math.random(), 1.2) * .72, th = rand(-1.4, 1.4);
+      if (nearTrail(th, t)) continue;
+      drop(th, t, .0014 + .0048 * Math.pow(Math.random(), 3));
+    }
+    for (const tr of trails) { const [th, t] = tr.pts[tr.pts.length - 1]; drop(th, t - .004, tr.r); }
+  }
+
+  function buildPaths() {
+    liquidPath = new Path2D();
+    for (let t = LEVEL; t >= .03; t -= .003) liquidPath.lineTo(cx - Ri(t) * Hp, baseY - t * Hp);
+    for (let t = .03; t <= LEVEL; t += .003) liquidPath.lineTo(cx + Ri(t) * Hp, baseY - t * Hp);
+    liquidPath.closePath();
+    innerPath = new Path2D();
+    for (let t = 1.002; t >= .03; t -= .003) innerPath.lineTo(cx - Ri(t) * Hp, baseY - t * Hp);
+    for (let t = .03; t <= 1.002; t += .003) innerPath.lineTo(cx + Ri(t) * Hp, baseY - t * Hp);
+    innerPath.closePath();
+  }
+
+  function buildFoam() {
+    const s = 256, c = document.createElement('canvas'); c.width = c.height = s;
+    const g = c.getContext('2d');
+    g.fillStyle = 'rgb(226,200,165)'; g.fillRect(0, 0, s, s);
+    for (let i = 0; i < 1100; i++) {
+      const x = Math.random() * s, y = Math.random() * s, r = (1 + Math.pow(Math.random(), 2.5) * 5) * dpr * .6;
+      for (const ox of [-s, 0, s]) for (const oy of [-s, 0, s]) {
+        const gg = g.createRadialGradient(x + ox - r * .3, y + oy - r * .3, 0, x + ox, y + oy, r);
+        gg.addColorStop(0, 'rgba(255,246,232,.95)'); gg.addColorStop(.75, 'rgba(236,214,184,.6)'); gg.addColorStop(1, 'rgba(140,90,50,.55)');
+        g.fillStyle = gg; g.beginPath(); g.arc(x + ox, y + oy, r, 0, 7); g.fill();
+      }
+    }
+    foamPat = ctx.createPattern(c, 'repeat');
+  }
+
+  /* ---------- Sprites ---------- */
+  const bubbleSprite = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const g = c.getContext('2d');
+    let gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(255,200,140,.10)'); gr.addColorStop(.62, 'rgba(255,190,130,.2)');
+    gr.addColorStop(.82, 'rgba(255,238,214,.92)'); gr.addColorStop(.93, 'rgba(80,24,8,.55)'); gr.addColorStop(1, 'rgba(80,24,8,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    gr = g.createRadialGradient(22, 20, 0, 22, 20, 10);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    return c;
+  })();
+  const fogSprite = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 128;
+    const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gr.addColorStop(0, 'rgba(236,238,242,.9)'); gr.addColorStop(.5, 'rgba(236,238,242,.35)'); gr.addColorStop(1, 'rgba(236,238,242,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+    return c;
+  })();
+
+  /* ---------- Simulation ---------- */
+  const MAX = 3200;
+  let bubbles = [], fogs = [], sites = [];
+  let opened = false, openAt = 0, clock = 0;
+  const cap = { on: true, x: 0, y: 0, rot: 0, vx: 0, vy: 0, vr: 0 };
+
+  function makeSites() {
+    sites = Array.from({ length: 36 }, () => ({ s: rand(-.9, .9), t: rand(.05, .72), d: Math.random(), rate: rand(.5, 2), acc: 0 }));
+  }
+  function spawn(s, t, r, d, stuck) {
+    if (bubbles.length >= MAX) return;
+    bubbles.push({ s, t, r, d, st: stuck, rmax: rand(.0013, .0026), ph: rand(0, 6.3), w: rand(2, 5) });
+  }
+  function reset() {
+    opened = false; bubbles = []; fogs = [];
+    cap.on = true; cap.x = 0; cap.y = 0; cap.rot = 0;
+    makeSites();
+    for (let i = 0; i < 26; i++) spawn(rand(-.95, .95), rand(.06, .8), .0003, Math.random() < .6 ? 0 : 1, true);
+    btn.textContent = 'Décapsuler';
+    hint.textContent = 'Bouteille scellée. Le gaz reste dissous, presque aucune bulle.';
+  }
+
+  let audio = null;
+  function psst() {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      const A = audio, now = A.currentTime, len = A.sampleRate * 1.4;
+      const buf = A.createBuffer(1, len, A.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      const src = A.createBufferSource(); src.buffer = buf;
+      const bp = A.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.setValueAtTime(5200, now); bp.frequency.exponentialRampToValueAtTime(2400, now + 1.1); bp.Q.value = .6;
+      const gn = A.createGain(); gn.gain.setValueAtTime(0, now); gn.gain.linearRampToValueAtTime(.5, now + .012); gn.gain.exponentialRampToValueAtTime(.001, now + 1.3);
+      src.connect(bp).connect(gn).connect(A.destination); src.start(now);
+      const os = A.createOscillator(), og = A.createGain();
+      os.frequency.setValueAtTime(420, now); os.frequency.exponentialRampToValueAtTime(90, now + .07);
+      og.gain.setValueAtTime(.35, now); og.gain.exponentialRampToValueAtTime(.001, now + .09);
+      os.connect(og).connect(A.destination); os.start(now); os.stop(now + .1);
+    } catch (e) { /* son indisponible */ }
+  }
+
+  function open(withSound) {
+    if (opened) return;
+    opened = true; openAt = clock;
+    cap.on = false; cap.vx = rand(-.25, .25) * Hp; cap.vy = -3.4 * Hp; cap.vr = rand(-14, 14);
+    for (let i = 0; i < 90; i++) spawn(rand(-.96, .96), rand(.05, .82), .0003, Math.random() < .6 ? 0 : 1, true);
+    for (let i = 0; i < 38; i++) emitFog();
+    if (withSound) psst();
+    btn.textContent = 'Nouvelle bouteille';
+    hint.textContent = 'La pression tombe : le CO₂ sort de la solution et se transforme en bulles.';
+  }
+  function emitFog() {
+    const my = baseY - Hp;
+    fogs.push({ x: cx + rand(-.03, .03) * Hp, y: my, vx: rand(-.18, .18) * Hp, vy: -rand(.3, .8) * Hp, r: rand(.012, .025) * Hp, a: rand(.25, .5), life: rand(1.2, 2.4), age: 0 });
+  }
+
+  function step(dt) {
+    clock += dt;
+    const age = clock - openAt;
+    const act = opened ? .35 + 2.3 * Math.exp(-age / 3) : .05;
+    for (const st of sites) {
+      st.acc += st.rate * act * 7 * dt;
+      while (st.acc >= 1) { st.acc--; spawn(st.s + rand(-.012, .012), st.t, rand(.0004, .0008), st.d, false); }
+    }
+    if (opened) {
+      const burst = 1500 * Math.exp(-age / .55);
+      let n = Math.floor(burst * dt + Math.random());
+      while (n-- > 0) spawn(rand(-.95, .95), rand(.04, LEVEL - .02), rand(.0004, .0015), Math.random(), false);
+      if (age < .9) { let f = Math.floor(45 * dt + Math.random()); while (f-- > 0) emitFog(); }
+    }
+    for (let i = bubbles.length - 1; i >= 0; i--) {
+      const b = bubbles[i];
+      if (b.st) {
+        b.r += .00016 * dt * (opened ? 1 + act : .15);
+        if (b.r > b.rmax) b.st = false;
+        continue;
+      }
+      b.t += (.045 + 38 * b.r + (opened ? .025 * act : 0)) * dt;
+      b.r += .00022 * dt * (.5 + act * .5);
+      b.ph += dt * b.w;
+      b.s = clamp(b.s + Math.sin(b.ph) * .03 * dt, -.97, .97);
+      if (b.t >= LEVEL - b.r * .5) { bubbles[i] = bubbles[bubbles.length - 1]; bubbles.pop(); }
+    }
+    for (let i = fogs.length - 1; i >= 0; i--) {
+      const f = fogs[i];
+      f.age += dt;
+      if (f.age > f.life) { fogs.splice(i, 1); continue; }
+      f.vx *= Math.exp(-2 * dt); f.vy *= Math.exp(-1.5 * dt); f.vy -= .03 * Hp * dt;
+      f.x += f.vx * dt; f.y += f.vy * dt; f.r += .07 * Hp * dt;
+    }
+    if (!cap.on) {
+      cap.vy += 2.6 * Hp * dt; cap.x += cap.vx * dt; cap.y += cap.vy * dt; cap.rot += cap.vr * dt;
+    }
+  }
+
+  function drawCap(x, yTop, rot) {
+    const Rc = .0535 * Hp, h = .031 * Hp, n = 12;
+    ctx.save(); ctx.translate(x, yTop + h / 2); ctx.rotate(rot);
+    const p = new Path2D();
+    p.moveTo(-Rc * .95, -h / 2);
+    p.quadraticCurveTo(0, -h / 2 - .007 * Hp, Rc * .95, -h / 2);
+    p.quadraticCurveTo(Rc, -h / 2, Rc, -h * .3);
+    for (let k = 0; k <= 2 * n; k++) {
+      const phi = Math.PI / 2 - k * Math.PI / (2 * n);
+      p.lineTo(Rc * Math.sin(phi) * (k % 2 ? .985 : 1), h / 2 - (k % 2 ? h * .1 : 0));
+    }
+    p.lineTo(-Rc, -h * .3);
+    p.quadraticCurveTo(-Rc, -h / 2, -Rc * .95, -h / 2);
+    p.closePath();
+    let g = ctx.createLinearGradient(-Rc, 0, Rc, 0);
+    [[0, '#300504'], [.1, '#6d110c'], [.26, '#c3321f'], [.34, '#ffc6b4'], [.4, '#d13a26'], [.62, '#8e170f'], [.84, '#3b0604'], [.94, '#7a1a10'], [1, '#2a0302']].forEach(([o, c]) => g.addColorStop(o, c));
+    ctx.fillStyle = g; ctx.fill(p);
+    ctx.save(); ctx.clip(p);
+    for (let k = 0; k < 2 * n; k++) {
+      const phi = Math.PI / 2 - (k + .5) * Math.PI / (2 * n), xs = Rc * Math.sin(phi), w = Rc * (Math.PI / (2 * n)) * Math.cos(phi);
+      const gg = ctx.createLinearGradient(xs - w / 2, 0, xs + w / 2, 0);
+      gg.addColorStop(0, 'rgba(0,0,0,.35)'); gg.addColorStop(.45, 'rgba(255,190,170,.22)'); gg.addColorStop(1, 'rgba(0,0,0,.3)');
+      ctx.fillStyle = gg; ctx.fillRect(xs - w / 2, -h * .22, w, h);
+    }
+    g = ctx.createLinearGradient(0, -h / 2, 0, h / 2);
+    g.addColorStop(0, 'rgba(255,220,205,.35)'); g.addColorStop(.18, 'rgba(0,0,0,0)'); g.addColorStop(.8, 'rgba(0,0,0,.1)'); g.addColorStop(1, 'rgba(0,0,0,.45)');
+    ctx.fillStyle = g; ctx.fillRect(-Rc, -h, 2 * Rc, 2 * h);
+    ctx.restore();
+    ctx.restore();
+  }
+
+  function foamHeight(age) {
+    return .165 * (1 - Math.exp(-age / .28)) * (.1 + .9 * Math.exp(-age / 2.6)) * Math.exp(-age / 40);
+  }
+
+  function draw() {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(stat, 0, 0);
+    const age = clock - openAt;
+
+    // bulles
+    ctx.save(); ctx.clip(liquidPath);
+    for (const b of bubbles) {
+      const ri = Ri(b.t), x = cx + b.s * ri * Hp, y = baseY - b.t * Hp;
+      const k = ri / .12, al = Math.exp(-b.d * k * 2.6) * .95 + .04;
+      const sq = .45 + .55 * Math.sqrt(1 - b.s * b.s);
+      const d = b.r * Hp * 2.9;
+      ctx.globalAlpha = al;
+      if (d < 1.8) { ctx.fillStyle = '#ffdcb4'; ctx.fillRect(x - d * sq / 2, y - d / 2, Math.max(.8, d * sq), Math.max(.8, d)); }
+      else ctx.drawImage(bubbleSprite, x - d * sq / 2, y - d / 2, d * sq, d);
+    }
+    ctx.restore();
+
+    // mousse et brouillard de CO₂ dans le col
+    if (opened) {
+      const h = foamHeight(age), ly = baseY - LEVEL * Hp, topY = ly - h * Hp;
+      if (h > .002) {
+        ctx.save(); ctx.clip(innerPath);
+        const fp = new Path2D(); const w = .06 * Hp;
+        fp.moveTo(cx - w, ly + 3 * dpr);
+        for (let i = 0; i <= 24; i++) {
+          const x = cx - w + (2 * w) * i / 24;
+          fp.lineTo(x, topY + Math.sin(i * 1.7 + clock * 3) * .0025 * Hp + Math.sin(i * 4.1 - clock * 5) * .0012 * Hp);
+        }
+        fp.lineTo(cx + w, ly + 3 * dpr); fp.closePath();
+        ctx.globalAlpha = .96; ctx.fillStyle = foamPat; ctx.fill(fp);
+        const g = ctx.createLinearGradient(0, topY, 0, ly + 3 * dpr);
+        g.addColorStop(0, 'rgba(255,240,220,.15)'); g.addColorStop(.6, 'rgba(150,80,30,.25)'); g.addColorStop(1, 'rgba(90,30,8,.6)');
+        ctx.fillStyle = g; ctx.fill(fp);
+        ctx.restore();
+        const over = h - (1 - LEVEL);
+        if (over > 0) {
+          const my = baseY - 1.0 * Hp, mh = over * Hp * .9, mw = .047 * Hp;
+          const mp = new Path2D();
+          mp.moveTo(cx - mw, my + .004 * Hp);
+          for (let i = 0; i <= 18; i++) {
+            const u = i / 18, x = cx - mw + 2 * mw * u;
+            mp.lineTo(x, my - mh * Math.sin(Math.PI * u) * (.85 + .15 * Math.sin(i * 2.3 + clock * 4)));
+          }
+          mp.lineTo(cx + mw, my + .004 * Hp); mp.closePath();
+          ctx.globalAlpha = 1; ctx.fillStyle = foamPat; ctx.fill(mp);
+          const g2 = ctx.createLinearGradient(cx - mw, 0, cx + mw, 0);
+          g2.addColorStop(0, 'rgba(90,40,15,.4)'); g2.addColorStop(.35, 'rgba(255,245,230,.15)'); g2.addColorStop(1, 'rgba(70,25,8,.5)');
+          ctx.fillStyle = g2; ctx.fill(mp);
+        }
+      }
+      const fi = .32 * Math.exp(-age / 1.1) * (1 - Math.exp(-age / .04));
+      if (fi > .005) {
+        ctx.save(); ctx.clip(innerPath);
+        const g = ctx.createLinearGradient(0, baseY - Hp, 0, baseY - LEVEL * Hp);
+        g.addColorStop(0, `rgba(238,240,244,${fi})`); g.addColorStop(1, `rgba(238,240,244,${fi * .4})`);
+        ctx.globalAlpha = 1; ctx.fillStyle = g; ctx.fillRect(cx - .06 * Hp, baseY - 1.01 * Hp, .12 * Hp, (1.01 - LEVEL) * Hp);
+        ctx.restore();
+      }
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.drawImage(labelCv, bx, by);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.drawImage(specCv, bx, by);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(dropCv, bx, by);
+
+    // capsule
+    const capTop = baseY - 1.004 * Hp;
+    if (cap.on) drawCap(cx, capTop, 0);
+    else if (capTop + cap.y > -.2 * Hp && capTop + cap.y < Hc + .1 * Hp) drawCap(cx + cap.x, capTop + cap.y, cap.rot);
+
+    for (const f of fogs) {
+      const a = f.a * Math.pow(1 - f.age / f.life, 1.5) * Math.min(1, f.age / .06);
+      ctx.globalAlpha = a;
+      ctx.drawImage(fogSprite, f.x - f.r, f.y - f.r, 2 * f.r, 2 * f.r);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /* ---------- Interface ---------- */
+  let frameN = 0;
+  function ui() {
+    const age = clock - openAt;
+    const p = opened ? 2.6 * Math.exp(-age / .22) : 2.6;
+    pvEl.textContent = p.toFixed(2).replace('.', ',');
+    pmEl.style.transform = `scaleX(${(p / 2.6).toFixed(3)})`;
+    bvEl.textContent = bubbles.length.toLocaleString('fr-FR');
+    bmEl.style.transform = `scaleX(${(bubbles.length / MAX).toFixed(3)})`;
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    step(reduce ? dt * .6 : dt); draw();
+    if ((frameN++ & 3) === 0) ui();
+    requestAnimationFrame(frame);
+  }
+
+  btn.addEventListener('click', () => { if (opened) reset(); else open(true); });
+
+  let rt = 0;
+  new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(build, 140); }).observe(stage);
+
+  const fontsReady = document.fonts ? Promise.race([
+    Promise.all([document.fonts.load('80px Yellowtail'), document.fonts.load('600 40px "Instrument Sans"')]),
+    new Promise(r => setTimeout(r, 1800))
+  ]) : Promise.resolve();
+  fontsReady.catch(() => {}).then(() => {
+    makeLabelTexture();
+    reset(); build(); ui();
+    requestAnimationFrame(t => { last = t; frame(t); });
+    if (!reduce) setTimeout(() => { if (!opened) open(false); }, 1600);
+  });
+})();
+</script>
