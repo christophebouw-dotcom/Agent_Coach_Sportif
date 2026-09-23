@@ -39,6 +39,8 @@
   .cap.hero h2{font:900 clamp(48px,8vw,138px)/.84 "Big Shoulders Display","Arial Narrow",Impact,sans-serif;text-transform:uppercase;margin:0 0 18px;letter-spacing:.005em}
   .cap.hero h2 span{display:block;color:var(--hot)}
 
+  .bug{position:absolute;top:5.5%;right:4%;z-index:2;font:900 clamp(14px,1.5vw,22px)/1 "Big Shoulders Display","Arial Narrow",Impact,sans-serif;letter-spacing:.22em;color:rgba(247,249,251,.82);text-shadow:0 1px 12px rgba(0,0,0,.35);pointer-events:none}
+  .bug::after{content:"";display:block;width:1.6em;height:2px;margin:6px 0 0 auto;background:var(--hot)}
   .controls{display:flex;gap:10px 18px;align-items:center;flex-wrap:wrap}
   .btn{appearance:none;border:1px solid var(--line);cursor:pointer;background:var(--ink-2);color:var(--cream);font:600 12px/1 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;padding:13px 18px;border-radius:2px;transition:background .15s,border-color .15s}
   .btn:hover{border-color:rgba(234,242,247,.35)}
@@ -76,6 +78,7 @@
     <canvas id="fx"></canvas>
     <canvas id="glTop"></canvas>
     <canvas id="post"></canvas>
+    <div class="bug" aria-hidden="true">NÉVÉ</div>
 
     <div class="cap" data-in="0.9" data-out="3.9">
       <p class="ey"><b>Névé</b> — eau minérale des Alpes</p>
@@ -212,6 +215,32 @@
     return { data: D, w: TW, h: TH };
   }
 
+  /* ================= Sérigraphie : texte imprimé sur le verre, dans l'espace (θ, t) ================= */
+  function buildPrint() {
+    const c = document.createElement('canvas'); c.width = 2048; c.height = 256;
+    const g = c.getContext('2d');
+    // t = .42 en bas, .58 en haut ; étirement horizontal pour compenser le déroulé du cylindre
+    const sx = (2048 / (2 * Math.PI * R(.5))) / (256 / .16), y = t => (1 - (t - .42) / .16) * 256;
+    g.save(); g.scale(sx, 1);
+    const cx = 1024 / sx;
+    g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+    g.fillStyle = '#e0457a';
+    g.font = '900 118px "Big Shoulders Display","Arial Narrow",Impact,sans-serif';
+    try { g.letterSpacing = '10px'; } catch (e) {}
+    g.fillText('NÉVÉ', cx, y(.498));
+    g.fillStyle = '#e0457a';
+    g.fillRect(cx - 70, y(.482) - 2, 140, 3);
+    g.font = '600 21px "Instrument Sans",system-ui,sans-serif';
+    try { g.letterSpacing = '5px'; } catch (e) {}
+    g.fillText('EAU MINÉRALE NATURELLE', cx, y(.466));
+    g.fillStyle = '#e0457a';
+    g.font = '600 17px "Instrument Sans",system-ui,sans-serif';
+    try { g.letterSpacing = '7px'; } catch (e) {}
+    g.fillText('PÉTILLANTE · DES ALPES', cx, y(.452));
+    g.restore();
+    return c;
+  }
+
   /* ================= Shaders ================= */
   const VS = `#version 300 es
   void main(){ vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2)); gl_Position = vec4(p * 2. - 1., 0., 1.); }`;
@@ -227,44 +256,54 @@
   uniform int uMode;
   uniform sampler2D uProf;
   uniform sampler2D uCond;
+  uniform sampler2D uPrint;
   const float PI = 3.14159265;
 
   float box(float x, float a, float b, float s){ return smoothstep(a - s, a + s, x) * (1. - smoothstep(b - s, b + s, x)); }
   float band(float x, float a, float b, float c, float d){ return smoothstep(a, b, x) * (1. - smoothstep(c, d, x)); }
   float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
   float wrapA(float a){ return mod(a + PI, 2. * PI) - PI; }
+  float tri(float x){ return 1. - abs(fract(x) * 2. - 1.); }
 
   vec4 prof(float t){
     float f = clamp(t, 0., 1.) * 1023.; int i = int(min(floor(f), 1022.)); float u = f - float(i);
     return mix(texelFetch(uProf, ivec2(i, 0), 0), texelFetch(uProf, ivec2(i + 1, 0), 0), u);
   }
 
-  // Studio : deux bandes lumineuses derrière (froide à gauche, chaude à droite), halo, bokeh
+  // Décor : aube sur les Alpes, très loin derrière la table, défocalisé par l'objectif
   vec3 backdrop(float u, float va, bool bok){
-    vec3 c = vec3(5., 9., 15.);
-    float dv = va - .52;
-    c += vec3(14., 34., 58.) * exp(-(u * u + dv * dv * .28) / .15);
-    float soft = .022 + uBlur;
-    float vert = 1. - smoothstep(1.04, 1.14 + uBlur, va);
-    float L = box(u, -.235, -.055, soft) * vert, Rr = box(u, .055, .235, soft) * vert;
-    float hl = exp(-(u + .145) * (u + .145) / .004), hr = exp(-(u - .145) * (u - .145) / .004);
-    c += L * (vec3(100., 135., 172.) + vec3(130., 120., 100.) * hl);
-    c += Rr * (vec3(165., 104., 128.) + vec3(120., 96., 110.) * hr);
+    float w = .004 + uBlur * .55;
+    vec3 c = mix(vec3(255., 222., 206.), vec3(190., 212., 244.), smoothstep(.3, 1.05, va));
+    c = mix(c, vec3(118., 162., 226.), smoothstep(1., 2.2, va));
+    vec2 sd = vec2(u - .62, va - .36);
+    c += vec3(255., 214., 170.) * (.25 * exp(-dot(sd, sd) / .3) + .45 * exp(-dot(sd, sd) / .012));
+    // chaîne lointaine, voilée par la brume
+    float r2 = .45 + .1 * tri(u * .8 + .2) + .05 * tri(u * 2.3 + .7) + .016 * tri(u * 6.1) + .005 * tri(u * 17.);
+    float snow2 = smoothstep(r2 - .18, r2 - .01, va);
+    vec3 far = mix(vec3(186., 196., 226.), vec3(246., 238., 244.), snow2);
+    c = mix(c, far, .8 * smoothstep(r2 + w, r2 - w, va));
+    // chaîne proche : neige au soleil, versants à l'ombre bleutés, quelques barres rocheuses
+    float r1 = .29 + .12 * tri(u * .55 + .55) + .045 * tri(u * 1.7 + .1) + .014 * tri(u * 5.3 + .3) + .004 * tri(u * 14.);
+    // versants au soleil / à l'ombre, variation douce le long de la chaîne
+    float sun = .5 + .5 * sin(u * 2.3 + .7 + .8 * sin(u * 5.1));
+    float cr = smoothstep(r1 - .2, r1 - .005, va);
+    vec3 near = mix(vec3(104., 126., 188.), mix(vec3(214., 222., 246.), vec3(255., 246., 238.), sun), .35 + .65 * cr * (.4 + .6 * sun));
+    near = mix(near, vec3(210., 214., 236.), smoothstep(r1 - .12, r1 - .3, va) * .6);
+    c = mix(c, near, smoothstep(r1 + w, r1 - w, va));
+    // brume de vallée au pied des montagnes
+    c = mix(c, vec3(226., 228., 242.), .6 * smoothstep(.2, -.02, va));
     if (bok) {
       vec2 q = vec2(u, va) * 7.; vec2 id = floor(q);
       for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
         vec2 cid = id + vec2(float(i), float(j)); float h = hash(cid);
-        if (h > .22) continue;
+        if (h > .18) continue;
         vec2 ctr = cid + vec2(hash(cid + 3.1), hash(cid + 7.7));
-        float rad = .22 + .3 * hash(cid + 1.3);
-        float d = length(q - ctr);
-        float disk = 1. - smoothstep(rad * (.82 - uBlur * 3.), rad, d);
-        disk *= .75 + .25 * smoothstep(rad * .5, rad * .95, d);
-        vec3 bc = hash(cid + 9.2) > .5 ? vec3(255., 160., 200.) : vec3(130., 185., 255.);
-        c += bc * disk * (.035 + .06 * hash(cid + 5.5)) * (.35 + uBlur * 8.);
+        float rad = .22 + .3 * hash(cid + 1.3), d = length(q - ctr);
+        float disk = (1. - smoothstep(rad * (.82 - uBlur * 3.), rad, d)) * (.75 + .25 * smoothstep(rad * .5, rad * .95, d));
+        c += vec3(255., 236., 236.) * disk * (.02 + .04 * hash(cid + 5.5)) * (.2 + uBlur * 9.);
       }
     }
-    return c;
+    return c * .96;
   }
 
   vec3 sceneBg(float sx, float sy, bool bok){
@@ -274,7 +313,7 @@
     float d = sy - hz;
     float vaH = (uBg.y - hz) / uBg.z;
     vec3 refl = backdrop(u, vaH + d / uBg.z, false);
-    return vec3(4., 7., 11.) + refl * .3 * exp(-d / uCam.z / .25);
+    return vec3(22., 26., 36.) + refl * (.22 + .4 * exp(-d / uCam.z / .3));
   }
 
   float studio(vec2 d){
@@ -289,7 +328,7 @@
     c += vec3(.9, .95, 1.) * 3.2 * smoothstep(.32, .75, el);
     c += uSweepI * vec3(1., .99, .97) * 34. * box(az, uSweep - .07, uSweep + .07, .025) * box(el, -.9, .9, .1);
     float bk = smoothstep(2.1, 2.9, abs(az));
-    c += bk * mix(vec3(.55, .78, 1.), vec3(1., .7, .82), smoothstep(-.5, .5, az)) * 1.1;
+    c += bk * mix(vec3(.6, .66, .9), vec3(1., .78, .74), smoothstep(-.5, .5, az)) * 1.6 * smoothstep(-.4, .3, el);
     c += (1. - smoothstep(-.6, -.2, el)) * vec3(.1, .13, .16);
     return c;
   }
@@ -304,7 +343,6 @@
   }
 
   // Relief en verre : une ligne de sommets alpins moulée dans le flanc
-  float tri(float x){ return 1. - abs(fract(x) * 2. - 1.); }
   float ridge(float a){ return .302 + .052 * tri(a * .62 + .31) + .03 * tri(a * 1.55 + .12) + .011 * tri(a * 4.1 + .4) + .004 * tri(a * 11.3); }
   float emb(float a, float t){
     a = wrapA(a);
@@ -405,16 +443,27 @@
     vec2 eg = embGrad(th + uAz, tc);
     vec4 cd = texture(uCond, vec2(fract((th + uAz) / (2. * PI) + .5), tc));
     vec2 dn = cd.rg * 2. - 1.; float cov = cd.a, dl = min(1., length(dn));
+    float kd = smoothstep(.6, .9, cov), haze = cov * (1. - kd);
     vec3 T = vec3(cos(th), 0., -sin(th));
     N = normalize(N - T * eg.x / pr.x + vec3(0., eg.y, 0.));
-    N = normalize(N + (T * dn.x - vec3(0., 1., 0.) * dn.y) * 1.5 * cov);
+    vec3 Np = N;
+    N = normalize(N + (T * dn.x - vec3(0., 1., 0.) * dn.y) * 1.5 * cov * mix(.25, 1., kd));
     float nz = max(N.z, 0.);
     float F = .04 + .96 * pow(1. - nz, 5.);
     vec3 Rf = vec3(2. * nz * N.x, 2. * nz * N.y, 2. * nz * nz - 1.);
     vec3 spec = 1. - exp(-F * env(Rf) * 1.25);
-    float ring = cov * smoothstep(.35, .95, dl);
-    vec3 body = vec3(.78, .87, .96) * cov * ((1. - dl) * .07 + .03);
-    return vec4((spec + body) * a, ring * .5 * a);
+    float ring = cov * kd * smoothstep(.35, .95, dl);
+    vec3 body = vec3(.8, .86, .95) * (cov * kd * ((1. - dl) * .07 + .03) + haze * .035);
+    float ra = ring * .45 + haze * .045;
+    // sérigraphie sur le verre
+    if (tc > .415 && tc < .585) {
+      vec4 ink = texture(uPrint, vec2(fract((th + uAz) / (2. * PI) + .5), (tc - .42) / .16));
+      float dif = .3 + .85 * max(0., dot(Np, normalize(vec3(-.75, -.25, .6)))) + .45 * max(0., dot(Np, normalize(vec3(.8, -.2, .55))));
+      float ia = ink.a * (1. - .35 * kd * cov);
+      body = body * (1. - ia) + ink.rgb * dif * .8 * ia;
+      ra = 1. - (1. - ra) * (1. - ia);
+    }
+    return vec4((spec + body) * a, ra * a);
   }
 
   vec3 tone(vec3 c){
@@ -458,7 +507,7 @@
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
     gl.useProgram(prog);
     const U = {};
-    ['uRes', 'uCam', 'uBg', 'uAz', 'uSweep', 'uSweepI', 'uBlur', 'uLevel', 'uPx', 'uMode', 'uProf', 'uCond'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+    ['uRes', 'uCam', 'uBg', 'uAz', 'uSweep', 'uSweepI', 'uBlur', 'uLevel', 'uPx', 'uMode', 'uProf', 'uCond', 'uPrint'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
     // profil : R, dR/dt, rayon intérieur, rayon apparent
     const pd = new Float32Array((N + 1) * 4);
     for (let i = 0; i <= N; i++) { const t = i / N; pd[i * 4] = RT[i]; pd[i * 4 + 1] = DRT[i]; pd[i * 4 + 2] = Ri(t); pd[i * 4 + 3] = Ra(t); }
@@ -476,6 +525,15 @@
       const an = gl.getExtension('EXT_texture_filter_anisotropic');
       if (an) gl.texParameterf(gl.TEXTURE_2D, an.TEXTURE_MAX_ANISOTROPY_EXT, 8);
       gl.uniform1i(U.uCond, 1);
+      const tq = gl.createTexture(); gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, tq);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, buildPrint());
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      if (an) gl.texParameterf(gl.TEXTURE_2D, an.TEXTURE_MAX_ANISOTROPY_EXT, 8);
+      gl.uniform1i(U.uPrint, 2);
     }
     gl.uniform1i(U.uMode, mode);
     gl.uniform1f(U.uLevel, LEVEL);
@@ -499,7 +557,7 @@
     if (k === 0) { hp = lerp(2.5, 2.15, e); ft = lerp(.38, .345, e); cxr = land ? .63 : .52; az = lerp(-.62, -.12, e); sw = lerp(-2.5, 2.5, clamp((T - .4) / 3.4)); swI = 1; blur = .065; }
     else if (k === 1) { hp = lerp(3.1, 3.6, e); ft = .962; cxr = land ? .6 : .5; az = lerp(.12, .3, e); blur = .085; }
     else if (k === 2) { hp = lerp(1.4, 1.18, e); ft = lerp(.5, .44, e); cxr = land ? .6 : .5; az = lerp(.35, .9, e); blur = .045; }
-    else { hp = land ? lerp(.84, .79, e) : lerp(.66, .62, e); ft = land ? .5 : .42; cxr = land ? .68 : .5; az = lerp(-.05, .12, e); sw = lerp(-2.5, 2.5, clamp((T - 12.3) / 2.6)); swI = 1; blur = .018; }
+    else { hp = land ? lerp(.84, .79, e) : lerp(.66, .62, e); ft = land ? .5 : .42; cxr = land ? .68 : .5; az = lerp(-.05, .12, e); sw = lerp(-2.5, 2.5, clamp((T - 12.3) / 2.6)); swI = 1; blur = .009; }
     const Hp = hp * H;
     const cx = W * cxr + Math.sin(T * .7) * W * .002;
     const baseY = H * .5 + ft * Hp + Math.sin(T * .9 + 1) * H * .002;
@@ -591,7 +649,8 @@
     g.putImageData(im, 0, 0);
     return c;
   })();
-  let grainPat = null, vignette = null;
+  let grainPat = null, vignette = null, scrim = null, bloom = null;
+  const canFilter = (() => { try { const g = document.createElement('canvas').getContext('2d'); g.filter = 'blur(2px)'; return g.filter === 'blur(2px)'; } catch (e) { return false; } })();
 
   /* ================= Couches 2D ================= */
   function liquidClip(c, cam, top) {
@@ -696,6 +755,15 @@
     c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
     c.clearRect(0, 0, W, H);
     const { cx, baseY, Hp } = cam;
+    if (bloom) {
+      const bw = bloom.a.width, bh = bloom.a.height, a = bloom.a.getContext('2d'), b = bloom.b.getContext('2d');
+      a.globalCompositeOperation = 'source-over';
+      a.drawImage(cvBase, 0, 0, bw, bh); a.drawImage(cvFx, 0, 0, bw, bh); a.drawImage(cvTop, 0, 0, bw, bh);
+      b.clearRect(0, 0, bw, bh); b.filter = 'brightness(.62) contrast(5) blur(3px)'; b.drawImage(bloom.a, 0, 0); b.filter = 'none';
+      c.globalCompositeOperation = 'lighter'; c.globalAlpha = .28;
+      c.drawImage(bloom.b, 0, 0, W, H);
+      c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
+    }
     const ph = cam.az + cap.tw, ringY = baseY - (RING_T + RING_H) * Hp;
     const capTop = baseY - (RING_T + RING_H + CAP_H + cap.lift) * Hp;
     drawRing(c, cam, cx, ringY, cam.az);
@@ -738,9 +806,10 @@
       c.drawImage(fogSprite, x - r, y - r, 2 * r, 2 * r);
     }
     c.globalAlpha = 1;
-    // vignettage, grain, fondus
+    // vignettage, voile des titres, grain, fondus
     c.globalCompositeOperation = 'source-over';
     c.drawImage(vignette, 0, 0);
+    if (W / H > 1.05) c.drawImage(scrim, 0, 0);
     if (grainPat) {
       c.globalCompositeOperation = 'overlay'; c.globalAlpha = .09;
       c.save(); c.translate(-Math.random() * 256, -Math.random() * 256); c.fillStyle = grainPat; c.fillRect(0, 0, W + 256, H + 256); c.restore();
@@ -875,8 +944,16 @@
     grainPat = post.createPattern(grain, 'repeat');
     vignette = document.createElement('canvas'); vignette.width = W; vignette.height = H;
     const v = vignette.getContext('2d'), g = v.createRadialGradient(W / 2, H * .48, Math.min(W, H) * .3, W / 2, H / 2, Math.hypot(W, H) * .62);
-    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.62)');
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.42)');
     v.fillStyle = g; v.fillRect(0, 0, W, H);
+    scrim = document.createElement('canvas'); scrim.width = W; scrim.height = H;
+    const sc = scrim.getContext('2d'), sg = sc.createLinearGradient(0, 0, W * .55, 0);
+    sg.addColorStop(0, 'rgba(10,16,34,.5)'); sg.addColorStop(1, 'rgba(8,10,22,0)');
+    sc.fillStyle = sg; sc.fillRect(0, 0, W, H);
+    if (canFilter) {
+      const mk = () => { const k = document.createElement('canvas'); k.width = Math.max(2, W >> 3); k.height = Math.max(2, H >> 3); return k; };
+      bloom = { a: mk(), b: mk() };
+    }
     dirty = true;
   }
   function renderGL(G, cam) {
@@ -920,6 +997,9 @@
     requestAnimationFrame(frame);
   }
 
+  const fontsReady = document.fonts ? Promise.race([document.fonts.load('900 118px "Big Shoulders Display"').then(() => document.fonts.ready), new Promise(r => setTimeout(r, 2500))]) : Promise.resolve();
+  fontsReady.catch(() => {}).then(start);
+  function start() {
   try {
     const cond = buildCondensation();
     Gb = makeGL(cvBase, 0, null);
@@ -938,5 +1018,6 @@
   resize();
   if (reduce) { playBtn.textContent = 'Lecture'; }
   requestAnimationFrame(t => { last = t; frame(t); });
+  }
 })();
 </script>
