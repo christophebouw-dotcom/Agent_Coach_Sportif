@@ -1,0 +1,48 @@
+{
+  "artefact": "Tableau de bord",
+  "url": "https://claude.ai/artifact/T17GcJh1P2Q1YQgTUyaDh2",
+  "date_sauvegarde": "2026-09-23",
+  "collections": {
+    "agenda-config": {
+      "horaires": {
+        "heures": [
+          "07:30",
+          "08:30",
+          "11:30",
+          "12:30",
+          "17:00",
+          "18:00",
+          "19:00"
+        ]
+      }
+    },
+    "agenda-creneaux": {},
+    "clients-email": {},
+    "clients-overrides": {},
+    "facturation-compteur": {},
+    "suivi-distanciel/clients": {},
+    "suivi/2026-10/clients": {
+      "anne-lise-medalin": {
+        "maj": "2026-09-17T08:41:48.188Z",
+        "note": "",
+        "statut": "a_traiter"
+      },
+      "audrey-ahmed": {
+        "maj": "2026-09-21T09:40:26.498Z",
+        "note": "",
+        "statut": "envoye"
+      },
+      "catarina-barros": {
+        "maj": "2026-09-18T09:13:02.655Z",
+        "note": "",
+        "statut": "envoye"
+      },
+      "sebastien-daumur": {
+        "maj": "2026-09-18T12:46:58.070Z",
+        "note": "",
+        "statut": "envoye"
+      }
+    },
+    "taches-hebdo/2026-09-21/items": {}
+  }
+}
